@@ -17,7 +17,7 @@
                    Text="系统设置"
                    Margin="0,0,0,20"/>
 
-        <ScrollViewer Grid.Row="1">
+        <ScrollViewer Grid.Row="1" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <StackPanel>
                 <materialDesign:Card Margin="0,0,0,15">
                     <Grid>

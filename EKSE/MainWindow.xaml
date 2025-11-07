@@ -49,6 +49,39 @@
                              From="0.0" To="1.0"
                              Duration="0:0:0.2"/>
         </Storyboard>
+        
+        <!-- 标题栏按钮动画 -->
+        <Storyboard x:Key="ButtonHoverStoryboard">
+            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleX)" 
+                             From="1" To="1.1" Duration="0:0:0.1"/>
+            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleY)" 
+                             From="1" To="1.1" Duration="0:0:0.1"/>
+        </Storyboard>
+        <Storyboard x:Key="ButtonNormalStoryboard">
+            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleX)" 
+                             From="1.1" To="1" Duration="0:0:0.1"/>
+            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleY)" 
+                             From="1.1" To="1" Duration="0:0:0.1"/>
+        </Storyboard>
+        
+        <!-- 关闭按钮特殊动画 -->
+        <Storyboard x:Key="CloseButtonHoverStoryboard">
+            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleX)" 
+                             From="1" To="1.1" Duration="0:0:0.1"/>
+            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleY)" 
+                             From="1" To="1.1" Duration="0:0:0.1"/>
+            <ColorAnimation Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)"
+                            From="White" To="Red" Duration="0:0:0.2"/>
+        </Storyboard>
+        <Storyboard x:Key="CloseButtonNormalStoryboard">
+            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleX)" 
+                             From="1.1" To="1" Duration="0:0:0.1"/>
+            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleY)" 
+                             From="1.1" To="1" Duration="0:0:0.1"/>
+            <ColorAnimation Storyboard.TargetProperty="(Foreground).(SolidColorBrush.Color)"
+                            From="Red" To="White" Duration="0:0:0.2"/>
+        </Storyboard>
+        
     </Window.Resources>
     
     <materialDesign:DialogHost>
@@ -70,10 +103,24 @@
                 </Grid.RowDefinitions>
 
                 <!-- 标题栏 -->
-                <Border Grid.Row="0" 
+                <Border x:Name="TitleBarBorder" Grid.Row="0" 
                         Background="{DynamicResource TitleBarBackground}"
                         CornerRadius="10,10,0,0"
                         MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <EventTrigger RoutedEvent="Border.Loaded">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0" To="1" Duration="0:0:0.5"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -107,7 +154,13 @@
                                     Style="{StaticResource MaterialDesignFlatButton}"
                                     Foreground="White"
                                     Click="MinimizeButton_Click"
-                                    ToolTip="最小化">
+                                    ToolTip="最小化"
+                                    RenderTransformOrigin="0.5,0.5"
+                                    MouseEnter="WindowControlButton_MouseEnter"
+                                    MouseLeave="WindowControlButton_MouseLeave">
+                                <Button.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </Button.RenderTransform>
                                 <materialDesign:PackIcon Kind="WindowMinimize"/>
                             </Button>
                             
@@ -115,7 +168,13 @@
                                     Style="{StaticResource MaterialDesignFlatButton}"
                                     Foreground="White"
                                     Click="MaximizeButton_Click"
-                                    ToolTip="最大化">
+                                    ToolTip="最大化"
+                                    RenderTransformOrigin="0.5,0.5"
+                                    MouseEnter="WindowControlButton_MouseEnter"
+                                    MouseLeave="WindowControlButton_MouseLeave">
+                                <Button.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </Button.RenderTransform>
                                 <materialDesign:PackIcon Name="MaximizeIcon" Kind="WindowMaximize"/>
                             </Button>
                             
@@ -123,7 +182,13 @@
                                     Style="{StaticResource MaterialDesignFlatButton}"
                                     Foreground="White"
                                     Click="CloseButton_Click"
-                                    ToolTip="关闭">
+                                    ToolTip="关闭"
+                                    RenderTransformOrigin="0.5,0.5"
+                                    MouseEnter="CloseButton_MouseEnter"
+                                    MouseLeave="CloseButton_MouseLeave">
+                                <Button.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </Button.RenderTransform>
                                 <materialDesign:PackIcon Kind="WindowClose"/>
                             </Button>
                         </StackPanel>
@@ -144,7 +209,8 @@
                         <Border Grid.Column="0" 
                                 Background="{DynamicResource MaterialDesignBackground}"
                                 CornerRadius="0,0,0,10">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                                          PreviewMouseWheel="SidebarScrollViewer_PreviewMouseWheel">
                                 <StackPanel x:Name="SidebarPanel" 
                                             Margin="0,20"/>
                             </ScrollViewer>

@@ -19,8 +19,10 @@
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
+        <ScrollViewer Grid.Row="1" 
+                      VerticalScrollBarVisibility="Auto"
+                      PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+            <StackPanel Margin="0,0,0,20">
                 <!-- 软件介绍卡片 -->
                 <materialDesign:Card Margin="0,0,0,20" UniformCornerRadius="10">
                     <Grid>

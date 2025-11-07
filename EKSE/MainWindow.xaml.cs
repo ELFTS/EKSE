@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using System.Windows.Media;
+using System.Windows.Threading;
 using EKSE.Views;
 using EKSE.Components;
 using EKSE.Services;
@@ -22,6 +23,15 @@ namespace EKSE
     public partial class MainWindow : Window
     {
         private readonly List<SidebarItem> sidebarItems = new List<SidebarItem>();
+        
+        // 平滑滚动相关字段
+        private double _sideBarScrollOffset = 0;
+        private ScrollViewer _sidebarScrollViewer;
+        private DispatcherTimer _sidebarScrollTimer;
+        private double _sidebarTargetOffset;
+        private double _sidebarStartOffset;
+        private DateTime _sidebarScrollStartTime;
+        private const int ScrollDuration = 300; // 滚动持续时间（毫秒）
         
         // 服务和管理器
         private readonly SoundService _soundService;
@@ -51,7 +61,6 @@ namespace EKSE
             InitializeNavigation();
             
             Loaded += MainWindow_Loaded;
-
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -65,6 +74,9 @@ namespace EKSE
             
             // 记录窗口正常状态时的位置和大小
             UpdateNormalWindowState();
+            
+            // 获取侧边栏ScrollViewer引用
+            _sidebarScrollViewer = FindVisualChild<ScrollViewer>(SidebarPanel.Parent as DependencyObject);
         }
         
         private void ApplySavedTitleBarColor()
@@ -252,14 +264,149 @@ namespace EKSE
                 MainContentArea.Content = content;
                 fadeInStoryboard.Begin();
                 
-                // 更新侧边栏选择状态
+                // 更新侧边栏选择状态并平滑滚动到对应项
                 UpdateSidebarSelection(contentType);
+                ScrollToSelectedItem(contentType);
                 
                 // 确保标题栏颜色正确应用（除了设置页面，它自己会处理颜色）
                 if (contentType != "Settings")
                 {
                     ApplySavedTitleBarColor();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 平滑滚动到选中的侧边栏项
+        /// </summary>
+        private void ScrollToSelectedItem(string contentType)
+        {
+            int targetIndex = -1;
+            
+            // 根据内容类型找到对应的侧边栏项索引
+            switch (contentType)
+            {
+                case "Home":
+                    targetIndex = 0;
+                    break;
+                case "SoundSettings":
+                    targetIndex = 1;
+                    break;
+                case "Settings":
+                    targetIndex = 2;
+                    break;
+                case "About":
+                    targetIndex = 3;
+                    break;
+            }
+
+            if (targetIndex >= 0 && targetIndex < SidebarPanel.Children.Count)
+            {
+                // 获取目标项
+                var targetItem = SidebarPanel.Children[targetIndex] as UIElement;
+
+                if (targetItem != null && _sidebarScrollViewer != null)
+                {
+                    // 设置目标偏移量
+                    _sidebarTargetOffset = CalculateScrollOffset(targetItem);
+                    _sidebarStartOffset = _sidebarScrollViewer.VerticalOffset;
+                    _sidebarScrollStartTime = DateTime.Now;
+
+                    // 启动滚动定时器
+                    if (_sidebarScrollTimer == null)
+                    {
+                        _sidebarScrollTimer = new DispatcherTimer();
+                        _sidebarScrollTimer.Interval = TimeSpan.FromMilliseconds(16); // 大约60fps
+                        _sidebarScrollTimer.Tick += SidebarScrollTimer_Tick;
+                    }
+                    _sidebarScrollTimer.Start();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 计算目标项的垂直偏移量以实现居中显示
+        /// </summary>
+        private double CalculateScrollOffset(UIElement targetItem)
+        {
+            if (targetItem == null || _sidebarScrollViewer == null)
+                return 0;
+
+            double targetItemTop = targetItem.TranslatePoint(new Point(0, 0), SidebarPanel).Y;
+            double targetItemHeight = targetItem.RenderSize.Height;
+            double viewerHeight = _sidebarScrollViewer.RenderSize.Height;
+
+            return targetItemTop - (viewerHeight - targetItemHeight) / 2;
+        }
+
+        /// <summary>
+        /// 侧边栏平滑滚动事件处理
+        /// </summary>
+        private void SidebarScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (sender is ScrollViewer scrollViewer)
+            {
+                // 计算目标滚动偏移量
+                double newOffset = scrollViewer.VerticalOffset - (e.Delta > 0 ? 50 : -50);
+                
+                // 限制滚动范围
+                newOffset = Math.Max(0, newOffset);
+                newOffset = Math.Min(scrollViewer.ScrollableHeight, newOffset);
+                
+                // 启动平滑滚动动画
+                StartSmoothScroll(scrollViewer, newOffset);
+                
+                // 标记事件已处理，防止默认滚动行为
+                e.Handled = true;
+            }
+        }
+        
+        /// <summary>
+        /// 启动平滑滚动动画
+        /// </summary>
+        private void StartSmoothScroll(ScrollViewer scrollViewer, double targetOffset)
+        {
+            // 初始化滚动动画参数
+            _sidebarStartOffset = scrollViewer.VerticalOffset;
+            _sidebarTargetOffset = targetOffset;
+            _sidebarScrollStartTime = DateTime.Now;
+            
+            // 如果计时器尚未创建，则创建它
+            if (_sidebarScrollTimer == null)
+            {
+                _sidebarScrollTimer = new DispatcherTimer();
+                _sidebarScrollTimer.Interval = TimeSpan.FromMilliseconds(10); // 10毫秒更新一次
+                _sidebarScrollTimer.Tick += SidebarScrollTimer_Tick;
+            }
+            
+            // 启动计时器
+            _sidebarScrollTimer.Start();
+        }
+        
+        /// <summary>
+        /// 侧边栏滚动计时器事件处理
+        /// </summary>
+        private void SidebarScrollTimer_Tick(object sender, EventArgs e)
+        {
+            // 计算经过的时间
+            double elapsed = (DateTime.Now - _sidebarScrollStartTime).TotalMilliseconds;
+            
+            // 计算进度（0到1之间）
+            double progress = Math.Min(elapsed / ScrollDuration, 1.0);
+            
+            // 应用缓动函数（使用立方缓动）
+            double easedProgress = 1 - Math.Pow(1 - progress, 3);
+            
+            // 计算当前偏移量
+            double currentOffset = _sidebarStartOffset + (_sidebarTargetOffset - _sidebarStartOffset) * easedProgress;
+            
+            // 设置滚动位置
+            _sidebarScrollViewer?.ScrollToVerticalOffset(currentOffset);
+            
+            // 如果滚动完成，停止计时器
+            if (progress >= 1.0)
+            {
+                _sidebarScrollTimer?.Stop();
             }
         }
         
@@ -305,6 +452,92 @@ namespace EKSE
             Close();
         }
 
+        /// <summary>
+        /// 窗口控制按钮鼠标进入事件
+        /// </summary>
+        private void WindowControlButton_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                var storyboard = (Storyboard)this.FindResource("ButtonHoverStoryboard");
+                if (storyboard != null)
+                {
+                    storyboard.Begin(button, true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 窗口控制按钮鼠标离开事件
+        /// </summary>
+        private void WindowControlButton_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                var storyboard = (Storyboard)this.FindResource("ButtonNormalStoryboard");
+                if (storyboard != null)
+                {
+                    storyboard.Begin(button, true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 关闭按钮鼠标进入事件
+        /// </summary>
+        private void CloseButton_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                var storyboard = (Storyboard)this.FindResource("CloseButtonHoverStoryboard");
+                if (storyboard != null)
+                {
+                    storyboard.Begin(button, true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 关闭按钮鼠标离开事件
+        /// </summary>
+        private void CloseButton_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                var storyboard = (Storyboard)this.FindResource("CloseButtonNormalStoryboard");
+                if (storyboard != null)
+                {
+                    storyboard.Begin(button, true);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 在可视化树中查找指定类型的子元素
+        /// </summary>
+        private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) return null;
+            
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                var correctlyTyped = child as T;
+                if (correctlyTyped != null)
+                {
+                    return correctlyTyped;
+                }
+                else
+                {
+                    var result = FindVisualChild<T>(child);
+                    if (result != null)
+                        return result;
+                }
+            }
+            
+            return null;
+        }
+        
         private void ToggleWindowState()
         {
             if (WindowState == WindowState.Maximized)
