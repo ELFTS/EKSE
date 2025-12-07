@@ -1,0 +1,82 @@
+<Window x:Class="EKSE.SplashScreenWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="EKSE 启动中..." 
+        Height="300" 
+        Width="500"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True">
+    <Grid>
+        <!-- 背景层 -->
+        <Border Background="#673AB7" 
+                Opacity="0.9" 
+                CornerRadius="15">
+            <Border.Effect>
+                <DropShadowEffect Color="#512DA8" 
+                                  ShadowDepth="0" 
+                                  BlurRadius="20" 
+                                  Opacity="0.7"/>
+            </Border.Effect>
+        </Border>
+        
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid Width="120" Height="120" Margin="0,0,0,20">
+                <Ellipse Stroke="#B39DDB" 
+                         StrokeThickness="5"
+                         RenderTransformOrigin="0.5,0.5">
+                    <Ellipse.RenderTransform>
+                        <RotateTransform x:Name="SpinnerRotate" Angle="0"/>
+                    </Ellipse.RenderTransform>
+                    <Ellipse.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever">
+                                    <DoubleAnimation Storyboard.TargetName="SpinnerRotate"
+                                                     Storyboard.TargetProperty="Angle"
+                                                     From="0" To="360"
+                                                     Duration="0:0:1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Ellipse.Triggers>
+                </Ellipse>
+                
+                <TextBlock Text="键盘" 
+                           Foreground="White"
+                           FontSize="48"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"/>
+            </Grid>
+
+            <TextBlock Text="万物键盘音效" 
+                       Foreground="White"
+                       FontSize="28"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,10"/>
+            
+            <TextBlock x:Name="StatusTextBlock"
+                       Text="正在启动..." 
+                       Foreground="#B39DDB"
+                       FontSize="16"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,20"/>
+            
+            <ProgressBar x:Name="LoadingProgressBar"
+                         Width="300"
+                         Height="4"
+                         IsIndeterminate="True"
+                         Foreground="White"
+                         Background="#B39DDB"
+                         BorderBrush="Transparent"/>
+        </StackPanel>
+    </Grid>
+</Window>

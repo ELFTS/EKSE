@@ -1,0 +1,111 @@
+<UserControl x:Class="EKSE.Components.VirtualKeyboard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EKSE.Components"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="800">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 功能说明 -->
+        <Border Grid.Row="0" 
+                Background="{DynamicResource MaterialDesignDivider}"
+                CornerRadius="5"
+                Padding="10">
+            <TextBlock Text="点击下方虚拟键盘按键，然后选择对应的音效文件" 
+                       Style="{StaticResource MaterialDesignBody1TextBlock}"
+                       Foreground="{DynamicResource MaterialDesignBody}"
+                       TextWrapping="Wrap"/>
+        </Border>
+
+        <!-- 虚拟键盘编辑区域容器 -->
+        <Border Grid.Row="1" 
+                Margin="0,10,0,0"
+                Background="{DynamicResource MaterialDesignBackground}"
+                CornerRadius="5">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" 
+                          VerticalScrollBarVisibility="Auto"
+                          PanningMode="VerticalOnly">
+                <ItemsControl x:Name="KeyboardItemsControl">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <!-- 普通行 -->
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5" 
+                                            Visibility="{Binding IsDirectionalRow, Converter={x:Static local:BoolToVisibilityInverseConverter.Instance}}">
+                                    <ItemsControl ItemsSource="{Binding Keys}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Width="{Binding Width}" 
+                                                        Height="40" 
+                                                        Margin="1" 
+                                                        Tag="{Binding Tag}" 
+                                                        Click="KeyButton_Click" 
+                                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                                        FontSize="{Binding FontSize}"
+                                                        Padding="2"
+                                                        Visibility="{Binding Width, Converter={x:Static local:WidthToVisibilityConverter.Instance}}">
+                                                    <TextBlock Text="{Binding Content}" 
+                                                               TextWrapping="NoWrap" 
+                                                               TextAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    
+                                    <!-- 分离的功能键容器 (编辑控制键和方向键) -->
+                                    <ItemsControl ItemsSource="{Binding FunctionKeys}" 
+                                                  Visibility="{Binding FunctionKeys, Converter={x:Static local:FunctionKeysVisibilityConverter.Instance}}"
+                                                  Margin="5,0,0,0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Width="{Binding Width}" 
+                                                        Height="40" 
+                                                        Margin="1" 
+                                                        Tag="{Binding Tag}" 
+                                                        Click="KeyButton_Click" 
+                                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                                        FontSize="{Binding FontSize}"
+                                                        Padding="2"
+                                                        Visibility="{Binding Width, Converter={x:Static local:WidthToVisibilityConverter.Instance}}">
+                                                    <TextBlock Text="{Binding Content}" 
+                                                               TextWrapping="NoWrap" 
+                                                               TextAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

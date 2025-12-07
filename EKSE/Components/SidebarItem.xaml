@@ -1,0 +1,60 @@
+<UserControl x:Class="EKSE.Components.SidebarItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="60" d:DesignWidth="250"
+             Cursor="Hand">
+    <UserControl.Resources>
+        <!-- 背景色变化动画 -->
+        <Storyboard x:Key="BackgroundAnimation">
+            <ColorAnimation x:Name="BackgroundAnimationColor"
+                            Storyboard.TargetName="MainBorder"
+                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                            Duration="0:0:0.2"/>
+        </Storyboard>
+        
+        <!-- 前景色变化动画 -->
+        <Storyboard x:Key="ForegroundAnimation">
+            <ColorAnimation x:Name="ForegroundAnimationColor"
+                            Storyboard.TargetName="TextPresenter"
+                            Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+                            Duration="0:0:0.2"/>
+        </Storyboard>
+        
+        <!-- 图标大小变化动画 -->
+        <Storyboard x:Key="IconSizeAnimation">
+            <DoubleAnimation x:Name="IconWidthAnimation"
+                             Storyboard.TargetName="IconPresenter"
+                             Storyboard.TargetProperty="Width"
+                             Duration="0:0:0.2"/>
+            <DoubleAnimation x:Name="IconHeightAnimation"
+                             Storyboard.TargetName="IconPresenter"
+                             Storyboard.TargetProperty="Height"
+                             Duration="0:0:0.2"/>
+        </Storyboard>
+    </UserControl.Resources>
+    
+    <Border x:Name="MainBorder" 
+            Background="Transparent"
+            Padding="15,10">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Image x:Name="IconPresenter"
+                   Width="24" 
+                   Height="24"
+                   VerticalAlignment="Center"/>
+
+            <TextBlock x:Name="TextPresenter"
+                       Grid.Column="1"
+                       VerticalAlignment="Center"
+                       Margin="15,0,0,0"
+                       FontSize="14"/>
+        </Grid>
+    </Border>
+</UserControl>
