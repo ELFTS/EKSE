@@ -30,6 +30,14 @@
 | [MaterialDesignInXamlToolkit](https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit)                                  | 界面主框架  |
 | [NAudio](https://github.com/naudio/NAudio)| 音频播放 |
 
+## ℹ️ 如何贡献
+
+- 安装 Visual Studio 2022（版本 17.12 或更高版本）
+
+- 安装 .Net 9 SDK
+  - 通过 Visual Studio 安装程序
+  - 通过 winget `winget install Microsoft.DotNet.SDK.9`
+
 ## 🌟 Star
 支持开发者的最简单方式是点击页面顶部的星标（⭐）
 
