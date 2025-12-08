@@ -15,17 +15,16 @@ namespace EKSE.Services
         
         public AudioFileManager()
         {
-            _audioFilesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Sounds");
+            // 使用Profiles文件夹而不是Assets文件夹
+            _audioFilesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles");
             _audioFiles = new List<string>();
             
-            // 确保音频文件目录存在
-            if (!Directory.Exists(_audioFilesDirectory))
+            // 不再强制创建目录，而是检查是否存在
+            if (Directory.Exists(_audioFilesDirectory))
             {
-                Directory.CreateDirectory(_audioFilesDirectory);
+                // 加载现有音频文件
+                LoadAudioFiles();
             }
-            
-            // 加载现有音频文件
-            LoadAudioFiles();
         }
         
         /// <summary>
@@ -40,15 +39,19 @@ namespace EKSE.Services
         {
             try
             {
-                // 支持的音频文件扩展名
-                var supportedExtensions = new[] { ".wav", ".mp3", ".aac", ".wma", ".flac" };
-                
-                // 获取目录中的所有文件
-                var allFiles = Directory.GetFiles(_audioFilesDirectory, "*.*", SearchOption.AllDirectories)
-                    .Where(file => supportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
-                
-                _audioFiles.Clear();
-                _audioFiles.AddRange(allFiles);
+                // 只有当目录存在时才尝试加载文件
+                if (Directory.Exists(_audioFilesDirectory))
+                {
+                    // 支持的音频文件扩展名
+                    var supportedExtensions = new[] { ".wav", ".mp3", ".aac", ".wma", ".flac" };
+                    
+                    // 获取目录中的所有文件
+                    var allFiles = Directory.GetFiles(_audioFilesDirectory, "*.*", SearchOption.AllDirectories)
+                        .Where(file => supportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
+                    
+                    _audioFiles.Clear();
+                    _audioFiles.AddRange(allFiles);
+                }
             }
             catch (Exception ex)
             {
@@ -65,32 +68,21 @@ namespace EKSE.Services
         {
             try
             {
-                if (!File.Exists(sourceFilePath))
-                {
-                    return string.Empty;
-                }
+                // 不再自动创建目录，如果Profiles目录不存在则返回null
+                if (!Directory.Exists(_audioFilesDirectory))
+                    return null;
                 
-                // 获取文件名
                 var fileName = Path.GetFileName(sourceFilePath);
                 var destFilePath = Path.Combine(_audioFilesDirectory, fileName);
                 
-                // 如果目标文件已存在，则先删除它以实现覆盖
+                // 如果目标文件已存在，先删除它
                 if (File.Exists(destFilePath))
                 {
                     File.Delete(destFilePath);
                 }
                 
-                // 复制文件（覆盖模式）
-                File.Copy(sourceFilePath, destFilePath);
-                
-                // 如果列表中不包含该文件，则添加到列表
-                if (!_audioFiles.Contains(destFilePath))
-                {
-                    _audioFiles.Add(destFilePath);
-                }
-                
-                // 重新排序列表以确保一致性
-                _audioFiles.Sort();
+                File.Copy(sourceFilePath, destFilePath, true);
+                _audioFiles.Add(destFilePath);
                 
                 return destFilePath;
             }
