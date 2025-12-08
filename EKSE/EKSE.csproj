@@ -1,58 +1,35 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<UseWPF>True</UseWPF>
+		<RootNamespace>EKSE</RootNamespace>
+		<AssemblyName>EKSE</AssemblyName>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UseWindowsForms>False</UseWindowsForms>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Assets\Icons\favicon.ico</ApplicationIcon>
-  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="MaterialDesignThemes" Version="5.3.0" />
+		<PackageReference Include="MaterialDesignColors" Version="5.3.0" />
+		<PackageReference Include="NAudio" Version="2.2.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Assets\alipay_qr.png" />
-    <None Remove="Assets\Icons\favicon.ico" />
-    <None Remove="Assets\Icons\home.png" />
-    <None Remove="Assets\Icons\info.png" />
-    <None Remove="Assets\Icons\music.png" />
-    <None Remove="Assets\Icons/settings.png" />
-    <None Remove="Assets\Icons\sponsor.png" />
-    <None Remove="Assets\wechat_qr.png" />
-    <None Remove="Components\SidebarItem.xaml" />
-    <None Remove="Components\VirtualKeyboard.xaml" />
-    <None Remove="SplashScreenWindow.xaml" />
-  </ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Components\" />
+	  <Folder Include="Models\" />
+	  <Folder Include="Services\" />
+	  <Folder Include="ViewModels\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MaterialDesignColors" Version="3.1.0" />
-    <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
-    <PackageReference Include="NAudio" Version="2.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Assets\alipay_qr.png" />
-    <EmbeddedResource Include="Assets\Icons\favicon.ico" />
-    <EmbeddedResource Include="Assets\Icons\home.png" />
-    <EmbeddedResource Include="Assets\Icons\info.png" />
-    <EmbeddedResource Include="Assets\Icons\music.png" />
-    <EmbeddedResource Include="Assets\Icons\settings.png" />
-    <EmbeddedResource Include="Assets\Icons\sponsor.png" />
-    <EmbeddedResource Include="Assets\wechat_qr.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="Components\SidebarItem.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Components\VirtualKeyboard.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="SplashScreenWindow.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-      <SubType>Designer</SubType>
-    </Page>
-  </ItemGroup>
-
+	<ItemGroup>
+		<Resource Include="Assets\Icons\home.png" />
+		<Resource Include="Assets\Icons\music.png" />
+		<Resource Include="Assets\Icons\settings.png" />
+		<Resource Include="Assets\Icons\info.png" />
+		<Resource Include="Assets\Icons\sponsor.png" />
+		<Resource Include="Assets\alipay_qr.png" />
+		<Resource Include="Assets\wechat_qr.png" />
+	</ItemGroup>
 </Project>
