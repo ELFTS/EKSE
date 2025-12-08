@@ -13,7 +13,8 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        Opacity="1">
+        Opacity="1"
+        Icon="Assets/Icons/logo.ico">
     <Window.Resources>
         <!-- 淡入淡出动画 -->
         <Storyboard x:Key="FadeOutStoryboard">

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net9.0-windows</TargetFramework>
@@ -8,6 +8,7 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseWindowsForms>False</UseWindowsForms>
+		<ApplicationIcon>Assets\Icons\logo.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -29,6 +30,7 @@
 		<Resource Include="Assets\Icons\settings.png" />
 		<Resource Include="Assets\Icons\info.png" />
 		<Resource Include="Assets\Icons\sponsor.png" />
+		<Resource Include="Assets\Icons\logo.ico" />
 		<Resource Include="Assets\alipay_qr.png" />
 		<Resource Include="Assets\wechat_qr.png" />
 	</ItemGroup>
