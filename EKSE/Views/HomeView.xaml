@@ -15,6 +15,7 @@
         <TextBlock Grid.Row="0"
                    Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                    Text="欢迎使用 万物键盘音效"
+                   FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
         <StackPanel Grid.Row="1"

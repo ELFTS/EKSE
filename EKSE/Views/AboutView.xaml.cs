@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using System.Windows.Media.Imaging;
+using EKSE.Services;
 
 namespace EKSE.Views
 {
@@ -12,6 +14,26 @@ namespace EKSE.Views
         public AboutView()
         {
             InitializeComponent();
+            Loaded += AboutView_Loaded;
+        }
+        
+        private void AboutView_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            LoadImages();
+        }
+
+        private void LoadImages()
+        {
+            try
+            {
+                // 加载Logo图片
+                var logoImage = ResourceImageLoader.LoadImageFromResource("res://Assets/Icons/logo.png");
+                LogoImage.Source = logoImage;
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"无法加载Logo图片: {ex.Message}");
+            }
         }
         
         /// <summary>

@@ -16,6 +16,7 @@
         <TextBlock Grid.Row="0"
                    Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                    Text="音效设置"
+                   FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
         <ScrollViewer Grid.Row="1">

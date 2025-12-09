@@ -15,7 +15,7 @@
 
         <!-- 标题 -->
         <TextBlock Grid.Row="0"
-                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                    Text="赞助我们"
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
@@ -39,10 +39,6 @@
             <StackPanel Grid.Column="0" 
                        Margin="0,0,20,0" 
                        HorizontalAlignment="Right">
-                <TextBlock Text="微信收款码" 
-                           Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,10"/>
                 
                 <Image x:Name="WeChatQRCode"
                        Width="300"
@@ -54,10 +50,6 @@
             <StackPanel Grid.Column="1" 
                        Margin="20,0,0,0" 
                        HorizontalAlignment="Left">
-                <TextBlock Text="支付宝收款码" 
-                           Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,10"/>
                 
                 <Image x:Name="AlipayQRCode"
                        Width="300"
