@@ -1,5 +1,5 @@
 <div align="center">
-    <img width="150" src="/KeySound2/Images/logo.png"></img>
+    <img width="150" src="/EKSE/Assets/Icons/logo.png"></img>
 </div>
 <h1 align="center">万物键盘音效</h1>
 <h4 align="center">一款适合迷惑行为的键盘音效软件~</h4>
