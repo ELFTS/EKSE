@@ -140,10 +140,23 @@ namespace EKSE.Services
                 System.Diagnostics.Debug.WriteLine("当前方案或按键音效映射为空");
             }
             
-            // 返回默认音效
-            return _profileManager?.CurrentProfile?.DefaultSound;
+            // 不再返回默认音效，如果没有找到对应音效则返回null
+            return null;
         }
 
+        private string GetSoundFile(Key key)
+        {
+            // 尝试获取按键对应的声音文件
+            var soundFile = _profileManager?.GetKeySound(key);
+
+            // 如果找到了按键对应的声音文件，直接返回
+            if (!string.IsNullOrEmpty(soundFile))
+                return soundFile;
+
+            // 不再返回默认音效，如果没有找到对应音效则返回null
+            return null;
+        }
+        
         // 全局键盘钩子实现
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
         {

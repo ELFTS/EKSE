@@ -18,6 +18,50 @@ namespace EKSE.Services
         private readonly List<SoundProfile> _profiles;
         private SoundProfile _currentProfile;
         
+        // 定义支持的音频扩展名
+        private static readonly string[] SupportedAudioExtensions = { ".wav", ".mp3", ".aac", ".wma", ".flac" };
+        
+        // 特殊键名映射字典，提取为字段以避免重复创建
+        private static readonly Dictionary<string, Key> KeyMap = new Dictionary<string, Key>
+        {
+            ["Space"] = Key.Space,
+            ["Enter"] = Key.Enter,
+            ["Backspace"] = Key.Back,
+            ["Tab"] = Key.Tab,
+            ["Caps"] = Key.CapsLock,
+            ["Esc"] = Key.Escape,
+            ["Win"] = Key.LWin,
+            ["L Shift"] = Key.LeftShift,
+            ["R Shift"] = Key.RightShift,
+            ["L Ctrl"] = Key.LeftCtrl,
+            ["R Ctrl"] = Key.RightCtrl,
+            ["L Alt"] = Key.LeftAlt,
+            ["R Alt"] = Key.RightAlt,
+            ["↑"] = Key.Up,
+            ["↓"] = Key.Down,
+            ["←"] = Key.Left,
+            ["→"] = Key.Right,
+            ["[ {"] = Key.OemOpenBrackets,
+            ["] }"] = Key.OemCloseBrackets,
+            ["; :"] = Key.OemSemicolon,
+            ["'"] = Key.OemQuotes,
+            [", <"] = Key.OemComma,
+            [". >"] = Key.OemPeriod,
+            ["/ ?"] = Key.OemQuestion,
+            ["\\"] = Key.Oem5,
+            ["-"] = Key.OemMinus,
+            ["="] = Key.OemPlus,
+            ["Del"] = Key.Delete,
+            ["Ins"] = Key.Insert,
+            ["Home"] = Key.Home,
+            ["End"] = Key.End,
+            ["PgUp"] = Key.PageUp,
+            ["PgDn"] = Key.PageDown,
+            ["Pause"] = Key.Pause,
+            ["SrcLk"] = Key.Scroll,
+            ["Fn"] = Key.None
+        };
+        
         public ProfileManager()
         {
             _profilesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles");
@@ -124,7 +168,7 @@ namespace EKSE.Services
         private void ConvertAssignedSoundsToKeySounds(SoundProfile profile)
         {
             profile.KeySounds.Clear();
-            if (profile.AssignedSounds != null)
+            if (profile.AssignedSounds?.Count > 0)
             {
                 System.Diagnostics.Debug.WriteLine($"开始转换 {profile.AssignedSounds.Count} 个分配的声音");
                 
@@ -166,38 +210,39 @@ namespace EKSE.Services
             // 处理单独的数字字符 '0'-'9'
             if (keyName.Length == 1 && char.IsDigit(keyName[0]))
             {
-                switch (keyName[0])
+                return keyName[0] switch
                 {
-                    case '0': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D0"); return Key.D0;
-                    case '1': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D1"); return Key.D1;
-                    case '2': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D2"); return Key.D2;
-                    case '3': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D3"); return Key.D3;
-                    case '4': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D4"); return Key.D4;
-                    case '5': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D5"); return Key.D5;
-                    case '6': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D6"); return Key.D6;
-                    case '7': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D7"); return Key.D7;
-                    case '8': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D8"); return Key.D8;
-                    case '9': System.Diagnostics.Debug.WriteLine($"解析直接数字键: {keyName} -> D9"); return Key.D9;
-                }
+                    '0' => Key.D0,
+                    '1' => Key.D1,
+                    '2' => Key.D2,
+                    '3' => Key.D3,
+                    '4' => Key.D4,
+                    '5' => Key.D5,
+                    '6' => Key.D6,
+                    '7' => Key.D7,
+                    '8' => Key.D8,
+                    '9' => Key.D9,
+                    _ => null
+                };
             }
             
             // 处理数字键 (D1, D2, D3 等)
             if (keyName.Length == 2 && keyName.StartsWith("D") && char.IsDigit(keyName[1]))
             {
-                var digit = keyName[1];
-                switch (digit)
+                return keyName[1] switch
                 {
-                    case '0': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D0"); return Key.D0;
-                    case '1': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D1"); return Key.D1;
-                    case '2': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D2"); return Key.D2;
-                    case '3': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D3"); return Key.D3;
-                    case '4': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D4"); return Key.D4;
-                    case '5': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D5"); return Key.D5;
-                    case '6': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D6"); return Key.D6;
-                    case '7': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D7"); return Key.D7;
-                    case '8': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D8"); return Key.D8;
-                    case '9': System.Diagnostics.Debug.WriteLine($"解析D格式数字键: {keyName} -> D9"); return Key.D9;
-                }
+                    '0' => Key.D0,
+                    '1' => Key.D1,
+                    '2' => Key.D2,
+                    '3' => Key.D3,
+                    '4' => Key.D4,
+                    '5' => Key.D5,
+                    '6' => Key.D6,
+                    '7' => Key.D7,
+                    '8' => Key.D8,
+                    '9' => Key.D9,
+                    _ => null
+                };
             }
             
             // 首先尝试直接解析
@@ -208,44 +253,10 @@ namespace EKSE.Services
             }
             
             // 处理特殊键名映射
-            switch (keyName)
+            if (KeyMap.TryGetValue(keyName, out var mappedKey))
             {
-                case "Space": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Space"); return Key.Space;
-                case "Enter": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Enter"); return Key.Enter;
-                case "Backspace": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Back"); return Key.Back;
-                case "Tab": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Tab"); return Key.Tab;
-                case "Caps": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> CapsLock"); return Key.CapsLock;
-                case "Esc": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Escape"); return Key.Escape;
-                case "Win": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> LWin"); return Key.LWin; // 或 Key.RWin
-                case "L Shift": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> LeftShift"); return Key.LeftShift;
-                case "R Shift": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> RightShift"); return Key.RightShift;
-                case "L Ctrl": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> LeftCtrl"); return Key.LeftCtrl;
-                case "R Ctrl": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> RightCtrl"); return Key.RightCtrl;
-                case "L Alt": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> LeftAlt"); return Key.LeftAlt;
-                case "R Alt": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> RightAlt"); return Key.RightAlt;
-                case "↑": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Up"); return Key.Up;
-                case "↓": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Down"); return Key.Down;
-                case "←": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Left"); return Key.Left;
-                case "→": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Right"); return Key.Right;
-                case "[ {": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemOpenBrackets"); return Key.OemOpenBrackets;
-                case "] }": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemCloseBrackets"); return Key.OemCloseBrackets;
-                case "; :": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemSemicolon"); return Key.OemSemicolon;
-                case "'": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemQuotes"); return Key.OemQuotes;
-                case ", <": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemComma"); return Key.OemComma;
-                case ". >": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemPeriod"); return Key.OemPeriod;
-                case "/ ?": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemQuestion"); return Key.OemQuestion;
-                case "\\": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Oem5"); return Key.Oem5;
-                case "-": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemMinus"); return Key.OemMinus;
-                case "=": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> OemPlus"); return Key.OemPlus; // 注意：在键盘上+和=是同一个键
-                case "Del": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Delete"); return Key.Delete;
-                case "Ins": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Insert"); return Key.Insert;
-                case "Home": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Home"); return Key.Home;
-                case "End": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> End"); return Key.End;
-                case "PgUp": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> PageUp"); return Key.PageUp;
-                case "PgDn": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> PageDown"); return Key.PageDown;
-                case "Pause": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Pause"); return Key.Pause;
-                case "SrcLk": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> Scroll"); return Key.Scroll;
-                case "Fn": System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> None"); return Key.None; // Fn键通常不被系统识别
+                System.Diagnostics.Debug.WriteLine($"解析特殊键: {keyName} -> {mappedKey}");
+                return mappedKey;
             }
             
             // 如果以上都无法匹配，记录并返回null
@@ -262,65 +273,42 @@ namespace EKSE.Services
             try
             {
                 var keySoundsDirectory = Path.Combine(profile.FilePath, "sounds");
-                if (Directory.Exists(keySoundsDirectory))
-                {
-                    var soundFiles = Directory.GetFiles(keySoundsDirectory, "*.*", SearchOption.AllDirectories)
-                        .Where(file => new[] { ".wav", ".mp3", ".aac", ".wma", ".flac" }
-                            .Contains(Path.GetExtension(file).ToLowerInvariant()));
-                    
-                    System.Diagnostics.Debug.WriteLine($"在目录 {keySoundsDirectory} 中找到 {soundFiles.Count()} 个音效文件");
-                    
-                    foreach (var soundFile in soundFiles)
-                    {
-                        var keyName = Path.GetFileNameWithoutExtension(soundFile);
-                        System.Diagnostics.Debug.WriteLine($"处理音效文件: {keyName} ({soundFile})");
-                        
-                        // 使用增强的按键解析功能
-                        var key = ParseKeyName(keyName);
-                        if (key.HasValue)
-                        {
-                            profile.KeySounds[key.Value] = soundFile;
-                            System.Diagnostics.Debug.WriteLine($"映射按键 {key.Value} 到文件 {soundFile}");
-                            
-                            // 特别关注数字键
-                            if (key.Value >= Key.D0 && key.Value <= Key.D9)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"数字键映射: {keyName} -> {key.Value} -> {soundFile}");
-                            }
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine($"无法解析按键名称: {keyName}");
-                        }
-                    }
-                }
-                else
+                if (!Directory.Exists(keySoundsDirectory)) 
                 {
                     System.Diagnostics.Debug.WriteLine($"音效目录不存在: {keySoundsDirectory}");
+                    return;
                 }
-                
-                // 加载默认音效
-                var defaultSoundFile = Path.Combine(profile.FilePath, "DefaultSound.wav");
-                if (File.Exists(defaultSoundFile))
+
+                var soundFiles = Directory.GetFiles(keySoundsDirectory, "*.*", SearchOption.AllDirectories)
+                    .Where(file => SupportedAudioExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
+
+                System.Diagnostics.Debug.WriteLine($"在目录 {keySoundsDirectory} 中找到 {soundFiles.Count()} 个音效文件");
+
+                foreach (var soundFile in soundFiles)
                 {
-                    profile.DefaultSound = defaultSoundFile;
-                    System.Diagnostics.Debug.WriteLine($"加载默认音效: {defaultSoundFile}");
-                }
-                else
-                {
-                    // 尝试其他音频格式
-                    var supportedExtensions = new[] { ".mp3", ".aac", ".wma", ".flac" };
-                    foreach (var extension in supportedExtensions)
+                    var keyName = Path.GetFileNameWithoutExtension(soundFile);
+                    System.Diagnostics.Debug.WriteLine($"处理音效文件: {keyName} ({soundFile})");
+
+                    // 使用增强的按键解析功能
+                    var key = ParseKeyName(keyName);
+                    if (key.HasValue)
                     {
-                        var file = Path.Combine(profile.FilePath, "DefaultSound" + extension);
-                        if (File.Exists(file))
+                        profile.KeySounds[key.Value] = soundFile;
+                        System.Diagnostics.Debug.WriteLine($"映射按键 {key.Value} 到文件 {soundFile}");
+
+                        // 特别关注数字键
+                        if (key.Value >= Key.D0 && key.Value <= Key.D9)
                         {
-                            profile.DefaultSound = file;
-                            System.Diagnostics.Debug.WriteLine($"加载默认音效: {file}");
-                            break;
+                            System.Diagnostics.Debug.WriteLine($"数字键映射: {keyName} -> {key.Value} -> {soundFile}");
                         }
                     }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"无法解析按键名称: {keyName}");
+                    }
                 }
+
+                // 不再加载默认音效
             }
             catch (Exception ex)
             {
@@ -337,22 +325,11 @@ namespace EKSE.Services
             var profileDirectory = Path.Combine(_profilesDirectory, defaultProfile.Name);
             
             // 确保方案目录存在
-            if (!Directory.Exists(profileDirectory))
-            {
-                Directory.CreateDirectory(profileDirectory);
-            }
-            
+            Directory.CreateDirectory(profileDirectory);
             defaultProfile.FilePath = profileDirectory;
             
             // 复制当前方案的按键映射
-            if (_currentProfile != null)
-            {
-                foreach (var kvp in _currentProfile.KeySounds)
-                {
-                    defaultProfile.KeySounds[kvp.Key] = kvp.Value;
-                }
-                defaultProfile.DefaultSound = _currentProfile.DefaultSound;
-            }
+            CopyCurrentProfileMappings(defaultProfile);
             
             _profiles.Add(defaultProfile);
             SaveProfile(defaultProfile);
@@ -369,26 +346,29 @@ namespace EKSE.Services
             var profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
             
             // 确保方案目录存在
-            if (!Directory.Exists(profileDirectory))
-            {
-                Directory.CreateDirectory(profileDirectory);
-            }
-            
+            Directory.CreateDirectory(profileDirectory);
             profile.FilePath = profileDirectory;
             
             // 复制当前方案的按键映射
-            if (_currentProfile != null)
-            {
-                foreach (var kvp in _currentProfile.KeySounds)
-                {
-                    profile.KeySounds[kvp.Key] = kvp.Value;
-                }
-                profile.DefaultSound = _currentProfile.DefaultSound;
-            }
+            CopyCurrentProfileMappings(profile);
             
             _profiles.Add(profile);
             SaveProfile(profile);
             return profile;
+        }
+        
+        /// <summary>
+        /// 复制当前方案的按键映射
+        /// </summary>
+        /// <param name="targetProfile">目标方案</param>
+        private void CopyCurrentProfileMappings(SoundProfile targetProfile)
+        {
+            if (_currentProfile == null) return;
+            
+            foreach (var kvp in _currentProfile.KeySounds)
+            {
+                targetProfile.KeySounds[kvp.Key] = kvp.Value;
+            }
         }
         
         /// <summary>
@@ -397,48 +377,58 @@ namespace EKSE.Services
         /// <param name="profile">要删除的方案</param>
         public void DeleteProfile(SoundProfile profile)
         {
+            // 至少需要保留一个方案
             if (_profiles.Count <= 1)
             {
                 System.Diagnostics.Debug.WriteLine("至少需要保留一个声音方案");
                 return;
             }
             
-            if (_profiles.Remove(profile))
-            {
-                try
-                {
-                    // 尝试删除方案文件夹（最多重试3次）
-                    for (int i = 0; i < 3; i++)
-                    {
-                        try
-                        {
-                            if (Directory.Exists(profile.FilePath))
-                            {
-                                Directory.Delete(profile.FilePath, true);
-                            }
-                            break; // 成功删除则跳出循环
-                        }
-                        catch (IOException)
-                        {
-                            // 如果是最后一次尝试，则重新抛出异常
-                            if (i == 2)
-                                throw;
-                            
-                            // 等待一段时间后重试
-                            System.Threading.Thread.Sleep(100);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"删除方案文件夹失败: {ex.Message}");
-                }
-            }
+            if (!_profiles.Remove(profile))
+                return;
+            
+            // 尝试删除方案文件夹
+            DeleteProfileDirectory(profile.FilePath);
             
             // 如果删除的是当前方案，则设置新的当前方案
             if (_currentProfile == profile)
             {
                 _currentProfile = _profiles.FirstOrDefault();
+            }
+        }
+        
+        /// <summary>
+        /// 删除方案目录
+        /// </summary>
+        /// <param name="profilePath">方案目录路径</param>
+        private void DeleteProfileDirectory(string profilePath)
+        {
+            try
+            {
+                // 尝试删除方案文件夹（最多重试3次）
+                for (int i = 0; i < 3; i++)
+                {
+                    try
+                    {
+                        if (Directory.Exists(profilePath))
+                        {
+                            Directory.Delete(profilePath, true);
+                        }
+                        break; // 成功删除则跳出循环
+                    }
+                    catch (IOException)
+                    {
+                        // 如果是最后一次尝试，则重新抛出异常
+                        if (i == 2) throw;
+                        
+                        // 等待一段时间后重试
+                        System.Threading.Thread.Sleep(100);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"删除方案文件夹失败: {ex.Message}");
             }
         }
         
@@ -478,24 +468,22 @@ namespace EKSE.Services
         private void ConvertKeySoundsToAssignedSounds(SoundProfile profile)
         {
             // 只有当AssignedSounds为空时才从KeySounds生成，避免覆盖已有的数据
-            if (profile.AssignedSounds == null || profile.AssignedSounds.Count == 0)
+            if (profile.AssignedSounds?.Count > 0) return;
+            
+            profile.AssignedSounds = new List<SoundAssignment>();
+            foreach (var kvp in profile.KeySounds)
             {
-                profile.AssignedSounds = new List<SoundAssignment>();
-                foreach (var kvp in profile.KeySounds)
+                // 提取音效文件名
+                var soundFileName = Path.GetFileName(kvp.Value);
+                if (!string.IsNullOrEmpty(soundFileName))
                 {
-                    // 提取音效文件名
-                    var soundFileName = Path.GetFileName(kvp.Value);
-                    if (!string.IsNullOrEmpty(soundFileName))
+                    profile.AssignedSounds.Add(new SoundAssignment
                     {
-                        profile.AssignedSounds.Add(new SoundAssignment
-                        {
-                            Key = kvp.Key.ToString(),
-                            Sound = soundFileName
-                        });
-                    }
+                        Key = kvp.Key.ToString(),
+                        Sound = soundFileName
+                    });
                 }
             }
-            // 如果AssignedSounds已经有数据，则保持不变
         }
         
         /// <summary>
@@ -515,7 +503,7 @@ namespace EKSE.Services
         /// </summary>
         /// <param name="key">按键</param>
         /// <param name="soundPath">音效文件路径</param>
-        public void SetKeySound(System.Windows.Input.Key key, string soundPath)
+        public void SetKeySound(Key key, string soundPath)
         {
             if (_currentProfile != null && File.Exists(soundPath))
             {
@@ -537,59 +525,15 @@ namespace EKSE.Services
         /// </summary>
         /// <param name="key">按键</param>
         /// <returns>音效文件路径</returns>
-        public string GetKeySound(System.Windows.Input.Key key)
+        public string GetKeySound(Key key)
         {
             if (_currentProfile != null && _currentProfile.KeySounds.ContainsKey(key))
             {
                 var soundPath = _currentProfile.KeySounds[key];
-                if (File.Exists(soundPath))
-                {
-                    return soundPath;
-                }
+                return File.Exists(soundPath) ? soundPath : null;
             }
             
-            return _currentProfile?.DefaultSound;
-        }
-        
-        /// <summary>
-        /// 设置默认音效
-        /// </summary>
-        /// <param name="soundPath">音效文件路径</param>
-        public void SetDefaultSound(string soundPath)
-        {
-            if (_currentProfile != null && File.Exists(soundPath))
-            {
-                try
-                {
-                    var extension = Path.GetExtension(soundPath);
-                    var destFileName = "DefaultSound" + extension;
-                    var destFilePath = Path.Combine(_currentProfile.FilePath, destFileName);
-                    
-                    // 如果目标文件已存在，先删除它
-                    if (File.Exists(destFilePath))
-                    {
-                        try 
-                        {
-                            File.Delete(destFilePath);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"删除已存在的默认音效文件失败: {ex.Message}");
-                        }
-                    }
-                    
-                    // 复制文件
-                    File.Copy(soundPath, destFilePath, true);
-                    
-                    // 更新默认音效路径
-                    _currentProfile.DefaultSound = destFilePath;
-                    SaveProfile(_currentProfile);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"设置默认音效失败: {ex.Message}");
-                }
-            }
+            return null;
         }
         
         /// <summary>
@@ -616,14 +560,7 @@ namespace EKSE.Services
                 // 如果目标文件已存在，先删除它
                 if (File.Exists(destFilePath))
                 {
-                    try 
-                    {
-                        File.Delete(destFilePath);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"删除已存在的音效文件失败: {ex.Message}");
-                    }
+                    File.Delete(destFilePath);
                 }
                 
                 // 复制文件
@@ -655,54 +592,45 @@ namespace EKSE.Services
         /// <returns>是否导出成功</returns>
         public bool ExportProfile(SoundProfile profile, string exportPath)
         {
+            // 创建临时目录用于打包
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDirectory);
+            
             try
             {
-                // 创建临时目录用于打包
-                var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-                Directory.CreateDirectory(tempDirectory);
+                // 复制index.json文件
+                var profileJsonPath = Path.Combine(profile.FilePath, "index.json");
+                if (File.Exists(profileJsonPath))
+                {
+                    File.Copy(profileJsonPath, Path.Combine(tempDirectory, "index.json"));
+                }
                 
-                try
+                // 复制sounds文件夹
+                var sourceKeySoundsDir = Path.Combine(profile.FilePath, "sounds");
+                var destKeySoundsDir = Path.Combine(tempDirectory, "sounds");
+                if (Directory.Exists(sourceKeySoundsDir))
                 {
-                    // 复制index.json文件
-                    var profileJsonPath = Path.Combine(profile.FilePath, "index.json");
-                    if (File.Exists(profileJsonPath))
-                    {
-                        File.Copy(profileJsonPath, Path.Combine(tempDirectory, "index.json"));
-                    }
-                    
-                    // 复制sounds文件夹
-                    var sourceKeySoundsDir = Path.Combine(profile.FilePath, "sounds");
-                    var destKeySoundsDir = Path.Combine(tempDirectory, "sounds");
-                    if (Directory.Exists(sourceKeySoundsDir))
-                    {
-                        CopyDirectory(sourceKeySoundsDir, destKeySoundsDir);
-                    }
-                    
-                    // 复制默认音效文件
-                    if (!string.IsNullOrEmpty(profile.DefaultSound) && File.Exists(profile.DefaultSound))
-                    {
-                        var defaultSoundFileName = Path.GetFileName(profile.DefaultSound);
-                        File.Copy(profile.DefaultSound, Path.Combine(tempDirectory, defaultSoundFileName));
-                    }
-                    
-                    // 创建ZIP文件
-                    ZipFile.CreateFromDirectory(tempDirectory, exportPath);
-                    
-                    return true;
+                    CopyDirectory(sourceKeySoundsDir, destKeySoundsDir);
                 }
-                finally
-                {
-                    // 清理临时目录
-                    if (Directory.Exists(tempDirectory))
-                    {
-                        Directory.Delete(tempDirectory, true);
-                    }
-                }
+                
+                
+                // 创建ZIP文件
+                ZipFile.CreateFromDirectory(tempDirectory, exportPath);
+                
+                return true;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"导出声音方案失败: {ex.Message}");
                 return false;
+            }
+            finally
+            {
+                // 清理临时目录
+                if (Directory.Exists(tempDirectory))
+                {
+                    Directory.Delete(tempDirectory, true);
+                }
             }
         }
         
@@ -713,156 +641,105 @@ namespace EKSE.Services
         /// <returns>导入的声音方案，如果失败则返回null</returns>
         public SoundProfile ImportProfile(string importPath)
         {
+            if (!File.Exists(importPath))
+            {
+                return null;
+            }
+            
+            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempDirectory);
+            
             try
             {
-                // 检查ZIP文件是否存在
-                if (!File.Exists(importPath))
+                ZipFile.ExtractToDirectory(importPath, tempDirectory);
+                
+                var profileJsonPath = Path.Combine(tempDirectory, "index.json");
+                if (!File.Exists(profileJsonPath))
                 {
-                    System.Diagnostics.Debug.WriteLine("指定的ZIP文件不存在");
                     return null;
                 }
                 
-                // 创建临时目录用于解压
-                var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-                Directory.CreateDirectory(tempDirectory);
+                var json = File.ReadAllText(profileJsonPath);
+                var options = new JsonSerializerOptions();
+                options.Converters.Add(new SoundProfileJsonConverter());
+                var profile = JsonSerializer.Deserialize<SoundProfile>(json, options);
                 
-                try
+                // 处理方案名称冲突
+                var profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
+                if (Directory.Exists(profileDirectory))
                 {
-                    // 解压ZIP文件
-                    ZipFile.ExtractToDirectory(importPath, tempDirectory);
-                    
-                    // 读取index.json文件
-                    var profileJsonPath = Path.Combine(tempDirectory, "index.json");
-                    if (!File.Exists(profileJsonPath))
-                    {
-                        System.Diagnostics.Debug.WriteLine("ZIP文件中缺少index.json文件");
-                        return null;
-                    }
-                    
-                    var json = File.ReadAllText(profileJsonPath);
-                    System.Diagnostics.Debug.WriteLine($"导入的JSON内容: {json}");
-                    
-                    var options = new JsonSerializerOptions();
-                    options.Converters.Add(new SoundProfileJsonConverter());
-                    var profile = JsonSerializer.Deserialize<SoundProfile>(json, options);
-                    
-                    // 验证是否正确读取了assigned_sounds
-                    System.Diagnostics.Debug.WriteLine($"读取到的AssignedSounds数量: {profile?.AssignedSounds?.Count ?? 0}");
-                    
-                    // 检查方案名称是否已存在
-                    var profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
-                    if (Directory.Exists(profileDirectory))
-                    {
-                        // 如果方案名称已存在，则添加时间戳
-                        var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-                        profile.Name = $"{profile.Name}_{timestamp}";
-                        profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
-                    }
-                    
-                    // 创建方案目录
-                    Directory.CreateDirectory(profileDirectory);
-                    profile.FilePath = profileDirectory;
-                    
-                    // 复制sounds文件夹
-                    var sourceKeySoundsDir = Path.Combine(tempDirectory, "sounds");
-                    var destKeySoundsDir = Path.Combine(profileDirectory, "sounds");
-                    if (Directory.Exists(sourceKeySoundsDir))
-                    {
-                        CopyDirectory(sourceKeySoundsDir, destKeySoundsDir);
-                    }
-                    
-                    // 复制默认音效文件
-                    var extensions = new[] { ".wav", ".mp3", ".aac", ".wma", ".flac" };
-                    foreach (var extension in extensions)
-                    {
-                        var defaultSoundFile = Path.Combine(tempDirectory, "DefaultSound" + extension);
-                        if (File.Exists(defaultSoundFile))
-                        {
-                            var destDefaultSoundFile = Path.Combine(profileDirectory, "DefaultSound" + extension);
-                            File.Copy(defaultSoundFile, destDefaultSoundFile);
-                            profile.DefaultSound = destDefaultSoundFile;
-                            break;
-                        }
-                    }
-                    
-                    // 修正KeySounds中的文件路径
-                    // 只有当AssignedSounds有数据时才执行转换
-                    if (profile.AssignedSounds != null && profile.AssignedSounds.Count > 0)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"处理 {profile.AssignedSounds.Count} 个分配的声音");
-                        profile.KeySounds.Clear();
-                        foreach (var assignment in profile.AssignedSounds)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"处理分配的声音: Key='{assignment.Key}', Sound='{assignment.Sound}'");
-                            
-                            // 解析按键名称，支持数字键和其他特殊键名
-                            var key = ParseKeyName(assignment.Key);
-                            if (key.HasValue)
-                            {
-                                // 构建完整的音效文件路径
-                                var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
-                                profile.KeySounds[key.Value] = soundPath;
-                                System.Diagnostics.Debug.WriteLine($"映射按键 {key.Value} 到文件 {soundPath}");
-                                
-                                // 特别关注数字键
-                                if (key.Value >= Key.D0 && key.Value <= Key.D9)
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"数字键映射: {assignment.Key} -> {key.Value} -> {soundPath}");
-                                }
-                            }
-                            else
-                            {
-                                // 如果无法解析按键名称，记录警告信息
-                                System.Diagnostics.Debug.WriteLine($"无法解析按键名称: {assignment.Key}");
-                            }
-                        }
-                    }
-                    
-                    // 处理soundsList中的文件（其他软件可能使用这种方式存储文件列表）
-                    // 如果AssignedSounds为空但有soundsList文件，则尝试从文件名推断按键
-                    if ((profile.AssignedSounds == null || profile.AssignedSounds.Count == 0))
-                    {
-                        // 检查是否有sounds文件夹
-                        if (Directory.Exists(destKeySoundsDir))
-                        {
-                            var soundFiles = Directory.GetFiles(destKeySoundsDir, "*.*", SearchOption.AllDirectories)
-                                .Where(file => new[] { ".wav", ".mp3", ".aac", ".wma", ".flac" }
-                                    .Contains(Path.GetExtension(file).ToLowerInvariant()));
-                            
-                            foreach (var soundFile in soundFiles)
-                            {
-                                var fileName = Path.GetFileName(soundFile);
-                                var fileNameWithoutExt = Path.GetFileNameWithoutExtension(soundFile);
-                                
-                                // 使用增强的按键解析功能
-                                var key = ParseKeyName(fileNameWithoutExt);
-                                if (key.HasValue)
-                                {
-                                    profile.KeySounds[key.Value] = soundFile;
-                                }
-                            }
-                        }
-                    }
-                    
-                    // 保存并加载新方案
-                    SaveProfile(profile);
-                    _profiles.Add(profile);
-                    
-                    return profile;
+                    var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+                    profile.Name = $"{profile.Name}_{timestamp}";
+                    profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
                 }
-                finally
+                
+                // 创建方案目录并复制文件
+                Directory.CreateDirectory(profileDirectory);
+                profile.FilePath = profileDirectory;
+                
+                var sourceKeySoundsDir = Path.Combine(tempDirectory, "sounds");
+                var destKeySoundsDir = Path.Combine(profileDirectory, "sounds");
+                if (Directory.Exists(sourceKeySoundsDir))
                 {
-                    // 清理临时目录
-                    if (Directory.Exists(tempDirectory))
+                    CopyDirectory(sourceKeySoundsDir, destKeySoundsDir);
+                }
+                
+                
+                // 重建KeySounds映射
+                RebuildKeySoundsMapping(profile, destKeySoundsDir);
+                
+                SaveProfile(profile);
+                _profiles.Add(profile);
+                
+                return profile;
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                if (Directory.Exists(tempDirectory))
+                {
+                    Directory.Delete(tempDirectory, true);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 根据AssignedSounds或文件列表重建KeySounds映射
+        /// </summary>
+        /// <param name="profile">声音方案</param>
+        /// <param name="destKeySoundsDir">目标音效目录</param>
+        private void RebuildKeySoundsMapping(SoundProfile profile, string destKeySoundsDir)
+        {
+            if (profile.AssignedSounds?.Count > 0)
+            {
+                profile.KeySounds.Clear();
+                foreach (var assignment in profile.AssignedSounds)
+                {
+                    var key = ParseKeyName(assignment.Key);
+                    if (key.HasValue)
                     {
-                        Directory.Delete(tempDirectory, true);
+                        var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
+                        profile.KeySounds[key.Value] = soundPath;
                     }
                 }
             }
-            catch (Exception ex)
+            else if (Directory.Exists(destKeySoundsDir))
             {
-                System.Diagnostics.Debug.WriteLine($"导入声音方案失败: {ex.Message}");
-                return null;
+                var soundFiles = Directory.GetFiles(destKeySoundsDir, "*.*", SearchOption.AllDirectories)
+                    .Where(file => SupportedAudioExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
+                
+                foreach (var soundFile in soundFiles)
+                {
+                    var fileNameWithoutExt = Path.GetFileNameWithoutExtension(soundFile);
+                    var key = ParseKeyName(fileNameWithoutExt);
+                    if (key.HasValue)
+                    {
+                        profile.KeySounds[key.Value] = soundFile;
+                    }
+                }
             }
         }
         
@@ -873,21 +750,15 @@ namespace EKSE.Services
         /// <param name="destDir">目标目录</param>
         private void CopyDirectory(string sourceDir, string destDir)
         {
-            // 创建目标目录
             Directory.CreateDirectory(destDir);
-            
-            // 复制文件
             foreach (var file in Directory.GetFiles(sourceDir))
             {
-                var destFile = Path.Combine(destDir, Path.GetFileName(file));
-                File.Copy(file, destFile);
+                File.Copy(file, Path.Combine(destDir, Path.GetFileName(file)));
             }
             
-            // 递归复制子目录
             foreach (var directory in Directory.GetDirectories(sourceDir))
             {
-                var destDirectory = Path.Combine(destDir, Path.GetFileName(directory));
-                CopyDirectory(directory, destDirectory);
+                CopyDirectory(directory, Path.Combine(destDir, Path.GetFileName(directory)));
             }
         }
     }

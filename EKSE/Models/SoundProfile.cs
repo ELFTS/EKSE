@@ -40,12 +40,6 @@ namespace EKSE.Models
         public Dictionary<Key, string> KeySounds { get; set; }
         
         /// <summary>
-        /// 默认音效文件路径
-        /// </summary>
-        [JsonIgnore]
-        public string DefaultSound { get; set; }
-        
-        /// <summary>
         /// 方案文件路径
         /// </summary>
         [JsonIgnore]
