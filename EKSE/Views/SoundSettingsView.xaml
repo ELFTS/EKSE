@@ -93,18 +93,11 @@
                             <components:VirtualKeyboard x:Name="VirtualKeyboardControl" 
                                                        KeySelected="VirtualKeyboardControl_KeySelected"/>
                             
-                            <Button x:Name="PlaySoundButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Content="播放当前音效"
-                                    HorizontalAlignment="Left"
-                                    Margin="0,10,0,0"
-                                    Click="PlaySoundButton_Click"/>
-                            
                             <TextBlock x:Name="CurrentSoundPathText"
                                        Text="当前音效路径: 无"
                                        Style="{StaticResource MaterialDesignCaptionTextBlock}"
                                        TextWrapping="Wrap"
-                                       Margin="0,10,0,0"/>
+                                       Margin="0,0,0,0"/>
                         </StackPanel>
                     </Grid>
                 </materialDesign:Card>

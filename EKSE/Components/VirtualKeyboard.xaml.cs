@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
+using EKSE.Services; // 添加SoundService引用
 
 namespace EKSE.Components
 {
@@ -27,6 +28,12 @@ namespace EKSE.Components
         
         // 键盘行数据集合
         private ObservableCollection<KeyboardRow> _keyboardRows = new ObservableCollection<KeyboardRow>();
+        
+        // 添加SoundService引用
+        private SoundService? _soundService;
+        
+        // 添加ProfileManager引用
+        private ProfileManager? _profileManager;
 
         public VirtualKeyboard()
         {
@@ -40,6 +47,13 @@ namespace EKSE.Components
             Resources.Add("FunctionKeysVisibilityConverter", new FunctionKeysVisibilityConverter());
             
             InitializeKeyboard();
+        }
+        
+        // 设置SoundService引用
+        public void SetServices(SoundService soundService, ProfileManager profileManager)
+        {
+            _soundService = soundService;
+            _profileManager = profileManager;
         }
         
         private void InitializeKeyboard()
@@ -216,6 +230,11 @@ namespace EKSE.Components
                 if (Enum.TryParse<Key>(keyName, out Key key))
                 {
                     _selectedKey = key;
+                    
+                    // 直接播放音效
+                    _soundService?.PlaySound(key);
+                    
+                    // 仍然触发事件，以便更新UI
                     KeySelected?.Invoke(this, new VirtualKeyEventArgs(key));
                 }
             }
@@ -384,4 +403,4 @@ namespace EKSE.Components
             Key = key;
         }
     }
-        }
+}
