@@ -317,6 +317,11 @@ namespace EKSE
                         _settingsView = new SettingsView();
                         _settingsView.ThemeColorChanged += OnThemeColorChanged;
                     }
+                    else
+                    {
+                        // 如果SettingsView已经存在，则刷新设置
+                        _settingsView.RefreshSettings();
+                    }
                     content = _settingsView;
                     break;
                 case "Sponsor":

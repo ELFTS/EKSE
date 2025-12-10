@@ -41,7 +41,8 @@
                             </StackPanel>
 
                             <ToggleButton Grid.Column="1"
-                                          Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
+                                          Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                          x:Name="AutoStartToggle"/>
                         </Grid>
 
                         <Separator Grid.Row="1"/>
@@ -70,7 +71,7 @@
 
                             <ToggleButton Grid.Column="1"
                                           Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                          IsChecked="True"/>
+                                          x:Name="MinimizeToTrayToggle"/>
                         </Grid>
 
                         <Separator Grid.Row="1"/>

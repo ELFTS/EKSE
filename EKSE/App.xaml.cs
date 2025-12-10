@@ -24,8 +24,8 @@ namespace EKSE
         {
             base.OnStartup(e);
             
-            // 初始化设置管理器
-            SettingsManager = new SettingsManager();
+            // 初始化设置管理器（使用单例模式）
+            SettingsManager = SettingsManager.Instance;
             
             // 加载保存的设置
             var settings = SettingsManager.LoadSettings();
