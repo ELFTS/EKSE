@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using System.Windows.Input;
 
 namespace EKSE.Models
@@ -12,25 +12,25 @@ namespace EKSE.Models
         /// <summary>
         /// 方案名称
         /// </summary>
-        [JsonPropertyName("name")]
+        [JsonProperty("name")]
         public string Name { get; set; }
         
         /// <summary>
         /// 模式（例如：随机）
         /// </summary>
-        [JsonPropertyName("mode")]
+        [JsonProperty("mode")]
         public string Mode { get; set; }
         
         /// <summary>
         /// 重复音效文件
         /// </summary>
-        [JsonPropertyName("repeat_sound")]
+        [JsonProperty("repeat_sound")]
         public string RepeatSound { get; set; }
         
         /// <summary>
         /// 分配的声音列表
         /// </summary>
-        [JsonPropertyName("assigned_sounds")]
+        [JsonProperty("assigned_sounds")]
         public List<SoundAssignment> AssignedSounds { get; set; }
         
         /// <summary>

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace EKSE.Models
 {
@@ -10,41 +10,33 @@ namespace EKSE.Models
     /// </summary>
     public class SoundProfileJsonConverter : JsonConverter<SoundProfile>
     {
-        public override SoundProfile Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override SoundProfile ReadJson(JsonReader reader, Type objectType, SoundProfile existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            using var doc = JsonDocument.ParseValue(ref reader);
-            var root = doc.RootElement;
+            JObject jo = JObject.Load(reader);
             
             var profile = new SoundProfile();
             
             // 读取标准字段
-            if (root.TryGetProperty("name", out var nameElement))
-            {
-                profile.Name = nameElement.GetString();
-            }
-            
-            if (root.TryGetProperty("mode", out var modeElement))
-            {
-                profile.Mode = modeElement.GetString();
-            }
-            
-            if (root.TryGetProperty("repeat_sound", out var repeatSoundElement))
-            {
-                profile.RepeatSound = repeatSoundElement.GetString();
-            }
+            profile.Name = jo["name"]?.ToString();
+            profile.Mode = jo["mode"]?.ToString();
+            profile.RepeatSound = jo["repeat_sound"]?.ToString();
             
             // 读取assigned_sounds数组
-            if (root.TryGetProperty("assigned_sounds", out var assignedSoundsElement) && assignedSoundsElement.ValueKind == JsonValueKind.Array)
+            var assignedSoundsToken = jo["assigned_sounds"];
+            if (assignedSoundsToken != null && assignedSoundsToken.Type == JTokenType.Array)
             {
                 profile.AssignedSounds = new List<SoundAssignment>(); // 确保初始化列表
-                foreach (var item in assignedSoundsElement.EnumerateArray())
+                foreach (var item in assignedSoundsToken)
                 {
-                    if (item.TryGetProperty("key", out var keyElement) && item.TryGetProperty("sound", out var soundElement))
+                    var key = item["key"]?.ToString();
+                    var sound = item["sound"]?.ToString();
+                    
+                    if (key != null && sound != null)
                     {
                         profile.AssignedSounds.Add(new SoundAssignment
                         {
-                            Key = keyElement.GetString(),
-                            Sound = soundElement.GetString()
+                            Key = key,
+                            Sound = sound
                         });
                     }
                 }
@@ -61,14 +53,19 @@ namespace EKSE.Models
             return profile;
         }
 
-        public override void Write(Utf8JsonWriter writer, SoundProfile value, JsonSerializerOptions options)
+        public override void WriteJson(JsonWriter writer, SoundProfile value, JsonSerializer serializer)
         {
             writer.WriteStartObject();
             
             // 写入标准字段
-            writer.WriteString("name", value.Name);
-            writer.WriteString("mode", value.Mode);
-            writer.WriteString("repeat_sound", value.RepeatSound);
+            writer.WritePropertyName("name");
+            writer.WriteValue(value.Name ?? string.Empty);
+            
+            writer.WritePropertyName("mode");
+            writer.WriteValue(value.Mode ?? string.Empty);
+            
+            writer.WritePropertyName("repeat_sound");
+            writer.WriteValue(value.RepeatSound ?? string.Empty);
             
             // 写入assigned_sounds数组
             writer.WritePropertyName("assigned_sounds");
@@ -78,8 +75,10 @@ namespace EKSE.Models
                 foreach (var assignment in value.AssignedSounds)
                 {
                     writer.WriteStartObject();
-                    writer.WriteString("key", assignment.Key);
-                    writer.WriteString("sound", assignment.Sound);
+                    writer.WritePropertyName("key");
+                    writer.WriteValue(assignment.Key ?? string.Empty);
+                    writer.WritePropertyName("sound");
+                    writer.WriteValue(assignment.Sound ?? string.Empty);
                     writer.WriteEndObject();
                 }
             }

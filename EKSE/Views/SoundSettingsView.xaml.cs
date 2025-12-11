@@ -28,24 +28,34 @@ namespace EKSE.Views
             public string Size { get; set; } = string.Empty;
         }
         
-        // 服务和管理器引用
+        private readonly ObservableCollection<AudioFileItem> _audioFilesList = new ObservableCollection<AudioFileItem>();
+        
+        // 服务引用
         private SoundService? _soundService;
         private ProfileManager? _profileManager;
         private AudioFileManager? _audioFileManager;
         
-        // 当前选中的按键
-        private System.Windows.Input.Key _selectedKey = System.Windows.Input.Key.None;
+        private Key _selectedKey = Key.None;
         
-        // 音频文件列表
-        private ObservableCollection<AudioFileItem> _audioFilesList = new ObservableCollection<AudioFileItem>();
-
         public SoundSettingsView()
         {
             InitializeComponent();
-            // 设置ListBox的数据源
             AudioFilesListBox.ItemsSource = _audioFilesList;
+            
+            // 订阅卸载事件以清理资源
+            Unloaded += SoundSettingsView_Unloaded;
         }
-
+        
+        // 用户控件卸载时取消订阅事件
+        private void SoundSettingsView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (_profileManager != null)
+            {
+                _profileManager.ProfilesChanged -= OnProfilesChanged;
+            }
+        }
+        
+        
         // 当虚拟键盘上的按键被选中时
         private void VirtualKeyboardControl_KeySelected(object sender, VirtualKeyEventArgs e)
         {
@@ -84,6 +94,12 @@ namespace EKSE.Views
             _profileManager = profileManager;
             _audioFileManager = audioFileManager;
             
+            // 订阅方案变化事件
+            if (_profileManager != null)
+            {
+                _profileManager.ProfilesChanged += OnProfilesChanged;
+            }
+            
             // 初始化声音方案界面
             InitializeProfileUI();
             
@@ -92,6 +108,16 @@ namespace EKSE.Views
             
             // 刷新音频文件列表
             RefreshAudioFilesList();
+        }
+        
+        // 当声音方案列表发生变化时的处理方法
+        private void OnProfilesChanged(object sender, EventArgs e)
+        {
+            // 在UI线程上刷新界面
+            Dispatcher.Invoke(() =>
+            {
+                InitializeProfileUI();
+            });
         }
         
         // 初始化声音方案界面

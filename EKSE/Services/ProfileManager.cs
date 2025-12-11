@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text.Json;
+using Newtonsoft.Json;
 using System.Windows.Input;
 using EKSE.Models;
 
@@ -17,6 +17,9 @@ namespace EKSE.Services
         private readonly string _profilesDirectory;
         private readonly List<SoundProfile> _profiles;
         private SoundProfile _currentProfile;
+        
+        // 添加事件，当方案列表发生变化时触发
+        public event EventHandler ProfilesChanged;
         
         // 定义支持的音频扩展名
         private static readonly string[] SupportedAudioExtensions = { ".wav", ".mp3", ".aac", ".wma", ".flac" };
@@ -116,9 +119,9 @@ namespace EKSE.Services
                         {
                             // 加载现有配置文件
                             var json = File.ReadAllText(configFile);
-                            var options = new JsonSerializerOptions();
-                            options.Converters.Add(new SoundProfileJsonConverter());
-                            profile = JsonSerializer.Deserialize<SoundProfile>(json, options);
+                            var settings = new JsonSerializerSettings();
+                            settings.Converters.Add(new SoundProfileJsonConverter());
+                            profile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
                             if (profile != null)
                             {
                                 profile.FilePath = directory;
@@ -354,6 +357,10 @@ namespace EKSE.Services
             
             _profiles.Add(profile);
             SaveProfile(profile);
+            
+            // 触发方案列表变化事件
+            ProfilesChanged?.Invoke(this, EventArgs.Empty);
+            
             return profile;
         }
         
@@ -395,6 +402,9 @@ namespace EKSE.Services
             {
                 _currentProfile = _profiles.FirstOrDefault();
             }
+            
+            // 触发方案列表变化事件
+            ProfilesChanged?.Invoke(this, EventArgs.Empty);
         }
         
         /// <summary>
@@ -445,14 +455,13 @@ namespace EKSE.Services
                 // 将按键声音映射转换为分配的声音列表
                 ConvertKeySoundsToAssignedSounds(profile);
                 
-                var options = new JsonSerializerOptions 
+                var settings = new JsonSerializerSettings 
                 { 
-                    WriteIndented = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    Formatting = Formatting.Indented
                 };
-                options.Converters.Add(new SoundProfileJsonConverter());
+                settings.Converters.Add(new SoundProfileJsonConverter());
                 
-                var json = JsonSerializer.Serialize(profile, options);
+                var json = JsonConvert.SerializeObject(profile, settings);
                 File.WriteAllText(profileFile, json);
             }
             catch (Exception ex)
@@ -660,9 +669,9 @@ namespace EKSE.Services
                 }
                 
                 var json = File.ReadAllText(profileJsonPath);
-                var options = new JsonSerializerOptions();
-                options.Converters.Add(new SoundProfileJsonConverter());
-                var profile = JsonSerializer.Deserialize<SoundProfile>(json, options);
+                var settings = new JsonSerializerSettings();
+                settings.Converters.Add(new SoundProfileJsonConverter());
+                var profile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
                 
                 // 处理方案名称冲突
                 var profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
@@ -690,6 +699,9 @@ namespace EKSE.Services
                 
                 SaveProfile(profile);
                 _profiles.Add(profile);
+                
+                // 触发方案列表变化事件
+                ProfilesChanged?.Invoke(this, EventArgs.Empty);
                 
                 return profile;
             }

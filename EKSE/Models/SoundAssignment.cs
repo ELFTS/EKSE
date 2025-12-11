@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace EKSE.Models
 {
@@ -10,13 +10,13 @@ namespace EKSE.Models
         /// <summary>
         /// 按键名称
         /// </summary>
-        [JsonPropertyName("key")]
+        [JsonProperty("key")]
         public string Key { get; set; }
         
         /// <summary>
         /// 音效文件名
         /// </summary>
-        [JsonPropertyName("sound")]
+        [JsonProperty("sound")]
         public string Sound { get; set; }
     }
 }
