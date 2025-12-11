@@ -11,8 +11,10 @@ using EKSE.Views;
 using EKSE.Components;
 using EKSE.Services;
 using EKSE.Models;
+using EKSE.Commands;
 using MaterialDesignThemes.Wpf;
 using MaterialDesignColors;
+using Hardcodet.Wpf.TaskbarNotification;
 
 namespace EKSE
 {
@@ -51,6 +53,8 @@ namespace EKSE
             InitializeNavigation();
             
             Loaded += MainWindow_Loaded;
+            StateChanged += MainWindow_StateChanged;
+            Closing += MainWindow_Closing;
 
         }
 
@@ -68,14 +72,134 @@ namespace EKSE
             
             // 记录窗口正常状态时的位置和大小
             UpdateNormalWindowState();
+            
+            // 初始化托盘图标
+            InitializeNotifyIcon();
         }
         
         /// <summary>
-        /// 应用启动动画效果
+        /// 初始化系统托盘图标
         /// </summary>
+        private void InitializeNotifyIcon()
+        {
+            if (MyNotifyIcon != null)
+            {
+                // 创建命令
+                MyNotifyIcon.DataContext = this;
+                
+                // 由于我们使用命令绑定，所以不需要手动处理事件
+            }
+        }
+        
         /// <summary>
-        /// 应用启动动画效果
+        /// 显示主窗口命令
         /// </summary>
+        public ICommand ShowWindowCommand => new RelayCommand(ShowMainWindow);
+        
+        /// <summary>
+        /// 退出应用程序命令
+        /// </summary>
+        public ICommand ExitApplicationCommand => new RelayCommand(ExitApplication);
+        
+        /// <summary>
+        /// 显示主窗口
+        /// </summary>
+        private void ShowMainWindow()
+        {
+            try
+            {
+                // 恢复窗口状态
+                this.Show();
+                this.WindowState = WindowState.Normal;
+                
+                // 激活窗口
+                this.Activate();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"显示主窗口失败: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 退出应用程序
+        /// </summary>
+        private void ExitApplication()
+        {
+            try
+            {
+                // 隐藏托盘图标
+                if (MyNotifyIcon != null)
+                {
+                    MyNotifyIcon.Dispose();
+                }
+                
+                // 关闭应用程序
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"退出应用程序失败: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 窗口状态改变事件处理
+        /// </summary>
+        private void MainWindow_StateChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                // 从设置管理器获取保存的设置
+                var settings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
+                
+                // 如果启用了最小化到托盘功能且窗口被最小化
+                if (settings.MinimizeToTray && WindowState == WindowState.Minimized)
+                {
+                    // 隐藏窗口而不是最小化到任务栏
+                    this.Hide();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"处理窗口状态改变事件失败: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 窗口关闭事件处理
+        /// </summary>
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            try
+            {
+                // 从设置管理器获取保存的设置
+                var settings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
+                
+                // 如果启用了最小化到托盘功能
+                if (settings.MinimizeToTray)
+                {
+                    // 取消关闭操作
+                    e.Cancel = true;
+                    
+                    // 隐藏窗口而不是关闭
+                    this.Hide();
+                }
+                else
+                {
+                    // 正常关闭，清理托盘图标
+                    if (MyNotifyIcon != null)
+                    {
+                        MyNotifyIcon.Dispose();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"处理窗口关闭事件失败: {ex.Message}");
+            }
+        }
+        
         /// <summary>
         /// 应用启动动画效果
         /// </summary>
@@ -368,7 +492,19 @@ namespace EKSE
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            WindowState = WindowState.Minimized;
+            // 检查是否启用了最小化到托盘功能
+            var settings = ((App)Application.Current).SettingsManager?.GetCurrentSettings();
+            bool minimizeToTray = settings?.MinimizeToTray ?? true;
+            
+            if (minimizeToTray)
+            {
+                // 隐藏窗口而不是最小化到任务栏
+                Hide();
+            }
+            else
+            {
+                WindowState = WindowState.Minimized;
+            }
         }
 
         private void MaximizeButton_Click(object sender, RoutedEventArgs e)
@@ -378,7 +514,20 @@ namespace EKSE
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            // 检查是否启用了最小化到托盘功能
+            var settings = ((App)Application.Current).SettingsManager?.GetCurrentSettings();
+            bool minimizeToTray = settings?.MinimizeToTray ?? true;
+            
+            if (minimizeToTray)
+            {
+                // 隐藏窗口而不是关闭
+                Hide();
+            }
+            else
+            {
+                // 正常关闭应用程序
+                Close();
+            }
         }
 
         private void ToggleWindowState()
