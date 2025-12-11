@@ -7,6 +7,21 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="DirectionalKeyStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        
+        <Style x:Key="NormalKeyStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+    </UserControl.Resources>
+    
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -32,79 +47,304 @@
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" 
                           VerticalScrollBarVisibility="Auto"
                           PanningMode="VerticalOnly">
-                <ItemsControl x:Name="KeyboardItemsControl">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Vertical"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <!-- 普通行 -->
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5" 
-                                            Visibility="{Binding IsDirectionalRow, Converter={x:Static local:BoolToVisibilityInverseConverter.Instance}}">
-                                    <ItemsControl ItemsSource="{Binding Keys}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Button Width="{Binding Width}" 
-                                                        Height="40" 
-                                                        Margin="1" 
-                                                        Tag="{Binding Tag}" 
-                                                        Click="KeyButton_Click" 
-                                                        Style="{StaticResource MaterialDesignRaisedButton}"
-                                                        FontSize="{Binding FontSize}"
-                                                        Padding="2"
-                                                        Visibility="{Binding Width, Converter={x:Static local:WidthToVisibilityConverter.Instance}}">
-                                                    <TextBlock Text="{Binding Content}" 
-                                                               TextWrapping="NoWrap" 
-                                                               TextAlignment="Center"
-                                                               VerticalAlignment="Center"
-                                                               HorizontalAlignment="Center"/>
-                                                </Button>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                    
-                                    <!-- 分离的功能键容器 (编辑控制键和方向键) -->
-                                    <ItemsControl ItemsSource="{Binding FunctionKeys}" 
-                                                  Visibility="{Binding FunctionKeys, Converter={x:Static local:FunctionKeysVisibilityConverter.Instance}}"
-                                                  Margin="5,0,0,0">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal"/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Button Width="{Binding Width}" 
-                                                        Height="40" 
-                                                        Margin="1" 
-                                                        Tag="{Binding Tag}" 
-                                                        Click="KeyButton_Click" 
-                                                        Style="{StaticResource MaterialDesignRaisedButton}"
-                                                        FontSize="{Binding FontSize}"
-                                                        Padding="2"
-                                                        Visibility="{Binding Width, Converter={x:Static local:WidthToVisibilityConverter.Instance}}">
-                                                    <TextBlock Text="{Binding Content}" 
-                                                               TextWrapping="NoWrap" 
-                                                               TextAlignment="Center"
-                                                               VerticalAlignment="Center"
-                                                               HorizontalAlignment="Center"/>
-                                                </Button>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!-- 定义键盘行 -->
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid.ColumnDefinitions>
+                        <!-- 定义列，以标准按键宽度为单位 -->
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                        <ColumnDefinition Width="45"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 第一行: ESC, F1-F12 -->
+                    <Button Content="Esc" Grid.Row="0" Grid.Column="0" Tag="Escape" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    
+                    <Button Content="F1" Grid.Row="0" Grid.Column="1" Tag="F1" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F2" Grid.Row="0" Grid.Column="2" Tag="F2" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F3" Grid.Row="0" Grid.Column="3" Tag="F3" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F4" Grid.Row="0" Grid.Column="4" Tag="F4" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    
+                    <Button Content="F5" Grid.Row="0" Grid.Column="5" Tag="F5" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F6" Grid.Row="0" Grid.Column="6" Tag="F6" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F7" Grid.Row="0" Grid.Column="7" Tag="F7" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F8" Grid.Row="0" Grid.Column="8" Tag="F8" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    
+                    <Button Content="F9" Grid.Row="0" Grid.Column="9" Tag="F9" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F10" Grid.Row="0" Grid.Column="10" Tag="F10" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F11" Grid.Row="0" Grid.Column="11" Tag="F11" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F12" Grid.Row="0" Grid.Column="12" Tag="F12" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    
+                    <!-- 编辑控制区第一行 -->
+                    <Button Content="PrtScn" Grid.Row="0" Grid.Column="14" Tag="PrintScreen" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="ScrLk" Grid.Row="0" Grid.Column="15" Tag="Scroll" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Pause" Grid.Row="0" Grid.Column="16" Tag="Pause" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    
+                    <!-- 第二行: 波浪号, 1-0, -, =, Backspace -->
+                    <Button Grid.Row="1" Grid.Column="0" Tag="Oem3" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="~"/>
+                                <LineBreak/>
+                                <Run Text="`"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="1" Tag="D1" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="1"/>
+                                <LineBreak/>
+                                <Run Text="!"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="2" Tag="D2" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="2"/>
+                                <LineBreak/>
+                                <Run Text="@"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="3" Tag="D3" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="3"/>
+                                <LineBreak/>
+                                <Run Text="#"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="4" Tag="D4" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="4"/>
+                                <LineBreak/>
+                                <Run Text="$"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="5" Tag="D5" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="5"/>
+                                <LineBreak/>
+                                <Run Text="%"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="6" Tag="D6" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="6"/>
+                                <LineBreak/>
+                                <Run Text="^"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="7" Tag="D7" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="7"/>
+                                <LineBreak/>
+                                <Run Text="&amp;"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="8" Tag="D8" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="8"/>
+                                <LineBreak/>
+                                <Run Text="*"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="9" Tag="D9" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="9"/>
+                                <LineBreak/>
+                                <Run Text="("/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="10" Tag="D0" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="0"/>
+                                <LineBreak/>
+                                <Run Text=")"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="11" Tag="OemMinus" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="-"/>
+                                <LineBreak/>
+                                <Run Text="_"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="12" Tag="OemPlus" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="="/>
+                                <LineBreak/>
+                                <Run Text="+"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Content="Backspace" Grid.Row="1" Grid.Column="13" Grid.ColumnSpan="2" Tag="Back" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    
+                    <!-- 编辑控制区 -->
+                    <Button Content="Ins" Grid.Row="1" Grid.Column="15" Tag="Insert" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Home" Grid.Row="1" Grid.Column="16" Tag="Home" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="PgUp" Grid.Row="1" Grid.Column="17" Tag="PageUp" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    
+                    <Button Content="Del" Grid.Row="2" Grid.Column="15" Tag="Delete" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="End" Grid.Row="2" Grid.Column="16" Tag="End" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="PgDn" Grid.Row="2" Grid.Column="17" Tag="PageDown" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    
+                    <!-- 第三行: Tab, Q-P, [, ], \ -->
+                    <Button Content="Tab" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Tag="Tab" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Q" Grid.Row="2" Grid.Column="2" Tag="Q" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="W" Grid.Row="2" Grid.Column="3" Tag="W" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="E" Grid.Row="2" Grid.Column="4" Tag="E" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="R" Grid.Row="2" Grid.Column="5" Tag="R" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="T" Grid.Row="2" Grid.Column="6" Tag="T" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="Y" Grid.Row="2" Grid.Column="7" Tag="Y" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="U" Grid.Row="2" Grid.Column="8" Tag="U" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="I" Grid.Row="2" Grid.Column="9" Tag="I" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="O" Grid.Row="2" Grid.Column="10" Tag="O" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="P" Grid.Row="2" Grid.Column="11" Tag="P" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="[" Grid.Row="2" Grid.Column="12" Tag="OemOpenBrackets" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="]" Grid.Row="2" Grid.Column="13" Tag="OemCloseBrackets" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Grid.Row="2" Grid.Column="14" Tag="Oem5" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="\"/>
+                                <LineBreak/>
+                                <Run Text="|"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    
+                    <!-- 第四行: Caps Lock, A-L, ;, ', Enter -->
+                    <Button Content="Caps Lock" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Tag="CapsLock" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="A" Grid.Row="3" Grid.Column="2" Tag="A" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="S" Grid.Row="3" Grid.Column="3" Tag="S" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="D" Grid.Row="3" Grid.Column="4" Tag="D" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F" Grid.Row="3" Grid.Column="5" Tag="F" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="G" Grid.Row="3" Grid.Column="6" Tag="G" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="H" Grid.Row="3" Grid.Column="7" Tag="H" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="J" Grid.Row="3" Grid.Column="8" Tag="J" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="K" Grid.Row="3" Grid.Column="9" Tag="K" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="L" Grid.Row="3" Grid.Column="10" Tag="L" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Grid.Row="3" Grid.Column="11" Tag="OemSemicolon" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text=";"/>
+                                <LineBreak/>
+                                <Run Text=":"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="3" Grid.Column="12" Tag="OemQuotes" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="'"/>
+                                <LineBreak/>
+                                <Run Text="&quot;"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Content="Enter" Grid.Row="3" Grid.Column="13" Grid.ColumnSpan="2" Tag="Enter" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    
+                    <!-- 第五行: Shift, Z-M, ,, ., /, Shift -->
+                    <Button Content="Shift" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Tag="LeftShift" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Z" Grid.Row="4" Grid.Column="2" Tag="Z" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="X" Grid.Row="4" Grid.Column="3" Tag="X" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="C" Grid.Row="4" Grid.Column="4" Tag="C" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="V" Grid.Row="4" Grid.Column="5" Tag="V" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="B" Grid.Row="4" Grid.Column="6" Tag="B" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="N" Grid.Row="4" Grid.Column="7" Tag="N" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="M" Grid.Row="4" Grid.Column="8" Tag="M" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Grid.Row="4" Grid.Column="9" Tag="OemComma" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text=","/>
+                                <LineBreak/>
+                                <Run Text="&lt;"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="4" Grid.Column="10" Tag="OemPeriod" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="."/>
+                                <LineBreak/>
+                                <Run Text="&gt;"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Grid.Row="4" Grid.Column="11" Tag="OemQuestion" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
+                        <Button.Content>
+                            <TextBlock TextAlignment="Center">
+                                <Run Text="/"/>
+                                <LineBreak/>
+                                <Run Text="?"/>
+                            </TextBlock>
+                        </Button.Content>
+                    </Button>
+                    <Button Content="Shift" Grid.Row="4" Grid.Column="12" Grid.ColumnSpan="3" Tag="RightShift" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    
+                    <!-- 方向键区域 -->
+                    <Button Content="↑" Grid.Row="4" Grid.Column="16" Tag="Up" Click="KeyButton_Click" Style="{StaticResource DirectionalKeyStyle}" Padding="2" />
+                    <Button Content="←" Grid.Row="5" Grid.Column="15" Tag="Left" Click="KeyButton_Click" Style="{StaticResource DirectionalKeyStyle}" Padding="2" />
+                    <Button Content="↓" Grid.Row="5" Grid.Column="16" Tag="Down" Click="KeyButton_Click" Style="{StaticResource DirectionalKeyStyle}" Padding="2" />
+                    <Button Content="→" Grid.Row="5" Grid.Column="17" Tag="Right" Click="KeyButton_Click" Style="{StaticResource DirectionalKeyStyle}" Padding="2" />
+                    
+                    <!-- 第六行: Ctrl, Win, Alt, Space, Alt, Win, Menu, Ctrl -->
+                    <Button Content="Ctrl" Grid.Row="6" Grid.Column="0" Tag="LeftCtrl" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Win" Grid.Row="6" Grid.Column="1" Tag="LWin" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Alt" Grid.Row="6" Grid.Column="2" Tag="LeftAlt" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="SPACE" Grid.Row="6" Grid.Column="3" Grid.ColumnSpan="7" Tag="Space" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Alt" Grid.Row="6" Grid.Column="10" Tag="RightAlt" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Win" Grid.Row="6" Grid.Column="11" Tag="RWin" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Menu" Grid.Row="6" Grid.Column="12" Tag="Apps" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Ctrl" Grid.Row="6" Grid.Column="13" Tag="RightCtrl" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                </Grid>
             </ScrollViewer>
         </Border>
     </Grid>
