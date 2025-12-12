@@ -46,7 +46,7 @@ namespace EKSE
             
             // 初始化服务和管理器
             _profileManager = new ProfileManager();
-            _audioFileManager = new AudioFileManager();
+            _audioFileManager = new AudioFileManager(_profileManager);
             _soundService = new SoundService(_profileManager);
             
             // 初始化导航

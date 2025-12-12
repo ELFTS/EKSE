@@ -19,9 +19,6 @@ namespace EKSE.Components
         // 定义按键事件
         public event EventHandler<VirtualKeyEventArgs>? KeySelected;
         
-        // 存储按键到音效路径的映射
-        private Dictionary<Key, string> _keySoundMap;
-        
         // 当前选中的按键
         private Key _selectedKey;
         
@@ -34,7 +31,6 @@ namespace EKSE.Components
         public VirtualKeyboard()
         {
             InitializeComponent();
-            _keySoundMap = new Dictionary<Key, string>();
         }
         
         // 设置SoundService引用
@@ -66,13 +62,63 @@ namespace EKSE.Components
         // 设置按键的音效路径
         public void SetKeySound(Key key, string soundPath)
         {
-            _keySoundMap[key] = soundPath;
+            // 不再使用_keySoundMap，而是直接通过ProfileManager设置音效
+            _profileManager?.SetKeySound(key, soundPath);
         }
 
         // 获取按键的音效路径
         public string? GetKeySound(Key key)
         {
-            return _keySoundMap.ContainsKey(key) ? _keySoundMap[key] : null;
+            if (_profileManager?.CurrentProfile == null) return null;
+            
+            return _profileManager.CurrentProfile.KeySounds.TryGetValue(key, out var soundPath)
+                ? soundPath
+                : null;
+        }
+
+        // 刷新虚拟键盘的视觉状态
+        public void RefreshVisualState()
+        {
+            if (_profileManager?.CurrentProfile == null) return;
+            
+            // 遍历Grid中的所有按钮
+            foreach (var child in MainGrid.Children)
+            {
+                if (child is Button button)
+                {
+                    UpdateButtonVisualState(button);
+                }
+            }
+        }
+        
+        // 更新单个按钮的视觉状态
+        private void UpdateButtonVisualState(Button button)
+        {
+            if (_profileManager?.CurrentProfile == null) return;
+            
+            // 获取按钮对应的键
+            if (button.Tag is string keyName && Enum.TryParse<Key>(keyName, out Key key))
+            {
+                // 检查是否是当前选中的键
+                if (key == _selectedKey)
+                {
+                    // 当前选中的键使用SecondaryMid颜色
+                    button.Background = Application.Current.FindResource("SecondaryHueMidBrush") as Brush ?? 
+                                       new SolidColorBrush(Colors.LightBlue);
+                }
+                // 检查是否已分配音效
+                else if (_profileManager.CurrentProfile.KeySounds.ContainsKey(key))
+                {
+                    // 已分配音效的键使用PrimaryMid颜色
+                    button.Background = Application.Current.FindResource("PrimaryHueMidBrush") as Brush ?? 
+                                       new SolidColorBrush(Colors.Blue);
+                }
+                else
+                {
+                    // 未分配音效的键使用默认颜色
+                    button.ClearValue(Button.BackgroundProperty);
+                }
+            }
         }
 
         // 获取当前选中的按键

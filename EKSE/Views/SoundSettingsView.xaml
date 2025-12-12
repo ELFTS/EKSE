@@ -66,6 +66,11 @@
                                     Style="{StaticResource MaterialDesignRaisedButton}"
                                     Content="导入"
                                     Click="ImportProfileButton_Click"/>
+                            
+                            <Button x:Name="RenameProfileButton"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Content="重命名"
+                                    Click="RenameProfileButton_Click"/>
                         </StackPanel>
                     </Grid>
                 </materialDesign:Card>

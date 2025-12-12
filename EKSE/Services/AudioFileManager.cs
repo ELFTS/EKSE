@@ -2,29 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Input;
 
 namespace EKSE.Services
 {
-    /// <summary>
-    /// 音频文件管理器
-    /// </summary>
     public class AudioFileManager
     {
-        private readonly string _audioFilesDirectory;
+        private readonly ProfileManager _profileManager;
         private readonly List<string> _audioFiles;
         
-        public AudioFileManager()
+        public AudioFileManager(ProfileManager profileManager)
         {
-            // 使用Profiles文件夹而不是Assets文件夹
-            _audioFilesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles");
+            _profileManager = profileManager;
             _audioFiles = new List<string>();
             
-            // 不再强制创建目录，而是检查是否存在
-            if (Directory.Exists(_audioFilesDirectory))
-            {
-                // 加载现有音频文件
-                LoadAudioFiles();
-            }
+            // 加载现有音频文件
+            Refresh();
         }
         
         /// <summary>
@@ -39,18 +32,34 @@ namespace EKSE.Services
         {
             try
             {
-                // 只有当目录存在时才尝试加载文件
-                if (Directory.Exists(_audioFilesDirectory))
+                var currentProfile = _profileManager.CurrentProfile;
+                if (currentProfile != null)
                 {
-                    // 支持的音频文件扩展名
-                    var supportedExtensions = new[] { ".wav", ".mp3", ".aac", ".wma", ".flac" };
+                    var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
                     
-                    // 获取目录中的所有文件
-                    var allFiles = Directory.GetFiles(_audioFilesDirectory, "*.*", SearchOption.AllDirectories)
-                        .Where(file => supportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
-                    
-                    _audioFiles.Clear();
-                    _audioFiles.AddRange(allFiles);
+                    // 只有当目录存在时才尝试加载文件
+                    if (Directory.Exists(keySoundsDirectory))
+                    {
+                        // 支持的音频文件扩展名
+                        var supportedExtensions = new[] { ".wav", ".mp3", ".aac", ".wma", ".flac" };
+                        
+                        // 获取目录中的所有文件
+                        var allFiles = Directory.GetFiles(keySoundsDirectory, "*.*", SearchOption.AllDirectories)
+                            .Where(file => supportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
+                        
+                        _audioFiles.Clear();
+                        _audioFiles.AddRange(allFiles);
+                        
+                        System.Diagnostics.Debug.WriteLine($"成功加载 {_audioFiles.Count} 个音频文件从目录: {keySoundsDirectory}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"音频目录不存在: {keySoundsDirectory}");
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("当前没有选择声音方案");
                 }
             }
             catch (Exception ex)
@@ -68,23 +77,8 @@ namespace EKSE.Services
         {
             try
             {
-                // 不再自动创建目录，如果Profiles目录不存在则返回null
-                if (!Directory.Exists(_audioFilesDirectory))
-                    return null;
-                
-                var fileName = Path.GetFileName(sourceFilePath);
-                var destFilePath = Path.Combine(_audioFilesDirectory, fileName);
-                
-                // 如果目标文件已存在，先删除它
-                if (File.Exists(destFilePath))
-                {
-                    File.Delete(destFilePath);
-                }
-                
-                File.Copy(sourceFilePath, destFilePath, true);
-                _audioFiles.Add(destFilePath);
-                
-                return destFilePath;
+                // 使用ProfileManager的方法将音频文件导入到当前配置中
+                return _profileManager.ImportSoundToCurrentProfile(sourceFilePath);
             }
             catch (Exception ex)
             {
@@ -101,25 +95,39 @@ namespace EKSE.Services
         {
             try
             {
-                // 标准化路径以确保比较准确
-                var normalizedFilePath = Path.GetFullPath(filePath);
-                var normalizedAudioDir = Path.GetFullPath(_audioFilesDirectory);
-                
-                // 检查文件是否存在且在正确的目录中
-                if (File.Exists(normalizedFilePath) && normalizedFilePath.StartsWith(normalizedAudioDir, StringComparison.OrdinalIgnoreCase))
+                var currentProfile = _profileManager.CurrentProfile;
+                if (currentProfile != null)
                 {
-                    // 删除文件
-                    File.Delete(normalizedFilePath);
+                    var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
                     
-                    // 从列表中移除
-                    _audioFiles.Remove(normalizedFilePath);
+                    // 标准化路径以确保比较准确
+                    var normalizedFilePath = Path.GetFullPath(filePath);
+                    var normalizedAudioDir = Path.GetFullPath(keySoundsDirectory);
                     
-                    // 也可以使用原始路径尝试移除（以防列表中存储的是原始路径）
-                    _audioFiles.Remove(filePath);
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"文件不存在或不在正确的目录中: {filePath}");
+                    // 检查文件是否存在且在正确的目录中
+                    if (File.Exists(normalizedFilePath) && normalizedFilePath.StartsWith(normalizedAudioDir, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // 删除文件
+                        File.Delete(normalizedFilePath);
+                        
+                        // 从列表中移除
+                        _audioFiles.Remove(normalizedFilePath);
+                        
+                        // 也可以使用原始路径尝试移除（以防列表中存储的是原始路径）
+                        _audioFiles.Remove(filePath);
+                        
+                        // 同时从当前配置中移除该键的映射
+                        var keyToRemove = currentProfile.KeySounds.FirstOrDefault(kvp => kvp.Value.Equals(filePath, StringComparison.OrdinalIgnoreCase)).Key;
+                        if (keyToRemove != default(System.Windows.Input.Key))
+                        {
+                            currentProfile.KeySounds.Remove(keyToRemove);
+                            _profileManager.SaveProfile(currentProfile);
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"文件不存在或不在正确的目录中: {filePath}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -137,13 +145,94 @@ namespace EKSE.Services
         {
             try
             {
-                var normalizedFilePath = Path.GetFullPath(filePath);
-                var normalizedAudioDir = Path.GetFullPath(_audioFilesDirectory);
-                return File.Exists(normalizedFilePath) && normalizedFilePath.StartsWith(normalizedAudioDir, StringComparison.OrdinalIgnoreCase);
+                var currentProfile = _profileManager.CurrentProfile;
+                if (currentProfile != null)
+                {
+                    var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
+                    var normalizedFilePath = Path.GetFullPath(filePath);
+                    var normalizedAudioDir = Path.GetFullPath(keySoundsDirectory);
+                    return File.Exists(normalizedFilePath) && normalizedFilePath.StartsWith(normalizedAudioDir, StringComparison.OrdinalIgnoreCase);
+                }
+                return false;
             }
             catch
             {
                 return false;
+            }
+        }
+        
+        /// <summary>
+        /// 重命名音频文件
+        /// </summary>
+        /// <param name="oldFilePath">原文件路径</param>
+        /// <param name="newFileNameWithoutExtension">新文件名（不含扩展名）</param>
+        /// <returns>重命名后的文件路径，失败则返回null</returns>
+        public string RenameAudioFile(string oldFilePath, string newFileNameWithoutExtension)
+        {
+            try
+            {
+                if (!File.Exists(oldFilePath))
+                    return null;
+
+                var currentProfile = _profileManager.CurrentProfile;
+                if (currentProfile == null)
+                    return null;
+
+                var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
+                if (!Directory.Exists(keySoundsDirectory))
+                    return null;
+
+                // 确保新文件名不包含非法字符
+                foreach (var c in Path.GetInvalidFileNameChars())
+                {
+                    newFileNameWithoutExtension = newFileNameWithoutExtension.Replace(c, '_');
+                }
+
+                var extension = Path.GetExtension(oldFilePath);
+                var newFilePath = Path.Combine(keySoundsDirectory, newFileNameWithoutExtension + extension);
+
+                // 如果新文件已存在，则先删除
+                if (File.Exists(newFilePath))
+                {
+                    File.Delete(newFilePath);
+                }
+
+                // 重命名文件
+                File.Move(oldFilePath, newFilePath);
+
+                // 更新当前方案中的按键映射
+                var keyToUpdate = currentProfile.KeySounds.FirstOrDefault(kvp => 
+                    kvp.Value.Equals(oldFilePath, StringComparison.OrdinalIgnoreCase)).Key;
+
+                if (!keyToUpdate.Equals(default(Key)))
+                {
+                    // 移除旧映射
+                    currentProfile.KeySounds.Remove(keyToUpdate);
+                    // 添加新映射
+                    currentProfile.KeySounds[keyToUpdate] = newFilePath;
+                    
+                    // 更新AssignedSounds中的条目
+                    var assignedSound = currentProfile.AssignedSounds?.FirstOrDefault(a => 
+                        a.Sound.Equals(Path.GetFileName(oldFilePath), StringComparison.OrdinalIgnoreCase));
+                    
+                    if (assignedSound != null)
+                    {
+                        assignedSound.Sound = Path.GetFileName(newFilePath);
+                    }
+                    
+                    // 保存方案
+                    _profileManager.SaveProfile(currentProfile);
+                }
+
+                // 刷新音频文件列表
+                Refresh();
+
+                return newFilePath;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"重命名音频文件失败: {ex.Message}");
+                return null;
             }
         }
         

@@ -117,6 +117,8 @@ namespace EKSE.Views
             Dispatcher.Invoke(() =>
             {
                 InitializeProfileUI();
+                // 刷新虚拟键盘的视觉状态
+                VirtualKeyboardControl.RefreshVisualState();
             });
         }
         
@@ -129,6 +131,9 @@ namespace EKSE.Views
                 ProfileComboBox.ItemsSource = _profileManager.Profiles;
                 ProfileComboBox.DisplayMemberPath = "Name";
                 ProfileComboBox.SelectedItem = _profileManager.CurrentProfile;
+                
+                // 刷新虚拟键盘的视觉状态
+                VirtualKeyboardControl.RefreshVisualState();
             }
         }
         
@@ -224,6 +229,40 @@ namespace EKSE.Views
             {
                 var newProfile = _profileManager.CreateProfile(textBox.Text.Trim());
                 ProfileComboBox.SelectedItem = newProfile;
+            }
+        }
+        
+        // 重命名声音方案按钮点击事件
+        private void RenameProfileButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_profileManager == null || _profileManager.CurrentProfile == null)
+                return;
+
+            var currentProfile = _profileManager.CurrentProfile;
+            var newName = Interaction.InputBox("请输入新的方案名称:", "重命名声音方案", currentProfile.Name);
+            
+            if (!string.IsNullOrWhiteSpace(newName) && newName != currentProfile.Name)
+            {
+                // 检查名称是否合法
+                var invalidChars = Path.GetInvalidFileNameChars();
+                if (newName.IndexOfAny(invalidChars) >= 0)
+                {
+                    MessageBox.Show("方案名称包含非法字符，请重新输入。", "错误", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (_profileManager.RenameProfile(currentProfile, newName))
+                {
+                    MessageBox.Show("重命名成功", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // 更新界面
+                    InitializeProfileUI();
+                    // 刷新音频文件列表以反映新的路径
+                    RefreshAudioFilesList();
+                }
+                else
+                {
+                    MessageBox.Show("重命名失败，可能是由于权限不足或其他系统错误。请确保程序有足够的权限访问方案文件夹。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
         
@@ -338,6 +377,9 @@ namespace EKSE.Views
         {
             _audioFilesList.Clear();
             
+            // 确保在加载文件列表前刷新AudioFileManager
+            _audioFileManager?.Refresh();
+            
             var audioFiles = _audioFileManager?.AudioFiles;
             if (audioFiles != null)
             {
@@ -384,6 +426,9 @@ namespace EKSE.Views
                 // 更新显示
                 UpdateSoundPathDisplay();
                 
+                // 刷新虚拟键盘的视觉状态
+                VirtualKeyboardControl.RefreshVisualState();
+                
                 MessageBox.Show($"已将 \"{selectedItem.Name}\" 设置为按键 {_selectedKey} 的音效", 
                     "设置成功", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -401,9 +446,16 @@ namespace EKSE.Views
                 {
                     try
                     {
-                        // 注意：这里需要实现重命名逻辑
-                        MessageBox.Show("此功能尚未实现", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                        RefreshAudioFilesList();
+                        var newFilePath = _audioFileManager.RenameAudioFile(item.Path, newName);
+                        if (newFilePath != null)
+                        {
+                            MessageBox.Show("重命名成功", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                            RefreshAudioFilesList();
+                        }
+                        else
+                        {
+                            MessageBox.Show("重命名失败", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                     catch (Exception ex)
                     {

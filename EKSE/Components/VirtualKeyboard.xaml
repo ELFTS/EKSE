@@ -22,7 +22,7 @@
         </Style>
     </UserControl.Resources>
     
-    <Grid Margin="10">
+    <Grid x:Name="MainGrid" Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>

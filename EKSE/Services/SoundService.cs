@@ -29,6 +29,9 @@ namespace EKSE.Services
             _profileManager = profileManager;
             _waveOut = new WaveOutEvent();
             
+            // 订阅当前方案改变事件，以便在方案改变时释放相关资源
+            _profileManager.CurrentProfileChanged += OnCurrentProfileChanged;
+            
             // 设置全局键盘钩子
             _proc = HookCallback;
             _hookID = SetHook(_proc);
@@ -157,6 +160,17 @@ namespace EKSE.Services
             return null;
         }
         
+        /// <summary>
+        /// 当前方案改变时的处理方法
+        /// </summary>
+        private void OnCurrentProfileChanged(object sender, EventArgs e)
+        {
+            // 停止当前播放的音效并释放相关资源
+            _waveOut.Stop();
+            _audioFileReader?.Dispose();
+            _audioFileReader = null;
+        }
+        
         // 全局键盘钩子实现
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
         {
@@ -203,6 +217,12 @@ namespace EKSE.Services
         {
             // 卸载键盘钩子
             UnhookWindowsHookEx(_hookID);
+            
+            // 取消订阅当前方案改变事件
+            if (_profileManager != null)
+            {
+                _profileManager.CurrentProfileChanged -= OnCurrentProfileChanged;
+            }
             
             // 释放音频资源
             _waveOut?.Dispose();

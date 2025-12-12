@@ -21,6 +21,9 @@ namespace EKSE.Services
         // 添加事件，当方案列表发生变化时触发
         public event EventHandler ProfilesChanged;
         
+        // 添加事件，当当前方案改变时触发
+        public event EventHandler CurrentProfileChanged;
+        
         // 定义支持的音频扩展名
         private static readonly string[] SupportedAudioExtensions = { ".wav", ".mp3", ".aac", ".wma", ".flac" };
         
@@ -296,8 +299,17 @@ namespace EKSE.Services
                     var key = ParseKeyName(keyName);
                     if (key.HasValue)
                     {
-                        profile.KeySounds[key.Value] = soundFile;
-                        System.Diagnostics.Debug.WriteLine($"映射按键 {key.Value} 到文件 {soundFile}");
+                        // 只有当该按键尚未分配音效时才添加映射
+                        // 避免覆盖用户已经设置的按键音效
+                        if (!profile.KeySounds.ContainsKey(key.Value))
+                        {
+                            profile.KeySounds[key.Value] = soundFile;
+                            System.Diagnostics.Debug.WriteLine($"映射按键 {key.Value} 到文件 {soundFile}");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"按键 {key.Value} 已有音效分配，跳过文件 {soundFile}");
+                        }
 
                         // 特别关注数字键
                         if (key.Value >= Key.D0 && key.Value <= Key.D9)
@@ -415,30 +427,121 @@ namespace EKSE.Services
         {
             try
             {
-                // 尝试删除方案文件夹（最多重试3次）
-                for (int i = 0; i < 3; i++)
+                if (Directory.Exists(profilePath))
+                {
+                    Directory.Delete(profilePath, true);
+                }
+            }
+            catch
+            {
+                // 静默忽略删除失败，不进行重试或强制删除
+            }
+        }
+        
+        /// <summary>
+        /// 递归删除目录内容，处理可能被占用的文件
+        /// </summary>
+        /// <param name="directoryPath">目录路径</param>
+        private void DeleteDirectoryContents(string directoryPath)
+        {
+            try
+            {
+                // 删除所有文件
+                var files = Directory.GetFiles(directoryPath);
+                foreach (var file in files)
                 {
                     try
                     {
-                        if (Directory.Exists(profilePath))
+                        // 检查文件是否只读，如果是则清除只读属性
+                        var fileInfo = new FileInfo(file);
+                        if (fileInfo.IsReadOnly)
                         {
-                            Directory.Delete(profilePath, true);
+                            fileInfo.IsReadOnly = false;
                         }
-                        break; // 成功删除则跳出循环
-                    }
-                    catch (IOException)
-                    {
-                        // 如果是最后一次尝试，则重新抛出异常
-                        if (i == 2) throw;
                         
-                        // 等待一段时间后重试
-                        System.Threading.Thread.Sleep(100);
+                        // 尝试强制删除文件
+                        ForceDeleteFile(file);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"删除文件失败 {file}: {ex.Message}");
+                        // 继续尝试删除其他文件，不抛出异常
+                    }
+                }
+                
+                // 递归删除子目录
+                var subdirectories = Directory.GetDirectories(directoryPath);
+                foreach (var subdirectory in subdirectories)
+                {
+                    DeleteDirectoryContents(subdirectory);
+                    try
+                    {
+                        Directory.Delete(subdirectory, true);
+                        System.Diagnostics.Debug.WriteLine($"成功删除子目录: {subdirectory}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"删除子目录失败 {subdirectory}: {ex.Message}");
+                        // 继续处理其他子目录，不抛出异常
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"删除方案文件夹失败: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"处理目录内容时出错 {directoryPath}: {ex.Message}");
+                // 不抛出异常，允许调用者继续尝试删除整个目录
+            }
+        }
+        
+        /// <summary>
+        /// 强制删除文件，尝试多种方法解除文件占用
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        private void ForceDeleteFile(string filePath)
+        {
+            const int maxRetries = 3;
+            for (int i = 0; i < maxRetries; i++)
+            {
+                try
+                {
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                        System.Diagnostics.Debug.WriteLine($"成功删除文件: {filePath}");
+                    }
+                    return;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    System.Diagnostics.Debug.WriteLine($"第{i + 1}次尝试删除文件失败（未授权访问）: {filePath}");
+                    
+                    // 尝试清除只读属性
+                    try
+                    {
+                        var fileInfo = new FileInfo(filePath);
+                        if (fileInfo.IsReadOnly)
+                        {
+                            fileInfo.IsReadOnly = false;
+                        }
+                    }
+                    catch
+                    {
+                        // 忽略设置只读属性时的错误
+                    }
+                    
+                    if (i == maxRetries - 1) throw; // 最后一次尝试，重新抛出异常
+                    
+                    // 等待后重试
+                    System.Threading.Thread.Sleep(100);
+                }
+                catch (IOException)
+                {
+                    System.Diagnostics.Debug.WriteLine($"第{i + 1}次尝试删除文件失败（IO异常）: {filePath}");
+                    if (i == maxRetries - 1) throw; // 最后一次尝试，重新抛出异常
+                    
+                    // 等待后重试
+                    System.Threading.Thread.Sleep(100);
+                }
             }
         }
         
@@ -476,9 +579,7 @@ namespace EKSE.Services
         /// <param name="profile">声音方案</param>
         private void ConvertKeySoundsToAssignedSounds(SoundProfile profile)
         {
-            // 只有当AssignedSounds为空时才从KeySounds生成，避免覆盖已有的数据
-            if (profile.AssignedSounds?.Count > 0) return;
-            
+            // 总是根据当前的KeySounds更新AssignedSounds，确保数据一致性
             profile.AssignedSounds = new List<SoundAssignment>();
             foreach (var kvp in profile.KeySounds)
             {
@@ -504,6 +605,8 @@ namespace EKSE.Services
             if (_profiles.Contains(profile))
             {
                 _currentProfile = profile;
+                // 触发当前方案改变事件
+                CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
             }
         }
         
@@ -765,13 +868,105 @@ namespace EKSE.Services
             Directory.CreateDirectory(destDir);
             foreach (var file in Directory.GetFiles(sourceDir))
             {
-                File.Copy(file, Path.Combine(destDir, Path.GetFileName(file)));
+                var destFile = Path.Combine(destDir, Path.GetFileName(file));
+                File.Copy(file, destFile);
             }
             
             foreach (var directory in Directory.GetDirectories(sourceDir))
             {
-                CopyDirectory(directory, Path.Combine(destDir, Path.GetFileName(directory)));
+                var destSubDir = Path.Combine(destDir, Path.GetFileName(directory));
+                CopyDirectory(directory, destSubDir);
+            }
+        }
+
+        /// <summary>
+        /// 重命名声音方案
+        /// </summary>
+        /// <param name="profile">要重命名的声音方案</param>
+        /// <param name="newName">新名称</param>
+        /// <returns>是否重命名成功</returns>
+        public bool RenameProfile(SoundProfile profile, string newName)
+        {
+            if (profile == null || string.IsNullOrWhiteSpace(newName))
+                return false;
+
+            // 检查新名称是否与现有方案名称冲突
+            if (_profiles.Any(p => p != profile && p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
+                return false;
+
+            string oldPath = profile.FilePath;
+            string newPath = Path.Combine(_profilesDirectory, newName);
+            
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"开始重命名方案: {profile.Name} ({oldPath}) -> {newName} ({newPath})");
+
+                // 通知其他组件当前方案即将改变，以便释放相关资源
+                if (_currentProfile == profile)
+                {
+                    CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
+                }
+
+                // 如果新路径已存在，则先删除
+                if (Directory.Exists(newPath))
+                {
+                    System.Diagnostics.Debug.WriteLine($"新路径已存在，先删除: {newPath}");
+                    DeleteProfileDirectory(newPath);
+                }
+
+                // 使用复制和删除的方式代替直接重命名，避免文件被占用的问题
+                // 先复制整个目录到新位置
+                System.Diagnostics.Debug.WriteLine($"开始复制目录: {oldPath} -> {newPath}");
+                CopyDirectory(oldPath, newPath);
+                System.Diagnostics.Debug.WriteLine($"完成复制目录: {oldPath} -> {newPath}");
+                
+                // 更新方案属性
+                profile.Name = newName;
+                profile.FilePath = newPath;
+                System.Diagnostics.Debug.WriteLine($"更新方案属性: {newName} ({newPath})");
+
+                // 保存更新后的方案
+                SaveProfile(profile);
+                System.Diagnostics.Debug.WriteLine($"保存更新后的方案: {newName}");
+                
+                // 删除旧目录（即使失败也不影响重命名结果）
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"开始删除旧目录: {oldPath}");
+                    DeleteProfileDirectory(oldPath);
+                    System.Diagnostics.Debug.WriteLine($"删除旧目录操作完成: {oldPath}");
+                }
+                catch
+                {
+                    // 静默忽略删除失败
+                }
+
+                // 触发方案列表变化事件
+                ProfilesChanged?.Invoke(this, EventArgs.Empty);
+                System.Diagnostics.Debug.WriteLine($"触发方案列表变化事件");
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"重命名声音方案失败: {ex.Message}");
+                // 发生严重错误时，尝试清理已创建的新目录
+                try
+                {
+                    if (Directory.Exists(newPath) && newPath != oldPath)
+                    {
+                        DeleteProfileDirectory(newPath);
+                    }
+                }
+                catch
+                {
+                    // 忽略清理过程中的错误
+                }
+                return false;
             }
         }
     }
 }
+
+
+
