@@ -22,7 +22,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      Solution_Path: ContextMenuManager.sln
+      Solution_Path: EKSE.sln
 
     steps:
 
@@ -55,5 +55,5 @@ jobs:
         with:
           retention-days: 7
           path: |
-            ContextMenuManager/bin/Release/net9.0-windows
+            EKSE/bin/Release/net9.0-windows
           compression-level: 0
