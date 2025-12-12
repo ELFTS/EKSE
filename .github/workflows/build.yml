@@ -22,7 +22,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      Solution_Path: EKSE.sln
+      Solution_Path: EKSE.slnx
 
     steps:
 
