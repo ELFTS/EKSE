@@ -100,6 +100,12 @@ namespace EKSE.Views
                 _profileManager.ProfilesChanged += OnProfilesChanged;
             }
             
+            // 订阅音频文件变化事件
+            if (_audioFileManager != null)
+            {
+                _audioFileManager.AudioFilesChanged += OnAudioFilesChanged;
+            }
+            
             // 初始化声音方案界面
             InitializeProfileUI();
             
@@ -114,12 +120,42 @@ namespace EKSE.Views
         private void OnProfilesChanged(object sender, EventArgs e)
         {
             // 在UI线程上刷新界面
-            Dispatcher.Invoke(() =>
+            if (Dispatcher.CheckAccess())
             {
                 InitializeProfileUI();
                 // 刷新虚拟键盘的视觉状态
                 VirtualKeyboardControl.RefreshVisualState();
-            });
+                // 刷新音频文件列表
+                RefreshAudioFilesList();
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    InitializeProfileUI();
+                    // 刷新虚拟键盘的视觉状态
+                    VirtualKeyboardControl.RefreshVisualState();
+                    // 刷新音频文件列表
+                    RefreshAudioFilesList();
+                });
+            }
+        }
+        
+        // 当音频文件列表发生变化时的处理方法
+        private void OnAudioFilesChanged(object sender, EventArgs e)
+        {
+            // 在UI线程上刷新界面
+            if (Dispatcher.CheckAccess())
+            {
+                RefreshAudioFilesList();
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    RefreshAudioFilesList();
+                });
+            }
         }
         
         // 初始化声音方案界面
@@ -254,10 +290,27 @@ namespace EKSE.Views
                 if (_profileManager.RenameProfile(currentProfile, newName))
                 {
                     MessageBox.Show("重命名成功", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                    // 更新界面
-                    InitializeProfileUI();
-                    // 刷新音频文件列表以反映新的路径
-                    RefreshAudioFilesList();
+                    // 强制刷新界面
+                    Dispatcher.Invoke(() =>
+                    {
+                        // 重新设置数据源以确保更新
+                        ProfileComboBox.ItemsSource = null;
+                        ProfileComboBox.ItemsSource = _profileManager.Profiles;
+                        ProfileComboBox.DisplayMemberPath = "Name";
+                        ProfileComboBox.SelectedItem = _profileManager.CurrentProfile;
+                        
+                        // 刷新音频文件列表以反映新的路径
+                        RefreshAudioFilesList();
+                        
+                        // 刷新音频文件管理器状态
+                        _audioFileManager?.Refresh();
+                        
+                        // 刷新声音服务状态
+                        _soundService?.Refresh();
+                        
+                        // 刷新虚拟键盘的视觉状态
+                        VirtualKeyboardControl.RefreshVisualState();
+                    });
                 }
                 else
                 {
@@ -377,9 +430,7 @@ namespace EKSE.Views
         {
             _audioFilesList.Clear();
             
-            // 确保在加载文件列表前刷新AudioFileManager
-            _audioFileManager?.Refresh();
-            
+            // 直接从AudioFileManager获取文件列表，避免递归调用Refresh
             var audioFiles = _audioFileManager?.AudioFiles;
             if (audioFiles != null)
             {

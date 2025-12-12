@@ -186,8 +186,17 @@ namespace EKSE.Services
                     {
                         // 构建完整的音效文件路径
                         var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
-                        profile.KeySounds[key.Value] = soundPath;
-                        System.Diagnostics.Debug.WriteLine($"映射按键 {key.Value} 到文件 {soundPath}");
+                        
+                        // 检查文件是否存在，只有存在时才添加映射
+                        if (File.Exists(soundPath))
+                        {
+                            profile.KeySounds[key.Value] = soundPath;
+                            System.Diagnostics.Debug.WriteLine($"映射按键 {key.Value} 到文件 {soundPath}");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"音效文件不存在，跳过映射: {soundPath}");
+                        }
                         
                         // 特别关注数字键
                         if (key.Value >= Key.D0 && key.Value <= Key.D9)
@@ -276,58 +285,36 @@ namespace EKSE.Services
         /// <param name="profile">声音方案</param>
         private void LoadKeySounds(SoundProfile profile)
         {
-            try
+            // 只使用JSON配置文件中的AssignedSounds数据
+            if (profile.AssignedSounds?.Count > 0)
             {
-                var keySoundsDirectory = Path.Combine(profile.FilePath, "sounds");
-                if (!Directory.Exists(keySoundsDirectory)) 
+                profile.KeySounds.Clear();
+                foreach (var assignment in profile.AssignedSounds)
                 {
-                    System.Diagnostics.Debug.WriteLine($"音效目录不存在: {keySoundsDirectory}");
-                    return;
-                }
-
-                var soundFiles = Directory.GetFiles(keySoundsDirectory, "*.*", SearchOption.AllDirectories)
-                    .Where(file => SupportedAudioExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
-
-                System.Diagnostics.Debug.WriteLine($"在目录 {keySoundsDirectory} 中找到 {soundFiles.Count()} 个音效文件");
-
-                foreach (var soundFile in soundFiles)
-                {
-                    var keyName = Path.GetFileNameWithoutExtension(soundFile);
-                    System.Diagnostics.Debug.WriteLine($"处理音效文件: {keyName} ({soundFile})");
-
-                    // 使用增强的按键解析功能
-                    var key = ParseKeyName(keyName);
+                    var key = ParseKeyName(assignment.Key);
                     if (key.HasValue)
                     {
-                        // 只有当该按键尚未分配音效时才添加映射
-                        // 避免覆盖用户已经设置的按键音效
-                        if (!profile.KeySounds.ContainsKey(key.Value))
+                        var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
+                        if (File.Exists(soundPath))
                         {
-                            profile.KeySounds[key.Value] = soundFile;
-                            System.Diagnostics.Debug.WriteLine($"映射按键 {key.Value} 到文件 {soundFile}");
+                            profile.KeySounds[key.Value] = soundPath;
+                            System.Diagnostics.Debug.WriteLine($"从JSON配置映射按键 {key.Value} 到文件 {soundPath}");
                         }
                         else
                         {
-                            System.Diagnostics.Debug.WriteLine($"按键 {key.Value} 已有音效分配，跳过文件 {soundFile}");
-                        }
-
-                        // 特别关注数字键
-                        if (key.Value >= Key.D0 && key.Value <= Key.D9)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"数字键映射: {keyName} -> {key.Value} -> {soundFile}");
+                            System.Diagnostics.Debug.WriteLine($"JSON配置中指定的文件不存在: {soundPath}");
                         }
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"无法解析按键名称: {keyName}");
+                        System.Diagnostics.Debug.WriteLine($"无法解析JSON配置中的按键名称: {assignment.Key}");
                     }
                 }
-
-                // 不再加载默认音效
             }
-            catch (Exception ex)
+            // 如果没有AssignedSounds数据，则不进行任何操作
+            else
             {
-                System.Diagnostics.Debug.WriteLine($"加载按键音效映射时出错: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine("没有找到JSON配置中的AssignedSounds数据");
             }
         }
         
@@ -413,6 +400,8 @@ namespace EKSE.Services
             if (_currentProfile == profile)
             {
                 _currentProfile = _profiles.FirstOrDefault();
+                // 触发当前方案改变事件
+                CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
             }
             
             // 触发方案列表变化事件
@@ -649,7 +638,7 @@ namespace EKSE.Services
         }
         
         /// <summary>
-        /// 导入音效文件到当前方案
+        /// 将音效文件导入到当前方案
         /// </summary>
         /// <param name="sourceFilePath">源文件路径</param>
         /// <returns>导入后的文件路径</returns>
@@ -661,37 +650,69 @@ namespace EKSE.Services
             try
             {
                 var keySoundsDirectory = Path.Combine(_currentProfile.FilePath, "sounds");
-                if (!Directory.Exists(keySoundsDirectory))
-                {
-                    Directory.CreateDirectory(keySoundsDirectory);
-                }
+                Directory.CreateDirectory(keySoundsDirectory);
                 
                 var fileName = Path.GetFileName(sourceFilePath);
                 var destFilePath = Path.Combine(keySoundsDirectory, fileName);
                 
-                // 如果目标文件已存在，先删除它
-                if (File.Exists(destFilePath))
+                // 如果目标文件已存在，生成唯一文件名
+                var counter = 1;
+                var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+                var extension = Path.GetExtension(fileName);
+                
+                while (File.Exists(destFilePath))
                 {
-                    File.Delete(destFilePath);
+                    var newFileName = $"{fileNameWithoutExtension}_{counter}{extension}";
+                    destFilePath = Path.Combine(keySoundsDirectory, newFileName);
+                    counter++;
                 }
                 
                 // 复制文件
-                File.Copy(sourceFilePath, destFilePath, true);
+                File.Copy(sourceFilePath, destFilePath);
                 
-                // 尝试从文件名解析按键并添加到KeySounds映射中
-                var fileNameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
-                var key = ParseKeyName(fileNameWithoutExt);
-                if (key.HasValue)
-                {
-                    _currentProfile.KeySounds[key.Value] = destFilePath;
-                    SaveProfile(_currentProfile);
-                }
+                // 直接保存配置文件
+                SaveProfile(_currentProfile);
                 
                 return destFilePath;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"导入音效文件失败: {ex.Message}");
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// 从目录加载声音方案
+        /// </summary>
+        /// <param name="profileDirectory">方案目录</param>
+        /// <returns>声音方案</returns>
+        private SoundProfile LoadProfileFromFile(string profileDirectory)
+        {
+            try
+            {
+                var profileName = Path.GetFileName(profileDirectory);
+                var configFile = Path.Combine(profileDirectory, "index.json");
+
+                if (File.Exists(configFile))
+                {
+                    // 加载现有配置文件
+                    var json = File.ReadAllText(configFile);
+                    var settings = new JsonSerializerSettings();
+                    settings.Converters.Add(new SoundProfileJsonConverter());
+                    var profile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
+                    if (profile != null)
+                    {
+                        profile.FilePath = profileDirectory;
+                        return profile;
+                    }
+                }
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"加载方案失败: {profileDirectory}, 错误: {ex.Message}");
                 return null;
             }
         }
@@ -763,8 +784,10 @@ namespace EKSE.Services
             
             try
             {
+                // 解压ZIP文件
                 ZipFile.ExtractToDirectory(importPath, tempDirectory);
                 
+                // 读取配置文件
                 var profileJsonPath = Path.Combine(tempDirectory, "index.json");
                 if (!File.Exists(profileJsonPath))
                 {
@@ -776,40 +799,53 @@ namespace EKSE.Services
                 settings.Converters.Add(new SoundProfileJsonConverter());
                 var profile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
                 
+                if (profile == null)
+                {
+                    return null;
+                }
+                
                 // 处理方案名称冲突
+                var originalName = profile.Name;
                 var profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
                 if (Directory.Exists(profileDirectory))
                 {
                     var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
                     profile.Name = $"{profile.Name}_{timestamp}";
-                    profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
                 }
                 
                 // 创建方案目录并复制文件
-                Directory.CreateDirectory(profileDirectory);
-                profile.FilePath = profileDirectory;
+                var finalProfileDirectory = Path.Combine(_profilesDirectory, profile.Name);
+                Directory.CreateDirectory(finalProfileDirectory);
+                profile.FilePath = finalProfileDirectory;
                 
+                // 复制index.json文件
+                File.Copy(profileJsonPath, Path.Combine(finalProfileDirectory, "index.json"), true);
+                
+                // 复制sounds目录
                 var sourceKeySoundsDir = Path.Combine(tempDirectory, "sounds");
-                var destKeySoundsDir = Path.Combine(profileDirectory, "sounds");
                 if (Directory.Exists(sourceKeySoundsDir))
                 {
+                    var destKeySoundsDir = Path.Combine(finalProfileDirectory, "sounds");
                     CopyDirectory(sourceKeySoundsDir, destKeySoundsDir);
                 }
                 
+                // 重新加载配置以确保数据一致性
+                var reloadedProfile = LoadProfileFromFile(finalProfileDirectory);
+                if (reloadedProfile != null)
+                {
+                    _profiles.Add(reloadedProfile);
+                    
+                    // 触发方案列表变化事件
+                    ProfilesChanged?.Invoke(this, EventArgs.Empty);
+                    
+                    return reloadedProfile;
+                }
                 
-                // 重建KeySounds映射
-                RebuildKeySoundsMapping(profile, destKeySoundsDir);
-                
-                SaveProfile(profile);
-                _profiles.Add(profile);
-                
-                // 触发方案列表变化事件
-                ProfilesChanged?.Invoke(this, EventArgs.Empty);
-                
-                return profile;
+                return null;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"导入声音方案失败: {ex.Message}");
                 return null;
             }
             finally
@@ -820,14 +856,15 @@ namespace EKSE.Services
                 }
             }
         }
-        
+
         /// <summary>
-        /// 根据AssignedSounds或文件列表重建KeySounds映射
+        /// 根据AssignedSounds重建KeySounds映射
         /// </summary>
         /// <param name="profile">声音方案</param>
         /// <param name="destKeySoundsDir">目标音效目录</param>
         private void RebuildKeySoundsMapping(SoundProfile profile, string destKeySoundsDir)
         {
+            // 只使用JSON配置文件中的AssignedSounds数据
             if (profile.AssignedSounds?.Count > 0)
             {
                 profile.KeySounds.Clear();
@@ -837,24 +874,26 @@ namespace EKSE.Services
                     if (key.HasValue)
                     {
                         var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
-                        profile.KeySounds[key.Value] = soundPath;
+                        if (File.Exists(soundPath))
+                        {
+                            profile.KeySounds[key.Value] = soundPath;
+                            System.Diagnostics.Debug.WriteLine($"从JSON配置映射按键 {key.Value} 到文件 {soundPath}");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"JSON配置中指定的文件不存在: {soundPath}");
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"无法解析JSON配置中的按键名称: {assignment.Key}");
                     }
                 }
             }
-            else if (Directory.Exists(destKeySoundsDir))
+            // 如果没有AssignedSounds数据，则不进行任何操作
+            else
             {
-                var soundFiles = Directory.GetFiles(destKeySoundsDir, "*.*", SearchOption.AllDirectories)
-                    .Where(file => SupportedAudioExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()));
-                
-                foreach (var soundFile in soundFiles)
-                {
-                    var fileNameWithoutExt = Path.GetFileNameWithoutExtension(soundFile);
-                    var key = ParseKeyName(fileNameWithoutExt);
-                    if (key.HasValue)
-                    {
-                        profile.KeySounds[key.Value] = soundFile;
-                    }
-                }
+                System.Diagnostics.Debug.WriteLine("没有找到JSON配置中的AssignedSounds数据");
             }
         }
         
@@ -899,8 +938,6 @@ namespace EKSE.Services
             
             try
             {
-                System.Diagnostics.Debug.WriteLine($"开始重命名方案: {profile.Name} ({oldPath}) -> {newName} ({newPath})");
-
                 // 通知其他组件当前方案即将改变，以便释放相关资源
                 if (_currentProfile == profile)
                 {
@@ -910,63 +947,62 @@ namespace EKSE.Services
                 // 如果新路径已存在，则先删除
                 if (Directory.Exists(newPath))
                 {
-                    System.Diagnostics.Debug.WriteLine($"新路径已存在，先删除: {newPath}");
-                    DeleteProfileDirectory(newPath);
+                    Directory.Delete(newPath, true);
                 }
 
-                // 使用复制和删除的方式代替直接重命名，避免文件被占用的问题
-                // 先复制整个目录到新位置
-                System.Diagnostics.Debug.WriteLine($"开始复制目录: {oldPath} -> {newPath}");
-                CopyDirectory(oldPath, newPath);
-                System.Diagnostics.Debug.WriteLine($"完成复制目录: {oldPath} -> {newPath}");
+                // 直接重命名目录
+                Directory.Move(oldPath, newPath);
+                
+                // 保存旧名称用于后续处理
+                string oldName = profile.Name;
                 
                 // 更新方案属性
                 profile.Name = newName;
                 profile.FilePath = newPath;
-                System.Diagnostics.Debug.WriteLine($"更新方案属性: {newName} ({newPath})");
+
+                // 重新加载方案以确保AssignedSounds数据是最新的
+                var profileFile = Path.Combine(profile.FilePath, "index.json");
+                if (File.Exists(profileFile))
+                {
+                    var json = File.ReadAllText(profileFile);
+                    var settings = new JsonSerializerSettings();
+                    settings.Converters.Add(new SoundProfileJsonConverter());
+                    var updatedProfile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
+                    
+                    // 更新当前方案的AssignedSounds数据
+                    if (updatedProfile != null)
+                    {
+                        profile.AssignedSounds = updatedProfile.AssignedSounds;
+                    }
+                }
+
+                // 重新构建按键音效映射
+                LoadKeySounds(profile);
 
                 // 保存更新后的方案
                 SaveProfile(profile);
-                System.Diagnostics.Debug.WriteLine($"保存更新后的方案: {newName}");
                 
-                // 删除旧目录（即使失败也不影响重命名结果）
-                try
+                // 如果重命名的是当前方案，则更新_currentProfile引用
+                if (_currentProfile == profile)
                 {
-                    System.Diagnostics.Debug.WriteLine($"开始删除旧目录: {oldPath}");
-                    DeleteProfileDirectory(oldPath);
-                    System.Diagnostics.Debug.WriteLine($"删除旧目录操作完成: {oldPath}");
-                }
-                catch
-                {
-                    // 静默忽略删除失败
+                    _currentProfile = profile;
+                    // 触发当前方案改变事件
+                    CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
                 }
 
-                // 触发方案列表变化事件
+                // 触发方案列表变化事件，确保UI更新
                 ProfilesChanged?.Invoke(this, EventArgs.Empty);
-                System.Diagnostics.Debug.WriteLine($"触发方案列表变化事件");
 
                 return true;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"重命名声音方案失败: {ex.Message}");
-                // 发生严重错误时，尝试清理已创建的新目录
-                try
-                {
-                    if (Directory.Exists(newPath) && newPath != oldPath)
-                    {
-                        DeleteProfileDirectory(newPath);
-                    }
-                }
-                catch
-                {
-                    // 忽略清理过程中的错误
-                }
+                
+                // 即使发生异常也要触发事件以确保UI状态一致
+                ProfilesChanged?.Invoke(this, EventArgs.Empty);
                 return false;
             }
         }
     }
 }
-
-
-

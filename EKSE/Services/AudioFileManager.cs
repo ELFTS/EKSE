@@ -11,6 +11,9 @@ namespace EKSE.Services
         private readonly ProfileManager _profileManager;
         private readonly List<string> _audioFiles;
         
+        // 添加事件，当音频文件列表发生变化时触发
+        public event EventHandler AudioFilesChanged;
+        
         public AudioFileManager(ProfileManager profileManager)
         {
             _profileManager = profileManager;
@@ -75,16 +78,16 @@ namespace EKSE.Services
         /// <returns>添加后的文件路径</returns>
         public string AddAudioFile(string sourceFilePath)
         {
-            try
+            // 使用ProfileManager的方法将音频文件导入到当前配置中
+            var result = _profileManager.ImportSoundToCurrentProfile(sourceFilePath);
+            
+            // 刷新文件列表并触发事件通知UI更新
+            if (!string.IsNullOrEmpty(result))
             {
-                // 使用ProfileManager的方法将音频文件导入到当前配置中
-                return _profileManager.ImportSoundToCurrentProfile(sourceFilePath);
+                Refresh();
             }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"添加音频文件失败: {ex.Message}");
-                return string.Empty;
-            }
+            
+            return result;
         }
         
         /// <summary>
@@ -242,6 +245,9 @@ namespace EKSE.Services
         public void Refresh()
         {
             LoadAudioFiles();
+            
+            // 触发事件通知UI更新
+            AudioFilesChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

@@ -109,7 +109,8 @@ namespace EKSE.Services
             // 检查当前方案中是否有该按键的音效
             if (_profileManager?.CurrentProfile?.KeySounds != null)
             {
-                System.Diagnostics.Debug.WriteLine($"当前方案中的按键数量: {_profileManager.CurrentProfile.KeySounds.Count}");
+                System.Diagnostics.Debug.WriteLine($"当前方案: {_profileManager.CurrentProfile.Name}");
+                System.Diagnostics.Debug.WriteLine($"当前方案路径: {_profileManager.CurrentProfile.FilePath}");
                 
                 // 打印所有按键信息用于调试
                 foreach (var kvp in _profileManager.CurrentProfile.KeySounds)
@@ -141,6 +142,14 @@ namespace EKSE.Services
             else
             {
                 System.Diagnostics.Debug.WriteLine("当前方案或按键音效映射为空");
+                if (_profileManager?.CurrentProfile == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("当前方案为空");
+                }
+                else if (_profileManager.CurrentProfile.KeySounds == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("当前方案的KeySounds为空");
+                }
             }
             
             // 不再返回默认音效，如果没有找到对应音效则返回null
@@ -169,6 +178,23 @@ namespace EKSE.Services
             _waveOut.Stop();
             _audioFileReader?.Dispose();
             _audioFileReader = null;
+            
+            // 注意：_profileManager引用保持不变，因为它指向的是同一个实例
+            // 我们只需要确保在获取音效路径时使用的是最新的CurrentProfile
+        }
+        
+        /// <summary>
+        /// 刷新服务状态以匹配当前配置方案
+        /// </summary>
+        public void Refresh()
+        {
+            // 停止当前播放的音效并释放相关资源
+            _waveOut.Stop();
+            _audioFileReader?.Dispose();
+            _audioFileReader = null;
+            
+            // 注意：_profileManager引用保持不变，因为它指向的是同一个实例
+            // 我们只需要确保在获取音效路径时使用的是最新的CurrentProfile
         }
         
         // 全局键盘钩子实现
