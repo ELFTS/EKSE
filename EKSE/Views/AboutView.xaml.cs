@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Navigation;
 using System.Windows.Media.Imaging;
 using EKSE.Services;
+using System.Windows;
 
 namespace EKSE.Views
 {
@@ -46,6 +47,38 @@ namespace EKSE.Views
             // 使用系统默认浏览器打开链接
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
             e.Handled = true;
+        }
+        
+        /// <summary>
+        /// Github按钮点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GithubButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 使用系统默认浏览器打开Github链接
+            Process.Start(new ProcessStartInfo("https://github.com/ELFTS/keysound2") { UseShellExecute = true });
+        }
+        
+        /// <summary>
+        /// QQ群按钮点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void QQGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("QQ群: 957042500", "联系信息", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        
+        /// <summary>
+        /// 问题反馈按钮点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FeedbackButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 使用系统默认浏览器打开反馈链接
+            Process.Start(new ProcessStartInfo("https://github.com/ELFTS/keysound2/issues") { UseShellExecute = true });
         }
     }
 }

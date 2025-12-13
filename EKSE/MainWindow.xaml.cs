@@ -39,7 +39,7 @@ namespace EKSE
         // Windows API 常量
         private const int WM_GETMINMAXINFO = 0x0024;
         private const int MONITOR_DEFAULTTONEAREST = 0x00000002;
-
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -456,11 +456,22 @@ namespace EKSE
                     break;
             }
             
+            // 执行页面滑入动画
+            PlayPageTransition();
+            
             // 将内容加载到主区域
             MainContentArea.Content = content;
             
             // 更新侧边栏选中状态
             UpdateSidebarSelection(contentType);
+        }
+        
+        // 执行页面切换动画
+        private void PlayPageTransition()
+        {
+            // 使用滑入动画
+            var slideInStoryboard = (Storyboard)Resources["SlideInFromLeftStoryboard"];
+            slideInStoryboard.Begin();
         }
         
         // 当主题颜色更改时的处理方法

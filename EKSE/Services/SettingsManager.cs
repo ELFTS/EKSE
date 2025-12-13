@@ -281,6 +281,11 @@ namespace EKSE.Services
         public bool MinimizeToTray { get; set; } = true;
         
         /// <summary>
+        /// 是否启用音效
+        /// </summary>
+        public bool EnableSound { get; set; } = true;
+        
+        /// <summary>
         /// 音量设置
         /// </summary>
         public int Volume { get; set; }

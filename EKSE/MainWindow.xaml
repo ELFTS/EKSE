@@ -32,25 +32,19 @@
         </Storyboard>
         
         <!-- 滑动动画 -->
-        <Storyboard x:Key="SlideOutToLeftStoryboard">
+        <Storyboard x:Key="SlideInFromLeftStoryboard">
             <ThicknessAnimation Storyboard.TargetName="MainContentArea"
                                 Storyboard.TargetProperty="Margin"
-                                From="0,0,0,0" To="-50,0,0,0"
-                                Duration="0:0:0.2"/>
-            <DoubleAnimation Storyboard.TargetName="MainContentArea"
-                             Storyboard.TargetProperty="Opacity"
-                             From="1.0" To="0.0"
-                             Duration="0:0:0.2"/>
-        </Storyboard>
-        <Storyboard x:Key="SlideInFromRightStoryboard">
-            <ThicknessAnimation Storyboard.TargetName="MainContentArea"
-                                Storyboard.TargetProperty="Margin"
-                                From="50,0,0,0" To="0,0,0,0"
-                                Duration="0:0:0.2"/>
+                                From="-50,0,0,0" To="0,0,0,0"
+                                Duration="0:0:0.3">
+                <ThicknessAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </ThicknessAnimation.EasingFunction>
+            </ThicknessAnimation>
             <DoubleAnimation Storyboard.TargetName="MainContentArea"
                              Storyboard.TargetProperty="Opacity"
                              From="0.0" To="1.0"
-                             Duration="0:0:0.2"/>
+                             Duration="0:0:0.3"/>
         </Storyboard>
         
         <!-- 涟漪效果动画 -->

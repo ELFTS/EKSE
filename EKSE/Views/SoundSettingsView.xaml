@@ -156,12 +156,21 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             
-                                            <TextBlock Grid.Column="0" 
-                                                       Text="{Binding Name}" 
-                                                       TextTrimming="CharacterEllipsis"
-                                                       VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="0" 
+                                                        Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" 
+                                                           TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Size, StringFormat=' ({0})'}"
+                                                           FontStyle="Italic"
+                                                           FontSize="10"
+                                                           VerticalAlignment="Center"
+                                                           Margin="5,0,0,0"
+                                                           Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                            </StackPanel>
                                             
                                             <Button Grid.Column="1"
                                                     Style="{StaticResource MaterialDesignRaisedButton}"

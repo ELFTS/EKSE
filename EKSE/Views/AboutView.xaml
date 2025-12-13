@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- 标题 -->
@@ -19,276 +20,89 @@
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <!-- 软件介绍卡片 -->
-                <materialDesign:Card Margin="0,0,0,20" UniformCornerRadius="10">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+        <!-- 软件介绍内容 -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-                        <StackPanel Grid.Row="0" Margin="20" HorizontalAlignment="Center">
-                            <!-- Logo -->
-                            <Image x:Name="LogoImage"
-                                   Width="64" 
-                                   Height="64" 
-                                   HorizontalAlignment="Center"/>
-                            
-                            <!-- 软件名称 -->
-                            <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                       Text="万物键盘音效"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,10,0,5"/>
-                            
-                            <!-- 软件描述 -->
-                            <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       TextWrapping="Wrap"
-                                       Text="万物键盘音效 是一款现代化的键盘音效软件，为您的打字过程增添愉悦的声音体验。"
-                                       HorizontalAlignment="Center"
-                                       TextAlignment="Center"
-                                       Margin="0,0,0,10"/>
-                            
-                            <!-- 版本号 -->
-                            <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       Text="版本 1.0.0"
-                                       HorizontalAlignment="Center"
-                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
-                        </StackPanel>
-
-                        <Separator Grid.Row="1"/>
-
-                        <StackPanel Grid.Row="2" Margin="20">
-                            <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                                       Text="主要功能"
-                                       Margin="0,0,0,10"/>
-
-                            <StackPanel Margin="0,0,0,10">
-                                <BulletDecorator Margin="0,5">
-                                    <BulletDecorator.Bullet>
-                                        <Ellipse Fill="{DynamicResource PrimaryHueMidBrush}" 
-                                               Width="6" 
-                                               Height="6" 
-                                               VerticalAlignment="Center"/>
-                                    </BulletDecorator.Bullet>
-                                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                             Text="支持多种音频格式（WAV、MP3、AAC、WMA、FLAC）"
-                                             Margin="10,0,0,0"/>
-                                </BulletDecorator>
-
-                                <BulletDecorator Margin="0,5">
-                                    <BulletDecorator.Bullet>
-                                        <Ellipse Fill="{DynamicResource PrimaryHueMidBrush}" 
-                                               Width="6" 
-                                               Height="6" 
-                                               VerticalAlignment="Center"/>
-                                    </BulletDecorator.Bullet>
-                                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                             Text="可视化虚拟键盘，方便设置按键音效"
-                                             Margin="10,0,0,0"/>
-                                </BulletDecorator>
-
-                                <BulletDecorator Margin="0,5">
-                                    <BulletDecorator.Bullet>
-                                        <Ellipse Fill="{DynamicResource PrimaryHueMidBrush}" 
-                                               Width="6" 
-                                               Height="6" 
-                                               VerticalAlignment="Center"/>
-                                    </BulletDecorator.Bullet>
-                                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                             Text="支持多种声音方案，可自由切换"
-                                             Margin="10,0,0,0"/>
-                                </BulletDecorator>
-
-                                <BulletDecorator Margin="0,5">
-                                    <BulletDecorator.Bullet>
-                                        <Ellipse Fill="{DynamicResource PrimaryHueMidBrush}" 
-                                               Width="6" 
-                                               Height="6" 
-                                               VerticalAlignment="Center"/>
-                                    </BulletDecorator.Bullet>
-                                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                             Text="支持音效文件管理，可添加、删除、重命名音频文件"
-                                             Margin="10,0,0,0"/>
-                                </BulletDecorator>
-
-                                <BulletDecorator Margin="0,5">
-                                    <BulletDecorator.Bullet>
-                                        <Ellipse Fill="{DynamicResource PrimaryHueMidBrush}" 
-                                               Width="6" 
-                                               Height="6" 
-                                               VerticalAlignment="Center"/>
-                                    </BulletDecorator.Bullet>
-                                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                             Text="支持声音方案导出和导入，便于分享"
-                                             Margin="10,0,0,0"/>
-                                </BulletDecorator>
-                            </StackPanel>
-
-                        </StackPanel>
-                    </Grid>
-                </materialDesign:Card>
-
-                <!-- 开发者信息卡片 -->
-                <materialDesign:Card Margin="0,0,0,20" UniformCornerRadius="10">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Margin="20">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                                <materialDesign:PackIcon Kind="AccountGroup" 
-                                                        Width="32" 
-                                                        Height="32" 
-                                                        VerticalAlignment="Center"
-                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Center"
-                                           Text="开发者信息"/>
-                            </StackPanel>
-                            
-                            <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       TextWrapping="Wrap"
-                                       LineHeight="24"
-                                       Text="本软件由万物永存技术工作室开发和维护。我们致力于为用户提供高质量、有趣的软件产品。"/>
-                        </StackPanel>
-
-                        <Separator Grid.Row="1" Visibility="Collapsed"/>
-
-                    </Grid>
-                </materialDesign:Card>
-
-                <!-- 开源许可卡片 -->
-                <materialDesign:Card Margin="0,0,0,20" UniformCornerRadius="10">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Margin="20">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                                <materialDesign:PackIcon Kind="OpenSourceInitiative" 
-                                                        Width="32" 
-                                                        Height="32" 
-                                                        VerticalAlignment="Center"
-                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Center"
-                                           Text="开源许可"/>
-                            </StackPanel>
-                            
-                            <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       TextWrapping="Wrap"
-                                       LineHeight="24"
-                                       Margin="0,0,0,10"
-                                       Text="本软件使用了以下开源组件："/>
-                        </StackPanel>
-
-                        <Separator Grid.Row="1"/>
-
-                        <StackPanel Grid.Row="2" Margin="20">
-                            <Expander HorizontalAlignment="Stretch" Header="MaterialDesignThemes">
-                                <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                           TextWrapping="Wrap"
-                                           Margin="10"
-                                           Text="MaterialDesignInXamlToolkit - 用于实现Material Design风格的WPF界面组件"/>
-                            </Expander>
-                            
-                            <Expander HorizontalAlignment="Stretch" Header="NAudio" Margin="0,10,0,0">
-                                <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                           TextWrapping="Wrap"
-                                           Margin="10"
-                                           Text="NAudio - 用于音频播放和处理的.NET音频库"/>
-                            </Expander>
-                        </StackPanel>
-                    </Grid>
-                </materialDesign:Card>
-
-                <!-- 联系我们卡片 -->
-                <materialDesign:Card Margin="0,0,0,20" UniformCornerRadius="10">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Margin="20">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                                <materialDesign:PackIcon Kind="Email" 
-                                                        Width="32" 
-                                                        Height="32" 
-                                                        VerticalAlignment="Center"
-                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Center"
-                                           Text="联系我们"/>
-                            </StackPanel>
-                            
-                            <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       TextWrapping="Wrap"
-                                       LineHeight="24"
-                                       Text="如果您有任何问题或建议，请通过以下方式联系我们："/>
-                        </StackPanel>
-
-                        <Separator Grid.Row="1"/>
-
-                        <StackPanel Grid.Row="2" Margin="20">
-                            <StackPanel Margin="0,0,0,15">
-                                <StackPanel Orientation="Horizontal" Margin="0,5">
-                                    <materialDesign:PackIcon Kind="Github" 
-                                                            Width="20" 
-                                                            Height="20" 
-                                                            VerticalAlignment="Center"
-                                                            Margin="0,0,10,0"/>
-                                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                               VerticalAlignment="Center">
-                                        <Hyperlink NavigateUri="https://github.com/ELFTS/keysound2" 
-                                                   RequestNavigate="Hyperlink_RequestNavigate">
-                                            GitHub 项目主页
-                                        </Hyperlink>
-                                    </TextBlock>
-                                </StackPanel>
-                                
-                                <StackPanel Orientation="Horizontal" Margin="0,5">
-                                    <materialDesign:PackIcon Kind="Qqchat" 
-                                                            Width="20" 
-                                                            Height="20" 
-                                                            VerticalAlignment="Center"
-                                                            Margin="0,0,10,0"/>
-                                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                               VerticalAlignment="Center"
-                                               Text="QQ群: 957042500"/>
-                                </StackPanel>
-                                
-                                <StackPanel Orientation="Horizontal" Margin="0,5">
-                                    <materialDesign:PackIcon Kind="EmailOutline" 
-                                                            Width="20" 
-                                                            Height="20" 
-                                                            VerticalAlignment="Center"
-                                                            Margin="0,0,10,0"/>
-                                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                               VerticalAlignment="Center"
-                                               Text="邮箱: support@elfts.com"/>
-                                </StackPanel>
-                            </StackPanel>
-                            
-                            <TextBlock Style="{StaticResource MaterialDesignBody2TextBlock}"
-                                       FontStyle="Italic"
-                                       Text="感谢您使用 EKSE！"/>
-                        </StackPanel>
-                    </Grid>
-                </materialDesign:Card>
+            <StackPanel Grid.Row="0" Margin="20" HorizontalAlignment="Center">
+                <!-- Logo -->
+                <Image x:Name="LogoImage"
+                       Width="128" 
+                       Height="128" 
+                       HorizontalAlignment="Center"/>
+                
+                <!-- 软件名称 -->
+                <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                           Text="万物键盘音效"
+                           HorizontalAlignment="Center"
+                           Margin="0,10,0,5"/>
+                
+                <!-- 软件描述 -->
+                <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
+                           TextWrapping="Wrap"
+                           Text="万物键盘音效 是一款现代化的键盘音效软件，为您的打字过程增添愉悦的声音体验。"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           Margin="0,0,0,10"/>
+                
+                <!-- 版本号 -->
+                <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
+                           Text="版本 1.0.0"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource MaterialDesignBodyLight}"/>
             </StackPanel>
-        </ScrollViewer>
+
+            <Separator Grid.Row="1"/>
+        </Grid>
+
+        <!-- 底部区域（按钮和版权信息） -->
+        <Grid Grid.Row="2">
+            <StackPanel>
+                <!-- 按钮区域 -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            Margin="5"
+                            Click="GithubButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Github" />
+                            <TextBlock Text="Github" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            Margin="5"
+                            Click="QQGroupButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Qqchat" />
+                            <TextBlock Text="QQ群" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                            Margin="5"
+                            Click="FeedbackButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CommentQuestionOutline" />
+                            <TextBlock Text="问题反馈" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- 版权信息 -->
+                <Border Background="{DynamicResource PrimaryHueLightBrush}" 
+                        CornerRadius="4" 
+                        Padding="15" 
+                        Margin="0,5,0,0">
+                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
+                               Text="版权所有 (C) 2021-2025 万物永存技术工作室 保留所有权利"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource PrimaryHueDarkBrush}"
+                               FontSize="14"
+                               FontWeight="Medium"/>
+                </Border>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

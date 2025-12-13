@@ -21,11 +21,10 @@
         <StackPanel Grid.Row="1"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center">
-            <materialDesign:PackIcon Kind="Keyboard" 
-                                     Width="120" 
-                                     Height="120"
-                                     HorizontalAlignment="Center"
-                                     Foreground="{DynamicResource PrimaryHueLightBrush}"/>
+            <Image x:Name="HomeImage"
+                   Width="120" 
+                   Height="120"
+                   HorizontalAlignment="Center"/>
 
             <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                        Text="万物键盘音效"
@@ -36,6 +35,29 @@
                        Text="点击侧边栏开始配置您的键盘音效"
                        HorizontalAlignment="Center"
                        Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+            
+            <materialDesign:Card Margin="0,30,0,0" Width="300">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="10">
+                        <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                   Text="音效开关"/>
+                        <TextBlock Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Text="启用或禁用键盘音效"/>
+                    </StackPanel>
+
+                    <ToggleButton Grid.Column="1"
+                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                  x:Name="SoundToggle"
+                                  Margin="10"
+                                  Checked="SoundToggle_Checked"
+                                  Unchecked="SoundToggle_Unchecked"/>
+                </Grid>
+            </materialDesign:Card>
         </StackPanel>
     </Grid>
 </UserControl>

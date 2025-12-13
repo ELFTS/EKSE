@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
+using System.Windows;
 using NAudio.Wave;
 using EKSE.Models;
 
@@ -23,7 +24,7 @@ namespace EKSE.Services
         // 事件定义
         public event EventHandler<SoundEventArgs> SoundPlayed;
         public event EventHandler<SoundErrorEventArgs> SoundError;
-
+        
         public SoundService(ProfileManager profileManager)
         {
             _profileManager = profileManager;
@@ -46,6 +47,14 @@ namespace EKSE.Services
         {
             try
             {
+                // 检查是否启用音效
+                var currentSettings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
+                if (!currentSettings.EnableSound)
+                {
+                    // 音效未启用，直接返回
+                    return;
+                }
+                
                 System.Diagnostics.Debug.WriteLine($"尝试播放按键 {key} 的音效");
                 
                 // 获取按键对应的音效路径
@@ -155,7 +164,7 @@ namespace EKSE.Services
             // 不再返回默认音效，如果没有找到对应音效则返回null
             return null;
         }
-
+        
         private string GetSoundFile(Key key)
         {
             // 尝试获取按键对应的声音文件

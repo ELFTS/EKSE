@@ -57,13 +57,11 @@
                         <RowDefinition Height="45"/>
                         <RowDefinition Height="45"/>
                         <RowDefinition Height="45"/>
-                        <RowDefinition Height="45"/>
+                        <RowDefinition Height="45"/> <!-- 新增行用于方向键 -->
                     </Grid.RowDefinitions>
                     
                     <Grid.ColumnDefinitions>
                         <!-- 定义列，以标准按键宽度为单位 -->
-                        <ColumnDefinition Width="45"/>
-                        <ColumnDefinition Width="45"/>
                         <ColumnDefinition Width="45"/>
                         <ColumnDefinition Width="45"/>
                         <ColumnDefinition Width="45"/>
@@ -87,25 +85,25 @@
                     <!-- 第一行: ESC, F1-F12 -->
                     <Button Content="Esc" Grid.Row="0" Grid.Column="0" Tag="Escape" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
                     
-                    <Button Content="F1" Grid.Row="0" Grid.Column="1" Tag="F1" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F2" Grid.Row="0" Grid.Column="2" Tag="F2" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F3" Grid.Row="0" Grid.Column="3" Tag="F3" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F4" Grid.Row="0" Grid.Column="4" Tag="F4" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F1" Grid.Row="0" Grid.Column="2" Tag="F1" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F2" Grid.Row="0" Grid.Column="3" Tag="F2" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F3" Grid.Row="0" Grid.Column="4" Tag="F3" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F4" Grid.Row="0" Grid.Column="5" Tag="F4" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
                     
-                    <Button Content="F5" Grid.Row="0" Grid.Column="5" Tag="F5" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F6" Grid.Row="0" Grid.Column="6" Tag="F6" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F7" Grid.Row="0" Grid.Column="7" Tag="F7" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F8" Grid.Row="0" Grid.Column="8" Tag="F8" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F5" Grid.Row="0" Grid.Column="6" Tag="F5" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F6" Grid.Row="0" Grid.Column="7" Tag="F6" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F7" Grid.Row="0" Grid.Column="8" Tag="F7" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F8" Grid.Row="0" Grid.Column="9" Tag="F8" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
                     
-                    <Button Content="F9" Grid.Row="0" Grid.Column="9" Tag="F9" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F10" Grid.Row="0" Grid.Column="10" Tag="F10" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F11" Grid.Row="0" Grid.Column="11" Tag="F11" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
-                    <Button Content="F12" Grid.Row="0" Grid.Column="12" Tag="F12" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F9" Grid.Row="0" Grid.Column="10" Tag="F9" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F10" Grid.Row="0" Grid.Column="11" Tag="F10" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F11" Grid.Row="0" Grid.Column="12" Tag="F11" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
+                    <Button Content="F12" Grid.Row="0" Grid.Column="13" Tag="F12" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="12" />
                     
                     <!-- 编辑控制区第一行 -->
-                    <Button Content="PrtScn" Grid.Row="0" Grid.Column="14" Tag="PrintScreen" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="ScrLk" Grid.Row="0" Grid.Column="15" Tag="Scroll" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="Pause" Grid.Row="0" Grid.Column="16" Tag="Pause" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="PrtScn" Grid.Row="0" Grid.Column="15" Tag="PrintScreen" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="ScrLk" Grid.Row="0" Grid.Column="16" Tag="Scroll" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Pause" Grid.Row="0" Grid.Column="17" Tag="Pause" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
                     
                     <!-- 第二行: 波浪号, 1-0, -, =, Backspace -->
                     <Button Grid.Row="1" Grid.Column="0" Tag="Oem3" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10">
@@ -328,22 +326,21 @@
                         </Button.Content>
                     </Button>
                     <Button Content="Shift" Grid.Row="4" Grid.Column="12" Grid.ColumnSpan="3" Tag="RightShift" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="↑" Grid.Row="4" Grid.Column="16" Tag="Up" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
                     
-                    <!-- 方向键区域 -->
-                    <Button Content="↑" Grid.Row="4" Grid.Column="16" Tag="Up" Click="KeyButton_Click" Style="{StaticResource DirectionalKeyStyle}" Padding="2" />
-                    <Button Content="←" Grid.Row="5" Grid.Column="15" Tag="Left" Click="KeyButton_Click" Style="{StaticResource DirectionalKeyStyle}" Padding="2" />
-                    <Button Content="↓" Grid.Row="5" Grid.Column="16" Tag="Down" Click="KeyButton_Click" Style="{StaticResource DirectionalKeyStyle}" Padding="2" />
-                    <Button Content="→" Grid.Row="5" Grid.Column="17" Tag="Right" Click="KeyButton_Click" Style="{StaticResource DirectionalKeyStyle}" Padding="2" />
-                    
+
                     <!-- 第六行: Ctrl, Win, Alt, Space, Alt, Win, Menu, Ctrl -->
-                    <Button Content="Ctrl" Grid.Row="6" Grid.Column="0" Tag="LeftCtrl" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="Win" Grid.Row="6" Grid.Column="1" Tag="LWin" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="Alt" Grid.Row="6" Grid.Column="2" Tag="LeftAlt" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="SPACE" Grid.Row="6" Grid.Column="3" Grid.ColumnSpan="7" Tag="Space" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="Alt" Grid.Row="6" Grid.Column="10" Tag="RightAlt" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="Win" Grid.Row="6" Grid.Column="11" Tag="RWin" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="Menu" Grid.Row="6" Grid.Column="12" Tag="Apps" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
-                    <Button Content="Ctrl" Grid.Row="6" Grid.Column="13" Tag="RightCtrl" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Ctrl" Grid.Row="5" Grid.Column="0" Tag="LeftCtrl" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Win" Grid.Row="5" Grid.Column="1" Tag="LWin" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Alt" Grid.Row="5" Grid.Column="2" Tag="LeftAlt" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="SPACE" Grid.Row="5" Grid.Column="3" Grid.ColumnSpan="8" Tag="Space" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Alt" Grid.Row="5" Grid.Column="11" Tag="RightAlt" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Win" Grid.Row="5" Grid.Column="12" Tag="RWin" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Menu" Grid.Row="5" Grid.Column="13" Tag="Apps" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="Ctrl" Grid.Row="5" Grid.Column="14" Tag="RightCtrl" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="←" Grid.Row="5" Grid.Column="15" Tag="Left" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="↓" Grid.Row="5" Grid.Column="16" Tag="Down" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
+                    <Button Content="→" Grid.Row="5" Grid.Column="17" Tag="Right" Click="KeyButton_Click" Style="{StaticResource NormalKeyStyle}" FontSize="10" />
                 </Grid>
             </ScrollViewer>
         </Border>
