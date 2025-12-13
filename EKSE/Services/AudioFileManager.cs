@@ -16,10 +16,14 @@ namespace EKSE.Services
         
         public AudioFileManager(ProfileManager profileManager)
         {
-            _profileManager = profileManager;
+            _profileManager = profileManager ?? throw new ArgumentNullException(nameof(profileManager));
             _audioFiles = new List<string>();
             
-            // 加载现有音频文件
+            // 订阅ProfileManager的事件
+            _profileManager.ProfilesChanged += (sender, args) => Refresh();
+            _profileManager.CurrentProfileChanged += (sender, args) => Refresh();
+            
+            // 初始化加载音频文件
             Refresh();
         }
         

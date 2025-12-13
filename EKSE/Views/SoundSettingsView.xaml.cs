@@ -98,6 +98,7 @@ namespace EKSE.Views
             if (_profileManager != null)
             {
                 _profileManager.ProfilesChanged += OnProfilesChanged;
+                _profileManager.CurrentProfileChanged += OnCurrentProfileChanged;
             }
             
             // 订阅音频文件变化事件
@@ -136,6 +137,31 @@ namespace EKSE.Views
                     // 刷新虚拟键盘的视觉状态
                     VirtualKeyboardControl.RefreshVisualState();
                     // 刷新音频文件列表
+                    RefreshAudioFilesList();
+                });
+            }
+        }
+        
+        /// <summary>
+        /// 当前方案改变时的事件处理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnCurrentProfileChanged(object sender, EventArgs e)
+        {
+            if (Dispatcher.CheckAccess())
+            {
+                // 刷新界面
+                InitializeProfileUI();
+                VirtualKeyboardControl.RefreshVisualState();
+                RefreshAudioFilesList();
+            }
+            else
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    InitializeProfileUI();
+                    VirtualKeyboardControl.RefreshVisualState();
                     RefreshAudioFilesList();
                 });
             }
@@ -324,29 +350,63 @@ namespace EKSE.Views
         {
             if (_profileManager != null && ProfileComboBox.SelectedItem is SoundProfile profile)
             {
-                var result = MessageBox.Show($"确定要删除声音方案 \"{profile.Name}\" 吗？", "确认删除", 
-                    MessageBoxButton.YesNo, MessageBoxImage.Question);
+                // 不允许删除默认方案（前端保护）
+                if (profile.Name == "默认方案")
+                {
+                    MessageBox.Show("不能删除默认方案。", "操作不允许", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                
+                // 确认删除操作
+                var result = MessageBox.Show(
+                    $"确定要删除声音方案 \"{profile.Name}\" 吗？此操作不可撤销。", 
+                    "确认删除", 
+                    MessageBoxButton.YesNo, 
+                    MessageBoxImage.Warning);
                 
                 if (result == MessageBoxResult.Yes)
                 {
                     try
                     {
+                        // 执行删除操作
                         _profileManager.DeleteProfile(profile);
-                        ProfileComboBox.SelectedItem = _profileManager.CurrentProfile;
                         
                         // 刷新界面
                         InitializeProfileUI();
                         
-                        // 刷新音频文件列表
-                        RefreshAudioFilesList();
+                        // 设置当前选中项为新的当前方案
+                        ProfileComboBox.SelectedItem = _profileManager.CurrentProfile;
                         
-                        MessageBox.Show("方案删除成功", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                        // 刷新音频文件列表和其他相关组件
+                        RefreshAudioFilesList();
+                        VirtualKeyboardControl.RefreshVisualState();
+                        
+                        // 通知用户删除成功
+                        MessageBox.Show(
+                            "声音方案已成功删除。", 
+                            "删除成功", 
+                            MessageBoxButton.OK, 
+                            MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"删除方案时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        // 处理删除过程中的异常
+                        MessageBox.Show(
+                            $"删除方案时发生错误: {ex.Message}", 
+                            "删除失败", 
+                            MessageBoxButton.OK, 
+                            MessageBoxImage.Error);
                     }
                 }
+            }
+            else
+            {
+                // 如果没有选中方案，给出提示
+                MessageBox.Show(
+                    "请先选择一个要删除的声音方案。", 
+                    "未选择方案", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Information);
             }
         }
         
@@ -389,7 +449,11 @@ namespace EKSE.Views
                 var importedProfile = _profileManager?.ImportProfile(openFileDialog.FileName);
                 if (importedProfile != null)
                 {
+                    // 确保界面刷新
+                    InitializeProfileUI();
                     ProfileComboBox.SelectedItem = importedProfile;
+                    VirtualKeyboardControl.RefreshVisualState();
+                    RefreshAudioFilesList();
                     MessageBox.Show("声音方案导入成功！", "导入成功", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else

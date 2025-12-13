@@ -174,13 +174,23 @@ namespace EKSE.Services
         /// </summary>
         private void OnCurrentProfileChanged(object sender, EventArgs e)
         {
-            // 停止当前播放的音效并释放相关资源
-            _waveOut.Stop();
+            // 停止当前播放的音效并彻底释放相关资源
+            try
+            {
+                _waveOut.Stop();
+            }
+            catch
+            {
+                // 忽略停止播放时的异常
+            }
+            
+            // 释放音频文件读取器资源
             _audioFileReader?.Dispose();
             _audioFileReader = null;
             
-            // 注意：_profileManager引用保持不变，因为它指向的是同一个实例
-            // 我们只需要确保在获取音效路径时使用的是最新的CurrentProfile
+            // 强制垃圾回收以尽快释放文件句柄
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
         
         /// <summary>
@@ -188,13 +198,23 @@ namespace EKSE.Services
         /// </summary>
         public void Refresh()
         {
-            // 停止当前播放的音效并释放相关资源
-            _waveOut.Stop();
+            // 停止当前播放的音效并彻底释放相关资源
+            try
+            {
+                _waveOut.Stop();
+            }
+            catch
+            {
+                // 忽略停止播放时的异常
+            }
+            
+            // 释放音频文件读取器资源
             _audioFileReader?.Dispose();
             _audioFileReader = null;
             
-            // 注意：_profileManager引用保持不变，因为它指向的是同一个实例
-            // 我们只需要确保在获取音效路径时使用的是最新的CurrentProfile
+            // 强制垃圾回收以尽快释放文件句柄
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
         
         // 全局键盘钩子实现
