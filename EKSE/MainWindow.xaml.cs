@@ -55,26 +55,30 @@ namespace EKSE
             Loaded += MainWindow_Loaded;
             StateChanged += MainWindow_StateChanged;
             Closing += MainWindow_Closing;
+            
+            // 初始化托盘图标命令
+            InitializeNotifyIconCommands();
 
         }
-
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        
+        /// <summary>
+        /// 初始化托盘图标命令
+        /// </summary>
+        private void InitializeNotifyIconCommands()
         {
-            // 应用启动动画
-            ApplyStartupAnimation();
-            
-            InitializeSidebar();
-            // 默认加载主页内容
-            LoadContent("Home");
-            
-            // 确保标题栏颜色正确应用
-            ApplySavedTitleBarColor();
-            
-            // 记录窗口正常状态时的位置和大小
-            UpdateNormalWindowState();
-            
-            // 初始化托盘图标
-            InitializeNotifyIcon();
+            try
+            {
+                // 设置托盘图标命令
+                if (MyNotifyIcon != null)
+                {
+                    // 显示窗口命令
+                    MyNotifyIcon.DataContext = this;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"初始化托盘图标命令失败: {ex.Message}");
+            }
         }
         
         /// <summary>
@@ -94,7 +98,7 @@ namespace EKSE
         /// <summary>
         /// 显示主窗口命令
         /// </summary>
-        public ICommand ShowWindowCommand => new RelayCommand(ShowMainWindow);
+        public ICommand ShowWindowCommand => new RelayCommand(ShowWindow);
         
         /// <summary>
         /// 退出应用程序命令
@@ -102,22 +106,78 @@ namespace EKSE
         public ICommand ExitApplicationCommand => new RelayCommand(ExitApplication);
         
         /// <summary>
-        /// 显示主窗口
+        /// 显示窗口
         /// </summary>
-        private void ShowMainWindow()
+        private void ShowWindow()
         {
             try
             {
-                // 恢复窗口状态
-                this.Show();
-                this.WindowState = WindowState.Normal;
+                // 确保窗口可见
+                Show();
                 
-                // 激活窗口
-                this.Activate();
+                // 恢复窗口状态
+                WindowState = WindowState.Normal;
+                
+                // 激活并置于顶层
+                Activate();
+                Topmost = true;
+                Topmost = false;
+                
+                // 应用垂直滑入动画
+                ApplyVerticalSlideInAnimation();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"显示主窗口失败: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"显示窗口失败: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 应用垂直滑入动画
+        /// </summary>
+        private void ApplyVerticalSlideInAnimation()
+        {
+            try
+            {
+                // 查找最外层的Border元素作为动画目标
+                var rootBorder = VisualTreeHelper.GetChild(this, 0) as FrameworkElement;
+                if (rootBorder != null)
+                {
+                    // 创建一个新的Storyboard来管理动画
+                    Storyboard slideInStoryboard = new Storyboard();
+                    
+                    // 创建厚度动画实现垂直滑入效果
+                    ThicknessAnimation thicknessAnimation = new ThicknessAnimation
+                    {
+                        From = new Thickness(0, -ActualHeight, 0, 0),
+                        To = new Thickness(0, 0, 0, 0),
+                        Duration = TimeSpan.FromMilliseconds(500)
+                    };
+                    thicknessAnimation.EasingFunction = new CircleEase { EasingMode = EasingMode.EaseOut };
+                    Storyboard.SetTarget(thicknessAnimation, rootBorder);
+                    Storyboard.SetTargetProperty(thicknessAnimation, new PropertyPath("(FrameworkElement.Margin)"));
+                    
+                    // 创建透明度动画实现淡入效果
+                    DoubleAnimation opacityAnimation = new DoubleAnimation
+                    {
+                        From = 0.0,
+                        To = 1.0,
+                        Duration = TimeSpan.FromMilliseconds(500)
+                    };
+                    Storyboard.SetTarget(opacityAnimation, rootBorder);
+                    Storyboard.SetTargetProperty(opacityAnimation, new PropertyPath("(UIElement.Opacity)"));
+                    
+                    // 将动画添加到Storyboard中
+                    slideInStoryboard.Children.Add(thicknessAnimation);
+                    slideInStoryboard.Children.Add(opacityAnimation);
+                    
+                    // 开始动画
+                    slideInStoryboard.Begin();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"应用垂直滑入动画失败: {ex.Message}");
             }
         }
         
@@ -128,18 +188,21 @@ namespace EKSE
         {
             try
             {
-                // 隐藏托盘图标
+                // 直接清理托盘图标并关闭应用程序
                 if (MyNotifyIcon != null)
                 {
                     MyNotifyIcon.Dispose();
                 }
                 
-                // 关闭应用程序
+                // 强制关闭应用程序
                 Application.Current.Shutdown();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"退出应用程序失败: {ex.Message}");
+                
+                // 最后的保障措施
+                Environment.Exit(0);
             }
         }
         
@@ -174,16 +237,24 @@ namespace EKSE
             try
             {
                 // 从设置管理器获取保存的设置
-                var settings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
+                var settings = ((App)Application.Current).SettingsManager?.GetCurrentSettings();
                 
-                // 如果启用了最小化到托盘功能
-                if (settings.MinimizeToTray)
+                // 如果启用了最小化到托盘功能且设置不为null
+                if (settings?.MinimizeToTray == true)
                 {
                     // 取消关闭操作
                     e.Cancel = true;
                     
-                    // 隐藏窗口而不是关闭
-                    this.Hide();
+                    // 如果窗口可见，启动关闭滑出动画并隐藏窗口
+                    if (IsVisible)
+                    {
+                        StartCloseSlideOutAnimation(true);
+                    }
+                    else
+                    {
+                        // 如果窗口已经不可见，直接隐藏
+                        Hide();
+                    }
                 }
                 else
                 {
@@ -192,12 +263,38 @@ namespace EKSE
                     {
                         MyNotifyIcon.Dispose();
                     }
+                    
+                    // 取消任何挂起的动画操作并关闭窗口
+                    var rootBorder = VisualTreeHelper.GetChild(this, 0) as FrameworkElement;
+                    if (rootBorder != null)
+                    {
+                        rootBorder.BeginAnimation(FrameworkElement.MarginProperty, null);
+                        rootBorder.BeginAnimation(UIElement.OpacityProperty, null);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"处理窗口关闭事件失败: {ex.Message}");
+                // 出现错误时，确保窗口能正常关闭
+                Application.Current.Shutdown();
             }
+        }
+        
+        /// <summary>
+        /// 窗口加载完成事件处理
+        /// </summary>
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 应用启动动画
+            ApplyStartupAnimation();
+            
+            InitializeSidebar();
+            // 默认加载主页内容
+            LoadContent("Home");
+            
+            // 确保标题栏颜色正确应用
+            ApplySavedTitleBarColor();
         }
         
         /// <summary>
@@ -207,8 +304,8 @@ namespace EKSE
         {
             try
             {
-                // 启动涟漪效果动画
-                StartRippleEffect();
+                // 启动垂直滑动动画
+                StartVerticalSlideAnimation();
             }
             catch (Exception ex)
             {
@@ -217,50 +314,49 @@ namespace EKSE
         }
         
         /// <summary>
-        /// 启动涟漪效果动画
+        /// 启动垂直滑动动画
         /// </summary>
-        private void StartRippleEffect()
+        private void StartVerticalSlideAnimation()
         {
             try
             {
-                // 设置涟漪效果的尺寸为窗口尺寸的1.5倍，确保能够覆盖整个窗口
-                double size = Math.Max(this.ActualWidth, this.ActualHeight) * 1.5;
-                RippleEllipse.Width = size;
-                RippleEllipse.Height = size;
-                
-                // 更新缩放变换的中心点
-                if (RippleEllipse.RenderTransform is ScaleTransform scaleTransform)
+                // 查找最外层的Border元素作为动画目标
+                var rootBorder = VisualTreeHelper.GetChild(this, 0) as FrameworkElement;
+                if (rootBorder != null)
                 {
-                    scaleTransform.CenterX = size / 2;
-                    scaleTransform.CenterY = size / 2;
-                }
-
-                // 显示涟漪元素
-                RippleEllipse.Visibility = Visibility.Visible;
-                
-                // 获取涟漪效果故事板并开始动画
-                Storyboard rippleStoryboard = (Storyboard)FindResource("RippleEffectStoryboard");
-                
-                // 添加动画完成事件处理
-                EventHandler? completedHandler = null;
-                completedHandler = (s, e) => {
-                    // 移除事件处理程序以避免内存泄漏
-                    rippleStoryboard.Completed -= completedHandler;
+                    // 创建一个新的Storyboard来控制动画
+                    var storyboard = new Storyboard();
                     
-                    // 隐藏涟漪元素
-                    RippleEllipse.Visibility = Visibility.Collapsed;
-                };
-
-                rippleStoryboard.Completed += completedHandler;
-
-                // 开始涟漪效果动画
-                rippleStoryboard.Begin(this);
+                    // 创建厚度动画实现垂直滑动效果
+                    var thicknessAnimation = new ThicknessAnimation
+                    {
+                        From = new Thickness(0, -ActualHeight, 0, 0),
+                        To = new Thickness(0, 0, 0, 0),
+                        Duration = TimeSpan.FromSeconds(0.8),
+                        EasingFunction = new CircleEase { EasingMode = EasingMode.EaseOut }
+                    };
+                    Storyboard.SetTarget(thicknessAnimation, rootBorder);
+                    Storyboard.SetTargetProperty(thicknessAnimation, new PropertyPath("(FrameworkElement.Margin)"));
+                    storyboard.Children.Add(thicknessAnimation);
+                    
+                    // 创建透明度动画实现淡入效果
+                    var opacityAnimation = new DoubleAnimation
+                    {
+                        From = 0.0,
+                        To = 1.0,
+                        Duration = TimeSpan.FromSeconds(0.8)
+                    };
+                    Storyboard.SetTarget(opacityAnimation, rootBorder);
+                    Storyboard.SetTargetProperty(opacityAnimation, new PropertyPath("(UIElement.Opacity)"));
+                    storyboard.Children.Add(opacityAnimation);
+                    
+                    // 开始动画
+                    storyboard.Begin();
+                }
             }
             catch (Exception ex)
             {
-                // 如果涟漪效果启动失败，隐藏涟漪元素
-                RippleEllipse.Visibility = Visibility.Collapsed;
-                System.Diagnostics.Debug.WriteLine($"涟漪效果动画失败: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"垂直滑动动画失败: {ex.Message}");
             }
         }
         
@@ -509,8 +605,8 @@ namespace EKSE
             
             if (minimizeToTray)
             {
-                // 隐藏窗口而不是最小化到任务栏
-                Hide();
+                // 启动最小化滑出动画
+                StartMinimizeSlideOutAnimation(true);
             }
             else
             {
@@ -531,16 +627,149 @@ namespace EKSE
             
             if (minimizeToTray)
             {
-                // 隐藏窗口而不是关闭
-                Hide();
+                // 启动关闭滑出动画并隐藏窗口
+                StartCloseSlideOutAnimation(true);
             }
             else
             {
-                // 正常关闭应用程序
-                Close();
+                // 启动关闭滑出动画并关闭应用程序
+                StartCloseSlideOutAnimation(false);
             }
         }
-
+        
+        /// <summary>
+        /// 启动最小化滑出动画
+        /// </summary>
+        /// <param name="hideAfterAnimation">动画结束后是否隐藏窗口</param>
+        private void StartMinimizeSlideOutAnimation(bool hideAfterAnimation)
+        {
+            try
+            {
+                // 查找最外层的Border元素作为动画目标
+                var rootBorder = VisualTreeHelper.GetChild(this, 0) as FrameworkElement;
+                if (rootBorder != null)
+                {
+                    // 获取最小化滑出动画故事板
+                    Storyboard minimizeStoryboard = (Storyboard)FindResource("MinimizeSlideOutStoryboard");
+                    
+                    // 添加动画完成事件处理
+                    EventHandler? completedHandler = null;
+                    completedHandler = (s, e) => {
+                        // 移除事件处理程序以避免内存泄漏
+                        minimizeStoryboard.Completed -= completedHandler;
+                        
+                        // 动画结束后隐藏窗口
+                        if (hideAfterAnimation)
+                        {
+                            Hide();
+                        }
+                    };
+                    
+                    minimizeStoryboard.Completed += completedHandler;
+                    
+                    // 开始最小化滑出动画
+                    minimizeStoryboard.Begin(rootBorder);
+                }
+                else
+                {
+                    // 如果找不到根元素，直接隐藏窗口
+                    if (hideAfterAnimation)
+                    {
+                        Hide();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"最小化滑出动画失败: {ex.Message}");
+                // 如果动画失败，直接隐藏窗口
+                if (hideAfterAnimation)
+                {
+                    Hide();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 启动关闭滑出动画
+        /// </summary>
+        /// <param name="hideAfterAnimation">动画结束后是否隐藏窗口</param>
+        private void StartCloseSlideOutAnimation(bool hideAfterAnimation)
+        {
+            try
+            {
+                // 查找最外层的Border元素作为动画目标
+                var rootBorder = VisualTreeHelper.GetChild(this, 0) as FrameworkElement;
+                if (rootBorder != null)
+                {
+                    // 获取关闭滑出动画故事板
+                    Storyboard closeStoryboard = (Storyboard)FindResource("CloseSlideOutStoryboard");
+                    
+                    // 添加动画完成事件处理
+                    EventHandler? completedHandler = null;
+                    completedHandler = (s, e) => {
+                        // 移除事件处理程序以避免内存泄漏
+                        closeStoryboard.Completed -= completedHandler;
+                        
+                        // 动画结束后隐藏窗口或关闭应用程序
+                        if (hideAfterAnimation)
+                        {
+                            Hide();
+                        }
+                        else
+                        {
+                            // 关闭应用程序前清理托盘图标
+                            if (MyNotifyIcon != null)
+                            {
+                                MyNotifyIcon.Dispose();
+                            }
+                            Close();
+                        }
+                    };
+                    
+                    closeStoryboard.Completed += completedHandler;
+                    
+                    // 开始关闭滑出动画
+                    closeStoryboard.Begin(rootBorder);
+                }
+                else
+                {
+                    // 如果找不到根元素，直接隐藏窗口或关闭应用程序
+                    if (hideAfterAnimation)
+                    {
+                        Hide();
+                    }
+                    else
+                    {
+                        // 关闭应用程序前清理托盘图标
+                        if (MyNotifyIcon != null)
+                        {
+                            MyNotifyIcon.Dispose();
+                        }
+                        Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"关闭滑出动画失败: {ex.Message}");
+                // 如果动画失败，直接隐藏窗口或关闭应用程序
+                if (hideAfterAnimation)
+                {
+                    Hide();
+                }
+                else
+                {
+                    // 关闭应用程序前清理托盘图标
+                    if (MyNotifyIcon != null)
+                    {
+                        MyNotifyIcon.Dispose();
+                    }
+                    Close();
+                }
+            }
+        }
+        
         private void ToggleWindowState()
         {
             if (WindowState == WindowState.Maximized)
@@ -643,6 +872,16 @@ namespace EKSE
             
             // 释放资源
             _soundService?.Dispose();
+        }
+        
+        private void ShowWindowMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ShowWindow();
+        }
+        
+        private void ExitApplicationMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ExitApplication();
         }
     }
     

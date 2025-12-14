@@ -47,6 +47,48 @@
                              Duration="0:0:0.3"/>
         </Storyboard>
         
+        <!-- 垂直滑动启动动画 -->
+        <Storyboard x:Key="VerticalSlideStartupStoryboard">
+            <ThicknessAnimation Storyboard.TargetProperty="Margin"
+                                From="0,-600,0,0" To="0,0,0,0"
+                                Duration="0:0:0.8">
+                <ThicknessAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </ThicknessAnimation.EasingFunction>
+            </ThicknessAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="0.0" To="1.0"
+                             Duration="0:0:0.8"/>
+        </Storyboard>
+        
+        <!-- 最小化滑出动画 -->
+        <Storyboard x:Key="MinimizeSlideOutStoryboard">
+            <ThicknessAnimation Storyboard.TargetProperty="Margin"
+                                From="0,0,0,0" To="0,600,0,0"
+                                Duration="0:0:0.5">
+                <ThicknessAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </ThicknessAnimation.EasingFunction>
+            </ThicknessAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="1.0" To="0.0"
+                             Duration="0:0:0.5"/>
+        </Storyboard>
+        
+        <!-- 关闭滑出动画 -->
+        <Storyboard x:Key="CloseSlideOutStoryboard">
+            <ThicknessAnimation Storyboard.TargetProperty="Margin"
+                                From="0,0,0,0" To="0,-600,0,0"
+                                Duration="0:0:0.5">
+                <ThicknessAnimation.EasingFunction>
+                    <CircleEase EasingMode="EaseOut"/>
+                </ThicknessAnimation.EasingFunction>
+            </ThicknessAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="1.0" To="0.0"
+                             Duration="0:0:0.5"/>
+        </Storyboard>
+        
         <!-- 涟漪效果动画 -->
         <Storyboard x:Key="RippleEffectStoryboard">
             <DoubleAnimation Storyboard.TargetName="RippleEllipse"
@@ -189,13 +231,13 @@
                                                 Visibility="Visible"
                                                 ToolTipText="万物键盘音效"
                                                 IconSource="Assets/Icons/logo.ico"
-                                                LeftClickCommand="{Binding ShowWindowCommand}"
-                                                NoLeftClickDelay="True">
+                                                NoLeftClickDelay="True"
+                                                TrayLeftMouseUp="ShowWindowMenuItem_Click">
                                     <tb:TaskbarIcon.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="显示窗口" Command="{Binding ShowWindowCommand}" />
+                                            <MenuItem Header="显示窗口" Click="ShowWindowMenuItem_Click" />
                                             <Separator />
-                                            <MenuItem Header="退出" Command="{Binding ExitApplicationCommand}" />
+                                            <MenuItem Header="退出" Click="ExitApplicationMenuItem_Click" />
                                         </ContextMenu>
                                     </tb:TaskbarIcon.ContextMenu>
                                 </tb:TaskbarIcon>

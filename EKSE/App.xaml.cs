@@ -124,5 +124,25 @@ namespace EKSE
                 System.Diagnostics.Debug.WriteLine($"初始化标题栏颜色时出错: {ex.Message}");
             }
         }
+        
+        protected override void OnExit(ExitEventArgs e)
+        {
+            base.OnExit(e);
+            
+            // 清理托盘图标
+            try
+            {
+                if (MainWindow is MainWindow mainWindow && mainWindow.MyNotifyIcon != null)
+                {
+                    mainWindow.MyNotifyIcon.Dispose();
+                    mainWindow.MyNotifyIcon = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 忽略托盘图标清理过程中的任何异常
+                System.Diagnostics.Debug.WriteLine($"清理托盘图标时出错: {ex.Message}");
+            }
+        }
     }
 }
