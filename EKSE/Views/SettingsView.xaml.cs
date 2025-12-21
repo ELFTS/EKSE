@@ -422,9 +422,28 @@ namespace EKSE.Views
                     System.Diagnostics.Debug.WriteLine("错误：_currentSettings为null，无法保存设置");
                 }
                 
+                // 强制刷新按钮样式
+                RefreshButtonStyles();
+                
                 // 触发颜色更改事件
                 ThemeColorChanged?.Invoke(this, color);
             }
+        }
+        
+        /// <summary>
+        /// 强制刷新按钮样式
+        /// </summary>
+        private void RefreshButtonStyles()
+        {
+            // 重新应用样式到所有按钮
+            if (ExportConfigButton != null)
+                ExportConfigButton.Style = (Style)FindResource("GradientButtonStyle");
+                
+            if (ImportConfigButton != null)
+                ImportConfigButton.Style = (Style)FindResource("GradientButtonStyle");
+                
+            if (ResetSettingsButton != null)
+                ResetSettingsButton.Style = (Style)FindResource("GradientButtonStyle");
         }
 
         private Color GetColorFromRadioButton(RadioButton radioButton)
@@ -476,6 +495,12 @@ namespace EKSE.Views
                 
                 // 应用新主题
                 paletteHelper.SetTheme(theme);
+                
+                // 更新当前主题颜色
+                ((App)Application.Current).SetCurrentThemeColor(color);
+                
+                // 更新渐变按钮样式以反映新的主题颜色
+                ((App)Application.Current).UpdateGradientButtonStyle();
             }
             catch (Exception ex)
             {
@@ -489,8 +514,8 @@ namespace EKSE.Views
             {
                 if (Application.Current != null && Application.Current.Resources != null)
                 {
-                    // 创建新的画笔
-                    var newBrush = new SolidColorBrush(color);
+                    // 创建新的画笔 - 使用线性渐变而不是纯色
+                    var newBrush = BrushHelper.CreateTitleBarBrush(color);
                     
                     // 更新标题栏背景色资源
                     Application.Current.Resources["TitleBarBackground"] = newBrush;

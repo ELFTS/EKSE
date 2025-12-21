@@ -373,8 +373,8 @@ namespace EKSE
                     var color = (Color)ColorConverter.ConvertFromString(settings.ThemeColor);
                     if (Application.Current != null && Application.Current.Resources != null)
                     {
-                        // 创建标题栏背景色画笔
-                        var titleBarBrush = new SolidColorBrush(color);
+                        // 创建标题栏背景色画笔 - 使用线性渐变而不是纯色
+                        var titleBarBrush = BrushHelper.CreateTitleBarBrush(color);
                         
                         // 更新标题栏背景色资源
                         Application.Current.Resources["TitleBarBackground"] = titleBarBrush;
@@ -390,7 +390,7 @@ namespace EKSE
                     System.Diagnostics.Debug.WriteLine("设置或主题颜色为空，使用默认紫色");
                     // 使用默认紫色
                     var defaultColor = Colors.Purple;
-                    var titleBarBrush = new SolidColorBrush(defaultColor);
+                    var titleBarBrush = BrushHelper.CreateTitleBarBrush(defaultColor);
                     if (Application.Current != null && Application.Current.Resources != null)
                     {
                         Application.Current.Resources["TitleBarBackground"] = titleBarBrush;
@@ -402,7 +402,7 @@ namespace EKSE
                 System.Diagnostics.Debug.WriteLine($"应用保存的标题栏颜色时出错: {ex.Message}");
                 // 出错时使用默认紫色
                 var defaultColor = Colors.Purple;
-                var titleBarBrush = new SolidColorBrush(defaultColor);
+                var titleBarBrush = BrushHelper.CreateTitleBarBrush(defaultColor);
                 if (Application.Current != null && Application.Current.Resources != null)
                 {
                     Application.Current.Resources["TitleBarBackground"] = titleBarBrush;

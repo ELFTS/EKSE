@@ -102,16 +102,16 @@ namespace EKSE.Components
                 // 检查是否是当前选中的键
                 if (key == _selectedKey)
                 {
-                    // 当前选中的键使用SecondaryMid颜色
-                    button.Background = Application.Current.FindResource("SecondaryHueMidBrush") as Brush ?? 
-                                       new SolidColorBrush(Colors.LightBlue);
+                    // 当前选中的键使用SecondaryMid颜色 - 改为使用渐变色
+                    var secondaryBrush = Application.Current.FindResource("SecondaryHueMidBrush") as Brush ?? CreateGradientBrush(Colors.LightBlue);
+                    button.Background = secondaryBrush;
                 }
                 // 检查是否已分配音效
                 else if (_profileManager.CurrentProfile.KeySounds.ContainsKey(key))
                 {
-                    // 已分配音效的键使用PrimaryMid颜色
-                    button.Background = Application.Current.FindResource("PrimaryHueMidBrush") as Brush ?? 
-                                       new SolidColorBrush(Colors.Blue);
+                    // 已分配音效的键使用PrimaryMid颜色 - 改为使用渐变色
+                    var primaryBrush = Application.Current.FindResource("PrimaryHueMidBrush") as Brush ?? CreateGradientBrush(Colors.Blue);
+                    button.Background = primaryBrush;
                 }
                 else
                 {
@@ -120,7 +120,18 @@ namespace EKSE.Components
                 }
             }
         }
-
+        
+        // 创建渐变画笔的辅助方法
+        private Brush CreateGradientBrush(Color baseColor)
+        {
+            return new LinearGradientBrush(
+                Color.FromArgb(255, (byte)Math.Min(255, (int)(baseColor.R * 1.2)), (byte)Math.Min(255, (int)(baseColor.G * 1.2)), (byte)Math.Min(255, (int)(baseColor.B * 1.2))),
+                baseColor,
+                new Point(0, 0),
+                new Point(0, 1)
+            );
+        }
+        
         // 获取当前选中的按键
         public Key SelectedKey => _selectedKey;
     }

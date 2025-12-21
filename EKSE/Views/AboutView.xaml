@@ -64,7 +64,7 @@
             <StackPanel>
                 <!-- 按钮区域 -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                    <Button Style="{StaticResource GradientButtonStyle}"
                             Margin="5"
                             Click="GithubButton_Click">
                         <StackPanel Orientation="Horizontal">
@@ -72,7 +72,7 @@
                             <TextBlock Text="Github" Margin="5,0,0,0"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                    <Button Style="{StaticResource GradientButtonStyle}"
                             Margin="5"
                             Click="QQGroupButton_Click">
                         <StackPanel Orientation="Horizontal">
@@ -80,7 +80,7 @@
                             <TextBlock Text="QQ群" Margin="5,0,0,0"/>
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                    <Button Style="{StaticResource GradientButtonStyle}"
                             Margin="5"
                             Click="FeedbackButton_Click">
                         <StackPanel Orientation="Horizontal">

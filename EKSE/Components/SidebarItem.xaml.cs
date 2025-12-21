@@ -26,7 +26,12 @@ namespace EKSE.Components
         public event EventHandler Click;
 
         // 定义默认颜色
-        private static readonly Brush ActiveBackgroundBrush = new SolidColorBrush(Color.FromArgb(25, 0, 0, 0));
+        private static readonly Brush ActiveBackgroundBrush = new LinearGradientBrush(
+            Color.FromArgb(25, 0, 0, 0),
+            Color.FromArgb(15, 0, 0, 0),
+            new Point(0, 0),
+            new Point(1, 0)
+        );
         private static readonly Brush InactiveBackgroundBrush = Brushes.Transparent;
         private static readonly Brush HoverBackgroundBrush = new SolidColorBrush(Color.FromArgb(15, 0, 0, 0));
         private static readonly Brush DefaultForegroundBrush = Brushes.Black;
@@ -174,18 +179,8 @@ namespace EKSE.Components
         // 动画背景色变化
         private void AnimateBackgroundColor(bool isActive)
         {
-            if (_backgroundStoryboard != null)
-            {
-                var colorAnimation = (ColorAnimation)_backgroundStoryboard.Children[0];
-                colorAnimation.From = ((SolidColorBrush)MainBorder.Background).Color;
-                colorAnimation.To = isActive ? ((SolidColorBrush)ActiveBackgroundBrush).Color : ((SolidColorBrush)InactiveBackgroundBrush).Color;
-                _backgroundStoryboard.Begin();
-            }
-            else
-            {
-                // 如果动画不可用，则直接设置颜色
-                MainBorder.Background = isActive ? ActiveBackgroundBrush : InactiveBackgroundBrush;
-            }
+            // 直接设置背景，对于渐变色不使用动画
+            MainBorder.Background = isActive ? ActiveBackgroundBrush : InactiveBackgroundBrush;
         }
 
         // 动画前景色变化

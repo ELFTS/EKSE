@@ -7,14 +7,6 @@
              d:DesignHeight="60" d:DesignWidth="250"
              Cursor="Hand">
     <UserControl.Resources>
-        <!-- 背景色变化动画 -->
-        <Storyboard x:Key="BackgroundAnimation">
-            <ColorAnimation x:Name="BackgroundAnimationColor"
-                            Storyboard.TargetName="MainBorder"
-                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                            Duration="0:0:0.2"/>
-        </Storyboard>
-        
         <!-- 前景色变化动画 -->
         <Storyboard x:Key="ForegroundAnimation">
             <ColorAnimation x:Name="ForegroundAnimationColor"

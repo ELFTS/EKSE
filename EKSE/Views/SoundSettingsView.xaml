@@ -45,30 +45,30 @@
                                       SelectionChanged="ProfileComboBox_SelectionChanged"/>
                             
                             <Button x:Name="NewProfileButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Style="{StaticResource GradientButtonStyle}"
                                     Content="新建"
                                     Click="NewProfileButton_Click"
                                     Margin="0,0,10,0"/>
                             
                             <Button x:Name="DeleteProfileButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Style="{StaticResource GradientButtonStyle}"
                                     Content="删除"
                                     Click="DeleteProfileButton_Click"
                                     Margin="0,0,10,0"/>
                             
                             <Button x:Name="ExportProfileButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Style="{StaticResource GradientButtonStyle}"
                                     Content="导出"
                                     Click="ExportProfileButton_Click"
                                     Margin="0,0,10,0"/>
                             
                             <Button x:Name="ImportProfileButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Style="{StaticResource GradientButtonStyle}"
                                     Content="导入"
                                     Click="ImportProfileButton_Click"/>
                             
                             <Button x:Name="RenameProfileButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Style="{StaticResource GradientButtonStyle}"
                                     Content="重命名"
                                     Click="RenameProfileButton_Click"/>
                         </StackPanel>
@@ -128,13 +128,13 @@
                                     Orientation="Horizontal"
                                     Margin="15,0,15,15">
                             <Button x:Name="AddAudioFileButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Style="{StaticResource GradientButtonStyle}"
                                     Content="添加音频文件"
                                     Click="AddAudioFileButton_Click"
                                     Margin="0,0,10,0"/>
                             
                             <Button x:Name="RefreshAudioFilesButton"
-                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Style="{StaticResource GradientButtonStyle}"
                                     Content="刷新"
                                     Click="RefreshAudioFilesButton_Click"/>
                         </StackPanel>
@@ -173,14 +173,14 @@
                                             </StackPanel>
                                             
                                             <Button Grid.Column="1"
-                                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                                    Style="{StaticResource GradientButtonStyle}"
                                                     Content="重命名"
                                                     Click="RenameAudioFileButton_Click"
                                                     Margin="5,0"
                                                     Padding="5,0"/>
                                             
                                             <Button Grid.Column="2"
-                                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                                    Style="{StaticResource GradientButtonStyle}"
                                                     Content="删除"
                                                     Click="DeleteAudioFileButton_Click"
                                                     Margin="5,0"

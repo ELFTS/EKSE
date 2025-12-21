@@ -8,14 +8,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="800">
     <UserControl.Resources>
-        <Style x:Key="DirectionalKeyStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+        <Style x:Key="DirectionalKeyStyle" TargetType="Button" BasedOn="{StaticResource GradientButtonStyle}">
             <Setter Property="Height" Value="40"/>
             <Setter Property="Margin" Value="1"/>
             <Setter Property="Padding" Value="2"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
         
-        <Style x:Key="NormalKeyStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+        <Style x:Key="NormalKeyStyle" TargetType="Button" BasedOn="{StaticResource GradientButtonStyle}">
             <Setter Property="Height" Value="40"/>
             <Setter Property="Margin" Value="1"/>
             <Setter Property="Padding" Value="2"/>
