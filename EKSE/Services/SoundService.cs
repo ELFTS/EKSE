@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows;
 using NAudio.Wave;
 using EKSE.Models;
+using System.Collections.Concurrent;
 
 namespace EKSE.Services
 {
@@ -13,6 +14,12 @@ namespace EKSE.Services
         private readonly WaveOutEvent _waveOut;
         private AudioFileReader _audioFileReader;
         private ProfileManager _profileManager;
+        
+        // 音频资源池，用于缓存已经加载的音频文件信息（仅缓存文件路径和基本参数，不缓存实际的读取器）
+        private readonly ConcurrentDictionary<string, (WaveFormat waveFormat, TimeSpan totalTimespan)> _audioInfoCache = new ConcurrentDictionary<string, (WaveFormat waveFormat, TimeSpan totalTimespan)>();
+        
+        // 最大缓存数量，防止内存过度使用
+        private const int MaxCacheSize = 50;
         
         // 全局键盘钩子相关
         private const int WH_KEYBOARD_LL = 13;
@@ -89,8 +96,14 @@ namespace EKSE.Services
                 _waveOut.Stop();
                 _audioFileReader?.Dispose();
                 
-                // 加载新的音效文件
+                // 创建新的音频文件读取器
                 _audioFileReader = new AudioFileReader(soundPath);
+                
+                // 缓存音频信息（仅缓存基本信息，不缓存读取器实例）
+                if (!_audioInfoCache.ContainsKey(soundPath) && _audioInfoCache.Count < MaxCacheSize)
+                {
+                    _audioInfoCache.TryAdd(soundPath, (_audioFileReader.WaveFormat, _audioFileReader.TotalTime));
+                }
                 
                 _waveOut.Init(_audioFileReader);
                 _waveOut.Play();
@@ -183,6 +196,9 @@ namespace EKSE.Services
         /// </summary>
         private void OnCurrentProfileChanged(object sender, EventArgs e)
         {
+            // 清空音频缓存，因为方案改变了
+            ClearAudioCache();
+            
             // 停止当前播放的音效并彻底释放相关资源
             try
             {
@@ -196,10 +212,14 @@ namespace EKSE.Services
             // 释放音频文件读取器资源
             _audioFileReader?.Dispose();
             _audioFileReader = null;
-            
-            // 强制垃圾回收以尽快释放文件句柄
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+        }
+        
+        /// <summary>
+        /// 清空音频缓存
+        /// </summary>
+        private void ClearAudioCache()
+        {
+            _audioInfoCache.Clear();
         }
         
         /// <summary>
@@ -207,6 +227,9 @@ namespace EKSE.Services
         /// </summary>
         public void Refresh()
         {
+            // 清空音频缓存
+            ClearAudioCache();
+            
             // 停止当前播放的音效并彻底释放相关资源
             try
             {
@@ -220,10 +243,6 @@ namespace EKSE.Services
             // 释放音频文件读取器资源
             _audioFileReader?.Dispose();
             _audioFileReader = null;
-            
-            // 强制垃圾回收以尽快释放文件句柄
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
         
         // 全局键盘钩子实现
@@ -270,16 +289,14 @@ namespace EKSE.Services
 
         public void Dispose()
         {
-            // 卸载键盘钩子
+            // 取消钩子
             UnhookWindowsHookEx(_hookID);
             
-            // 取消订阅当前方案改变事件
-            if (_profileManager != null)
-            {
-                _profileManager.CurrentProfileChanged -= OnCurrentProfileChanged;
-            }
+            // 清空音频缓存
+            ClearAudioCache();
             
-            // 释放音频资源
+            // 释放音频设备
+            _waveOut?.Stop();
             _waveOut?.Dispose();
             _audioFileReader?.Dispose();
         }

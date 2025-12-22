@@ -38,7 +38,7 @@ namespace EKSE.Services
             ["End"] = Key.End, ["PgUp"] = Key.PageUp, ["PgDn"] = Key.PageDown,
             ["Pause"] = Key.Pause, ["SrcLk"] = Key.Scroll, ["Fn"] = Key.None
         };
-        
+
         public ProfileManager()
         {
             _profilesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles");
@@ -335,6 +335,13 @@ namespace EKSE.Services
         {
             if (profile != null && _profiles.Contains(profile))
             {
+                // 如果当前有方案，先清理其资源
+                if (_currentProfile != null)
+                {
+                    // 清理当前方案的资源
+                    _currentProfile.KeySounds.Clear();
+                }
+                
                 _currentProfile = profile;
                 LoadKeySounds(_currentProfile);
                 CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
@@ -553,6 +560,8 @@ namespace EKSE.Services
             {
                 if (_currentProfile == profile)
                 {
+                    // 清理当前方案的资源
+                    _currentProfile.KeySounds.Clear();
                     CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
                 }
 

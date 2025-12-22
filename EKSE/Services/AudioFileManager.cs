@@ -10,6 +10,7 @@ namespace EKSE.Services
     {
         private readonly ProfileManager _profileManager;
         private readonly List<string> _audioFiles;
+        private string _lastLoadedProfilePath; // 记录上次加载的方案路径
         
         // 添加事件，当音频文件列表发生变化时触发
         public event EventHandler AudioFilesChanged;
@@ -18,6 +19,7 @@ namespace EKSE.Services
         {
             _profileManager = profileManager ?? throw new ArgumentNullException(nameof(profileManager));
             _audioFiles = new List<string>();
+            _lastLoadedProfilePath = string.Empty;
             
             // 订阅ProfileManager的事件
             _profileManager.ProfilesChanged += (sender, args) => Refresh();
@@ -42,6 +44,13 @@ namespace EKSE.Services
                 var currentProfile = _profileManager.CurrentProfile;
                 if (currentProfile != null)
                 {
+                    // 如果是同一个方案，不需要重新加载
+                    if (_lastLoadedProfilePath == currentProfile.FilePath)
+                    {
+                        return;
+                    }
+                    
+                    _lastLoadedProfilePath = currentProfile.FilePath;
                     var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
                     
                     // 只有当目录存在时才尝试加载文件
@@ -62,16 +71,19 @@ namespace EKSE.Services
                     else
                     {
                         System.Diagnostics.Debug.WriteLine($"音频目录不存在: {keySoundsDirectory}");
+                        _audioFiles.Clear();
                     }
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("当前没有选择声音方案");
+                    _audioFiles.Clear();
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"加载音频文件时出错: {ex.Message}");
+                _audioFiles.Clear();
             }
         }
         

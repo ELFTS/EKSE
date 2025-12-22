@@ -49,9 +49,16 @@ namespace EKSE.Views
         // 用户控件卸载时取消订阅事件
         private void SoundSettingsView_Unloaded(object sender, RoutedEventArgs e)
         {
+            // 取消订阅所有事件以防止内存泄漏
             if (_profileManager != null)
             {
                 _profileManager.ProfilesChanged -= OnProfilesChanged;
+                _profileManager.CurrentProfileChanged -= OnCurrentProfileChanged;
+            }
+            
+            if (_audioFileManager != null)
+            {
+                _audioFileManager.AudioFilesChanged -= OnAudioFilesChanged;
             }
         }
         
