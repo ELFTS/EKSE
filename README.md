@@ -3,7 +3,7 @@
 </div>
 <h1 align="center">万物键盘音效</h1>
 <h4 align="center">一款适合迷惑行为的键盘音效软件~</h4>
-<h4 align="center">支持 Windows 7、8、8.1、10、11、12</h4>
+<h4 align="center">支持 Windows 7、8、8.1、10、11 64位</h4>
 <div align="center">
 
 ![GitHub Release](https://img.shields.io/github/v/release/ELFTS/EKSE?label=版本)
