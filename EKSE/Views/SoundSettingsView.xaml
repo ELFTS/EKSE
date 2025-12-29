@@ -46,31 +46,63 @@
                             
                             <Button x:Name="NewProfileButton"
                                     Style="{StaticResource GradientButtonStyle}"
-                                    Content="新建"
                                     Click="NewProfileButton_Click"
-                                    Margin="0,0,10,0"/>
+                                    Margin="0,0,10,0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Margin="0,0,5,0"/>
+                                        <TextBlock>新建</TextBlock>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
                             
                             <Button x:Name="DeleteProfileButton"
                                     Style="{StaticResource GradientButtonStyle}"
-                                    Content="删除"
                                     Click="DeleteProfileButton_Click"
-                                    Margin="0,0,10,0"/>
+                                    Margin="0,0,10,0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Margin="0,0,5,0"/>
+                                        <TextBlock>删除</TextBlock>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
                             
                             <Button x:Name="ExportProfileButton"
                                     Style="{StaticResource GradientButtonStyle}"
-                                    Content="导出"
                                     Click="ExportProfileButton_Click"
-                                    Margin="0,0,10,0"/>
+                                    Margin="0,0,10,0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Export" Width="16" Height="16" Margin="0,0,5,0"/>
+                                        <TextBlock>导出</TextBlock>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
                             
                             <Button x:Name="ImportProfileButton"
                                     Style="{StaticResource GradientButtonStyle}"
-                                    Content="导入"
-                                    Click="ImportProfileButton_Click"/>
+                                    Click="ImportProfileButton_Click"
+                                    Margin="0,0,10,0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Import" Width="16" Height="16" Margin="0,0,5,0"/>
+                                        <TextBlock>导入</TextBlock>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
                             
                             <Button x:Name="RenameProfileButton"
                                     Style="{StaticResource GradientButtonStyle}"
-                                    Content="重命名"
-                                    Click="RenameProfileButton_Click"/>
+                                    Click="RenameProfileButton_Click"
+                                    Margin="0,0,10,0">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="RenameBox" Width="16" Height="16" Margin="0,0,5,0"/>
+                                        <TextBlock>重命名</TextBlock>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </materialDesign:Card>
@@ -94,16 +126,16 @@
                             <TextBlock x:Name="SelectedKeyText" 
                                        Text="当前选中按键: 无"
                                        Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       Margin="0,0,0,10"/>
-                            
-                            <components:VirtualKeyboard x:Name="VirtualKeyboardControl" 
-                                                       KeySelected="VirtualKeyboardControl_KeySelected"/>
+                                       Margin="0,0,0,5"/>
                             
                             <TextBlock x:Name="CurrentSoundPathText"
                                        Text="当前音效路径: 无"
                                        Style="{StaticResource MaterialDesignCaptionTextBlock}"
                                        TextWrapping="Wrap"
-                                       Margin="0,0,0,0"/>
+                                       Margin="0,5,0,10"/>
+                            
+                            <components:VirtualKeyboard x:Name="VirtualKeyboardControl" 
+                                                       KeySelected="VirtualKeyboardControl_KeySelected"/>
                         </StackPanel>
                     </Grid>
                 </materialDesign:Card>
@@ -146,7 +178,7 @@
                                        Margin="0,0,0,10"/>
                             
                             <ListBox x:Name="AudioFilesListBox"
-                                     Height="150"
+                                     Height="300"
                                      SelectionMode="Single"
                                      MouseDoubleClick="AudioFilesListBox_MouseDoubleClick">
                                 <ListBox.ItemTemplate>

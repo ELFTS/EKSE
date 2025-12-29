@@ -146,31 +146,21 @@
                         MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         
-                        <!-- 应用图标 -->
-                        <materialDesign:PackIcon Grid.Column="0"
-                                                 Kind="Music"
-                                                 Width="24"
-                                                 Height="24"
-                                                 Foreground="White"
-                                                 VerticalAlignment="Center"
-                                                 Margin="15,0,5,0"/>
-                        
                         <!-- 应用标题 -->
-                        <TextBlock Grid.Column="1" 
+                        <TextBlock Grid.Column="0" 
                                    Text="万物键盘音效" 
                                    Foreground="White"
                                    VerticalAlignment="Center"
-                                   Margin="5,0,0,0"
+                                   Margin="15,0,0,0"
                                    FontSize="16"
                                    FontWeight="Medium"/>
                         
                         <!-- 窗口控制按钮 -->
-                        <StackPanel Grid.Column="2" 
+                        <StackPanel Grid.Column="1" 
                                     Orientation="Horizontal"
                                     Margin="0,0,10,0">
                             <Button x:Name="MinimizeButton"
@@ -178,6 +168,39 @@
                                     Foreground="White"
                                     Click="MinimizeButton_Click"
                                     ToolTip="最小化">
+                                <Button.Effect>
+                                    <DropShadowEffect x:Name="MinimizeShadow" 
+                                                      ShadowDepth="0" 
+                                                      BlurRadius="10" 
+                                                      Color="Yellow"
+                                                      Opacity="0"/>
+                                </Button.Effect>
+                                <Button.Resources>
+                                    <Storyboard x:Key="MinimizeButtonHoverOn">
+                                        <DoubleAnimation Storyboard.TargetName="MinimizeShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="0" To="1.0" Duration="0:0:0.1"/>
+                                        <DoubleAnimation Storyboard.TargetName="MinimizeShadow"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         From="10" To="25" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                    <Storyboard x:Key="MinimizeButtonHoverOff">
+                                        <DoubleAnimation Storyboard.TargetName="MinimizeShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="1.0" To="0" Duration="0:0:0.1"/>
+                                        <DoubleAnimation Storyboard.TargetName="MinimizeShadow"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         From="25" To="10" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </Button.Resources>
+                                <Button.Triggers>
+                                    <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                                        <BeginStoryboard Storyboard="{StaticResource MinimizeButtonHoverOn}"/>
+                                    </EventTrigger>
+                                    <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                                        <BeginStoryboard Storyboard="{StaticResource MinimizeButtonHoverOff}"/>
+                                    </EventTrigger>
+                                </Button.Triggers>
                                 <materialDesign:PackIcon Kind="WindowMinimize"/>
                             </Button>
                             
@@ -186,6 +209,39 @@
                                     Foreground="White"
                                     Click="MaximizeButton_Click"
                                     ToolTip="最大化">
+                                <Button.Effect>
+                                    <DropShadowEffect x:Name="MaximizeShadow" 
+                                                      ShadowDepth="0" 
+                                                      BlurRadius="10" 
+                                                      Color="Yellow"
+                                                      Opacity="0"/>
+                                </Button.Effect>
+                                <Button.Resources>
+                                    <Storyboard x:Key="MaximizeButtonHoverOn">
+                                        <DoubleAnimation Storyboard.TargetName="MaximizeShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="0" To="1.0" Duration="0:0:0.1"/>
+                                        <DoubleAnimation Storyboard.TargetName="MaximizeShadow"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         From="10" To="25" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                    <Storyboard x:Key="MaximizeButtonHoverOff">
+                                        <DoubleAnimation Storyboard.TargetName="MaximizeShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="1.0" To="0" Duration="0:0:0.1"/>
+                                        <DoubleAnimation Storyboard.TargetName="MaximizeShadow"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         From="25" To="10" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </Button.Resources>
+                                <Button.Triggers>
+                                    <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                                        <BeginStoryboard Storyboard="{StaticResource MaximizeButtonHoverOn}"/>
+                                    </EventTrigger>
+                                    <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                                        <BeginStoryboard Storyboard="{StaticResource MaximizeButtonHoverOff}"/>
+                                    </EventTrigger>
+                                </Button.Triggers>
                                 <materialDesign:PackIcon Name="MaximizeIcon" Kind="WindowMaximize"/>
                             </Button>
                             
@@ -194,6 +250,39 @@
                                     Foreground="White"
                                     Click="CloseButton_Click"
                                     ToolTip="关闭">
+                                <Button.Effect>
+                                    <DropShadowEffect x:Name="CloseShadow" 
+                                                      ShadowDepth="0" 
+                                                      BlurRadius="10" 
+                                                      Color="Yellow"
+                                                      Opacity="0"/>
+                                </Button.Effect>
+                                <Button.Resources>
+                                    <Storyboard x:Key="CloseButtonHoverOn">
+                                        <DoubleAnimation Storyboard.TargetName="CloseShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="0" To="1.0" Duration="0:0:0.1"/>
+                                        <DoubleAnimation Storyboard.TargetName="CloseShadow"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         From="10" To="25" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                    <Storyboard x:Key="CloseButtonHoverOff">
+                                        <DoubleAnimation Storyboard.TargetName="CloseShadow"
+                                                         Storyboard.TargetProperty="Opacity"
+                                                         From="1.0" To="0" Duration="0:0:0.1"/>
+                                        <DoubleAnimation Storyboard.TargetName="CloseShadow"
+                                                         Storyboard.TargetProperty="BlurRadius"
+                                                         From="25" To="10" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </Button.Resources>
+                                <Button.Triggers>
+                                    <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                                        <BeginStoryboard Storyboard="{StaticResource CloseButtonHoverOn}"/>
+                                    </EventTrigger>
+                                    <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                                        <BeginStoryboard Storyboard="{StaticResource CloseButtonHoverOff}"/>
+                                    </EventTrigger>
+                                </Button.Triggers>
                                 <materialDesign:PackIcon Kind="WindowClose"/>
                             </Button>
                         </StackPanel>
