@@ -512,7 +512,7 @@ namespace EKSE.Views
                     
                     _audioFilesList.Add(new AudioFileItem
                     {
-                        Name = Path.GetFileNameWithoutExtension(file),
+                        Name = Path.GetFileName(file),  // 显示完整文件名（包含扩展名）
                         Path = file,
                         Size = sizeString
                     });
