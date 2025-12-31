@@ -44,12 +44,6 @@ namespace EKSE.Services
                 var currentProfile = _profileManager.CurrentProfile;
                 if (currentProfile != null)
                 {
-                    // 如果是同一个方案，不需要重新加载
-                    if (_lastLoadedProfilePath == currentProfile.FilePath)
-                    {
-                        return;
-                    }
-                    
                     _lastLoadedProfilePath = currentProfile.FilePath;
                     var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
                     

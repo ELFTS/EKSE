@@ -486,7 +486,7 @@ namespace EKSE.Views
                     _audioFileManager?.AddAudioFile(filePath);
                 }
                 
-                RefreshAudioFilesList();
+                // 列表会通过AudioFilesChanged事件自动刷新，不需要手动调用
             }
         }
         
