@@ -300,8 +300,58 @@ namespace EKSE.Services
             _waveOut?.Dispose();
             _audioFileReader?.Dispose();
         }
-    }
 
+    /// <summary>
+    /// 直接播放指定路径的音频文件
+    /// </summary>
+    /// <param name="audioFilePath">音频文件路径</param>
+    public void PlayAudioFile(string audioFilePath)
+    {
+        try
+        {
+            // 检查音频文件是否存在
+            if (string.IsNullOrEmpty(audioFilePath) || !File.Exists(audioFilePath))
+            {
+                System.Diagnostics.Debug.WriteLine($"音频文件不存在或路径为空: {audioFilePath}");
+                return;
+            }
+            
+            // 检查文件是否被占用
+            try
+            {
+                using (var stream = File.Open(audioFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    // 文件可以被打开，继续播放
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"音频文件被占用或无法访问: {ex.Message}");
+                return;
+            }
+            
+            // 停止当前正在播放的音效
+            _waveOut.Stop();
+            _audioFileReader?.Dispose();
+            
+            // 创建新的音频文件读取器
+            _audioFileReader = new AudioFileReader(audioFilePath);
+            
+            // 缓存音频信息（仅缓存基本信息，不缓存读取器实例）
+            if (!_audioInfoCache.ContainsKey(audioFilePath) && _audioInfoCache.Count < MaxCacheSize)
+            {
+                _audioInfoCache.TryAdd(audioFilePath, (_audioFileReader.WaveFormat, _audioFileReader.TotalTime));
+            }
+            
+            _waveOut.Init(_audioFileReader);
+            _waveOut.Play();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"播放音频时出错: {ex.Message}");
+        }
+    }
+    
     
     /// <summary>
     /// 声音事件参数
@@ -332,4 +382,5 @@ namespace EKSE.Services
             ErrorMessage = errorMessage;
         }
     }
+}
 }

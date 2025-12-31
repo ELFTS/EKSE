@@ -12,6 +12,7 @@ using EKSE.Components;
 using EKSE.Services;
 using EKSE.Models;
 using Microsoft.VisualBasic;
+using NAudio.Wave;
 
 namespace EKSE.Views
 {
@@ -608,6 +609,25 @@ namespace EKSE.Views
                     {
                         MessageBox.Show($"删除失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
+                }
+            }
+        }
+        
+        // 播放音频文件按钮点击事件
+        private void PlayAudioFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && 
+                button.DataContext is AudioFileItem item &&
+                _soundService != null)
+            {
+                try
+                {
+                    // 使用SoundService播放音频文件
+                    _soundService.PlayAudioFile(item.Path);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"播放音频失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

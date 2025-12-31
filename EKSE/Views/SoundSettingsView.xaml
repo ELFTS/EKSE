@@ -189,6 +189,7 @@
                                                 <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             
                                             <StackPanel Grid.Column="0" 
@@ -206,12 +207,23 @@
                                             
                                             <Button Grid.Column="1"
                                                     Style="{StaticResource GradientButtonStyle}"
+                                                    Click="PlayAudioFileButton_Click"
+                                                    Margin="5,0"
+                                                    Padding="5,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="Play" Width="16" Height="16" Margin="0,0,3,0"/>
+                                                    <TextBlock Text="播放"/>
+                                                </StackPanel>
+                                            </Button>
+                                            
+                                            <Button Grid.Column="2"
+                                                    Style="{StaticResource GradientButtonStyle}"
                                                     Content="重命名"
                                                     Click="RenameAudioFileButton_Click"
                                                     Margin="5,0"
                                                     Padding="5,0"/>
                                             
-                                            <Button Grid.Column="2"
+                                            <Button Grid.Column="3"
                                                     Style="{StaticResource GradientButtonStyle}"
                                                     Content="删除"
                                                     Click="DeleteAudioFileButton_Click"
