@@ -24,6 +24,7 @@ namespace EKSE.Services
         // 全局键盘钩子相关
         private const int WH_KEYBOARD_LL = 13;
         private const int WM_KEYDOWN = 0x0100;
+        private const int WM_KEYUP = 0x0101;
         private LowLevelKeyboardProc _proc;
         private IntPtr _hookID = IntPtr.Zero;
         private AudioFileManager _audioFileManager;
@@ -31,6 +32,9 @@ namespace EKSE.Services
         // 事件定义
         public event EventHandler<SoundEventArgs> SoundPlayed;
         public event EventHandler<SoundErrorEventArgs> SoundError;
+        
+        // 按键状态跟踪（使用ConcurrentDictionary提高并发性能）
+        private readonly ConcurrentDictionary<Key, bool> _keyStates = new ConcurrentDictionary<Key, bool>();
         
         public SoundService(ProfileManager profileManager)
         {
@@ -260,11 +264,25 @@ namespace EKSE.Services
 
         private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            if (nCode >= 0 && wParam == (IntPtr)WM_KEYDOWN)
+            if (nCode >= 0)
             {
                 int vkCode = Marshal.ReadInt32(lParam);
                 Key key = KeyInterop.KeyFromVirtualKey(vkCode);
-                PlaySound(key);
+
+                if (wParam == (IntPtr)WM_KEYDOWN)
+                {
+                    // 只有当按键未被按下时才播放音效
+                    if (_keyStates.AddOrUpdate(key, true, (k, oldValue) => oldValue) == false)
+                    {
+                        PlaySound(key);
+                        _keyStates[key] = true;
+                    }
+                }
+                else if (wParam == (IntPtr)WM_KEYUP)
+                {
+                    // 更新按键状态为已释放
+                    _keyStates[key] = false;
+                }
             }
 
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
@@ -299,8 +317,10 @@ namespace EKSE.Services
             _waveOut?.Stop();
             _waveOut?.Dispose();
             _audioFileReader?.Dispose();
+            
+            // 清理按键状态集合
+            _keyStates.Clear();
         }
-
     /// <summary>
     /// 直接播放指定路径的音频文件
     /// </summary>
