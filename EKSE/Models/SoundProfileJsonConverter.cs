@@ -10,7 +10,7 @@ namespace EKSE.Models
     /// </summary>
     public class SoundProfileJsonConverter : JsonConverter<SoundProfile>
     {
-        public override SoundProfile ReadJson(JsonReader reader, Type objectType, SoundProfile existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override SoundProfile ReadJson(JsonReader reader, Type objectType, SoundProfile? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             JObject jo = JObject.Load(reader);
             
@@ -53,7 +53,7 @@ namespace EKSE.Models
             return profile;
         }
 
-        public override void WriteJson(JsonWriter writer, SoundProfile value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, SoundProfile? value, JsonSerializer serializer)
         {
             writer.WriteStartObject();
             

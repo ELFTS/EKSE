@@ -13,19 +13,19 @@ namespace EKSE.Models
         /// 方案名称
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         
         /// <summary>
         /// 模式（例如：随机）
         /// </summary>
         [JsonProperty("mode")]
-        public string Mode { get; set; }
+        public string? Mode { get; set; }
         
         /// <summary>
         /// 重复音效文件
         /// </summary>
         [JsonProperty("repeat_sound")]
-        public string RepeatSound { get; set; }
+        public string? RepeatSound { get; set; }
         
         /// <summary>
         /// 分配的声音列表
@@ -43,7 +43,7 @@ namespace EKSE.Models
         /// 方案文件路径
         /// </summary>
         [JsonIgnore]
-        public string FilePath { get; set; }
+        public string? FilePath { get; set; }
         
         /// <summary>
         /// 无参构造函数

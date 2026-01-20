@@ -13,7 +13,7 @@ namespace EKSE.Services
         private string _lastLoadedProfilePath; // 记录上次加载的方案路径
         
         // 添加事件，当音频文件列表发生变化时触发
-        public event EventHandler AudioFilesChanged;
+        public event EventHandler? AudioFilesChanged;
         
         public AudioFileManager(ProfileManager profileManager)
         {
@@ -42,7 +42,7 @@ namespace EKSE.Services
             try
             {
                 var currentProfile = _profileManager.CurrentProfile;
-                if (currentProfile != null)
+                if (currentProfile != null && !string.IsNullOrEmpty(currentProfile.FilePath))
                 {
                     _lastLoadedProfilePath = currentProfile.FilePath;
                     var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
@@ -59,24 +59,19 @@ namespace EKSE.Services
                         
                         _audioFiles.Clear();
                         _audioFiles.AddRange(allFiles);
-                        
-                        System.Diagnostics.Debug.WriteLine($"成功加载 {_audioFiles.Count} 个音频文件从目录: {keySoundsDirectory}");
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"音频目录不存在: {keySoundsDirectory}");
                         _audioFiles.Clear();
                     }
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("当前没有选择声音方案");
                     _audioFiles.Clear();
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"加载音频文件时出错: {ex.Message}");
                 _audioFiles.Clear();
             }
         }
@@ -109,7 +104,7 @@ namespace EKSE.Services
             try
             {
                 var currentProfile = _profileManager.CurrentProfile;
-                if (currentProfile != null)
+                if (currentProfile != null && !string.IsNullOrEmpty(currentProfile.FilePath))
                 {
                     var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
                     
@@ -159,7 +154,7 @@ namespace EKSE.Services
             try
             {
                 var currentProfile = _profileManager.CurrentProfile;
-                if (currentProfile != null)
+                if (currentProfile != null && !string.IsNullOrEmpty(currentProfile.FilePath))
                 {
                     var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
                     var normalizedFilePath = Path.GetFullPath(filePath);
@@ -188,7 +183,7 @@ namespace EKSE.Services
                     return null;
 
                 var currentProfile = _profileManager.CurrentProfile;
-                if (currentProfile == null)
+                if (currentProfile == null || string.IsNullOrEmpty(currentProfile.FilePath))
                     return null;
 
                 var keySoundsDirectory = Path.Combine(currentProfile.FilePath, "sounds");
@@ -225,12 +220,15 @@ namespace EKSE.Services
                     currentProfile.KeySounds[keyToUpdate] = newFilePath;
                     
                     // 更新AssignedSounds中的条目
-                    var assignedSound = currentProfile.AssignedSounds?.FirstOrDefault(a => 
-                        a.Sound.Equals(Path.GetFileName(oldFilePath), StringComparison.OrdinalIgnoreCase));
-                    
-                    if (assignedSound != null)
+                    if (currentProfile.AssignedSounds != null)
                     {
-                        assignedSound.Sound = Path.GetFileName(newFilePath);
+                        var assignedSound = currentProfile.AssignedSounds.FirstOrDefault(a => 
+                            a != null && a.Sound.Equals(Path.GetFileName(oldFilePath), StringComparison.OrdinalIgnoreCase));
+                        
+                        if (assignedSound != null)
+                        {
+                            assignedSound.Sound = Path.GetFileName(newFilePath);
+                        }
                     }
                     
                     // 保存方案

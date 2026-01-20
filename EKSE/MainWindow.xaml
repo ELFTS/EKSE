@@ -31,59 +31,30 @@
                              Duration="0:0:0.15"/>
         </Storyboard>
         
-        <!-- 滑动动画 -->
+        <!-- 淡入动画 -->
         <Storyboard x:Key="SlideInFromLeftStoryboard">
-            <ThicknessAnimation Storyboard.TargetName="MainContentArea"
-                                Storyboard.TargetProperty="Margin"
-                                From="-50,0,0,0" To="0,0,0,0"
-                                Duration="0:0:0.3">
-                <ThicknessAnimation.EasingFunction>
-                    <CircleEase EasingMode="EaseOut"/>
-                </ThicknessAnimation.EasingFunction>
-            </ThicknessAnimation>
             <DoubleAnimation Storyboard.TargetName="MainContentArea"
                              Storyboard.TargetProperty="Opacity"
                              From="0.0" To="1.0"
                              Duration="0:0:0.3"/>
         </Storyboard>
         
-        <!-- 垂直滑动启动动画 -->
+        <!-- 启动淡入动画 -->
         <Storyboard x:Key="VerticalSlideStartupStoryboard">
-            <ThicknessAnimation Storyboard.TargetProperty="Margin"
-                                From="0,-600,0,0" To="0,0,0,0"
-                                Duration="0:0:0.8">
-                <ThicknessAnimation.EasingFunction>
-                    <CircleEase EasingMode="EaseOut"/>
-                </ThicknessAnimation.EasingFunction>
-            </ThicknessAnimation>
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
                              From="0.0" To="1.0"
                              Duration="0:0:0.8"/>
         </Storyboard>
         
-        <!-- 最小化滑出动画 -->
+        <!-- 最小化淡出动画 -->
         <Storyboard x:Key="MinimizeSlideOutStoryboard">
-            <ThicknessAnimation Storyboard.TargetProperty="Margin"
-                                From="0,0,0,0" To="0,600,0,0"
-                                Duration="0:0:0.5">
-                <ThicknessAnimation.EasingFunction>
-                    <CircleEase EasingMode="EaseOut"/>
-                </ThicknessAnimation.EasingFunction>
-            </ThicknessAnimation>
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
                              From="1.0" To="0.0"
                              Duration="0:0:0.5"/>
         </Storyboard>
         
-        <!-- 关闭滑出动画 -->
+        <!-- 关闭淡出动画 -->
         <Storyboard x:Key="CloseSlideOutStoryboard">
-            <ThicknessAnimation Storyboard.TargetProperty="Margin"
-                                From="0,0,0,0" To="0,-600,0,0"
-                                Duration="0:0:0.5">
-                <ThicknessAnimation.EasingFunction>
-                    <CircleEase EasingMode="EaseOut"/>
-                </ThicknessAnimation.EasingFunction>
-            </ThicknessAnimation>
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
                              From="1.0" To="0.0"
                              Duration="0:0:0.5"/>
@@ -127,12 +98,6 @@
                 BorderBrush="{DynamicResource MaterialDesignDivider}" 
                 BorderThickness="1"
                 Margin="10">
-            <Border.Effect>
-                <DropShadowEffect Color="Black" 
-                                  ShadowDepth="3" 
-                                  BlurRadius="10" 
-                                  Opacity="0.3"/>
-            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -168,37 +133,22 @@
                                     Foreground="White"
                                     Click="MinimizeButton_Click"
                                     ToolTip="最小化">
-                                <Button.Effect>
-                                    <DropShadowEffect x:Name="MinimizeShadow" 
-                                                      ShadowDepth="0" 
-                                                      BlurRadius="10" 
-                                                      Color="Yellow"
-                                                      Opacity="0"/>
-                                </Button.Effect>
-                                <Button.Resources>
-                                    <Storyboard x:Key="MinimizeButtonHoverOn">
-                                        <DoubleAnimation Storyboard.TargetName="MinimizeShadow"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         From="0" To="1.0" Duration="0:0:0.1"/>
-                                        <DoubleAnimation Storyboard.TargetName="MinimizeShadow"
-                                                         Storyboard.TargetProperty="BlurRadius"
-                                                         From="10" To="25" Duration="0:0:0.1"/>
-                                    </Storyboard>
-                                    <Storyboard x:Key="MinimizeButtonHoverOff">
-                                        <DoubleAnimation Storyboard.TargetName="MinimizeShadow"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         From="1.0" To="0" Duration="0:0:0.1"/>
-                                        <DoubleAnimation Storyboard.TargetName="MinimizeShadow"
-                                                         Storyboard.TargetProperty="BlurRadius"
-                                                         From="25" To="10" Duration="0:0:0.1"/>
-                                    </Storyboard>
-                                </Button.Resources>
                                 <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Mouse.MouseEnter">
-                                        <BeginStoryboard Storyboard="{StaticResource MinimizeButtonHoverOn}"/>
+                                    <EventTrigger RoutedEvent="MouseEnter">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.8" To="1.0" Duration="0:0:0.2"/>
+                                                <ColorAnimation Storyboard.TargetProperty="Foreground.Color" From="White" To="#FFD700" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
                                     </EventTrigger>
-                                    <EventTrigger RoutedEvent="Mouse.MouseLeave">
-                                        <BeginStoryboard Storyboard="{StaticResource MinimizeButtonHoverOff}"/>
+                                    <EventTrigger RoutedEvent="MouseLeave">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.8" Duration="0:0:0.2"/>
+                                                <ColorAnimation Storyboard.TargetProperty="Foreground.Color" From="#FFD700" To="White" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
                                     </EventTrigger>
                                 </Button.Triggers>
                                 <materialDesign:PackIcon Kind="WindowMinimize"/>
@@ -209,37 +159,22 @@
                                     Foreground="White"
                                     Click="MaximizeButton_Click"
                                     ToolTip="最大化">
-                                <Button.Effect>
-                                    <DropShadowEffect x:Name="MaximizeShadow" 
-                                                      ShadowDepth="0" 
-                                                      BlurRadius="10" 
-                                                      Color="Yellow"
-                                                      Opacity="0"/>
-                                </Button.Effect>
-                                <Button.Resources>
-                                    <Storyboard x:Key="MaximizeButtonHoverOn">
-                                        <DoubleAnimation Storyboard.TargetName="MaximizeShadow"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         From="0" To="1.0" Duration="0:0:0.1"/>
-                                        <DoubleAnimation Storyboard.TargetName="MaximizeShadow"
-                                                         Storyboard.TargetProperty="BlurRadius"
-                                                         From="10" To="25" Duration="0:0:0.1"/>
-                                    </Storyboard>
-                                    <Storyboard x:Key="MaximizeButtonHoverOff">
-                                        <DoubleAnimation Storyboard.TargetName="MaximizeShadow"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         From="1.0" To="0" Duration="0:0:0.1"/>
-                                        <DoubleAnimation Storyboard.TargetName="MaximizeShadow"
-                                                         Storyboard.TargetProperty="BlurRadius"
-                                                         From="25" To="10" Duration="0:0:0.1"/>
-                                    </Storyboard>
-                                </Button.Resources>
                                 <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Mouse.MouseEnter">
-                                        <BeginStoryboard Storyboard="{StaticResource MaximizeButtonHoverOn}"/>
+                                    <EventTrigger RoutedEvent="MouseEnter">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.8" To="1.0" Duration="0:0:0.2"/>
+                                                <ColorAnimation Storyboard.TargetProperty="Foreground.Color" From="White" To="#FFD700" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
                                     </EventTrigger>
-                                    <EventTrigger RoutedEvent="Mouse.MouseLeave">
-                                        <BeginStoryboard Storyboard="{StaticResource MaximizeButtonHoverOff}"/>
+                                    <EventTrigger RoutedEvent="MouseLeave">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.8" Duration="0:0:0.2"/>
+                                                <ColorAnimation Storyboard.TargetProperty="Foreground.Color" From="#FFD700" To="White" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
                                     </EventTrigger>
                                 </Button.Triggers>
                                 <materialDesign:PackIcon Name="MaximizeIcon" Kind="WindowMaximize"/>
@@ -250,37 +185,22 @@
                                     Foreground="White"
                                     Click="CloseButton_Click"
                                     ToolTip="关闭">
-                                <Button.Effect>
-                                    <DropShadowEffect x:Name="CloseShadow" 
-                                                      ShadowDepth="0" 
-                                                      BlurRadius="10" 
-                                                      Color="Yellow"
-                                                      Opacity="0"/>
-                                </Button.Effect>
-                                <Button.Resources>
-                                    <Storyboard x:Key="CloseButtonHoverOn">
-                                        <DoubleAnimation Storyboard.TargetName="CloseShadow"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         From="0" To="1.0" Duration="0:0:0.1"/>
-                                        <DoubleAnimation Storyboard.TargetName="CloseShadow"
-                                                         Storyboard.TargetProperty="BlurRadius"
-                                                         From="10" To="25" Duration="0:0:0.1"/>
-                                    </Storyboard>
-                                    <Storyboard x:Key="CloseButtonHoverOff">
-                                        <DoubleAnimation Storyboard.TargetName="CloseShadow"
-                                                         Storyboard.TargetProperty="Opacity"
-                                                         From="1.0" To="0" Duration="0:0:0.1"/>
-                                        <DoubleAnimation Storyboard.TargetName="CloseShadow"
-                                                         Storyboard.TargetProperty="BlurRadius"
-                                                         From="25" To="10" Duration="0:0:0.1"/>
-                                    </Storyboard>
-                                </Button.Resources>
                                 <Button.Triggers>
-                                    <EventTrigger RoutedEvent="Mouse.MouseEnter">
-                                        <BeginStoryboard Storyboard="{StaticResource CloseButtonHoverOn}"/>
+                                    <EventTrigger RoutedEvent="MouseEnter">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.8" To="1.0" Duration="0:0:0.2"/>
+                                                <ColorAnimation Storyboard.TargetProperty="Foreground.Color" From="White" To="#FF4500" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
                                     </EventTrigger>
-                                    <EventTrigger RoutedEvent="Mouse.MouseLeave">
-                                        <BeginStoryboard Storyboard="{StaticResource CloseButtonHoverOff}"/>
+                                    <EventTrigger RoutedEvent="MouseLeave">
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.8" Duration="0:0:0.2"/>
+                                                <ColorAnimation Storyboard.TargetProperty="Foreground.Color" From="#FF4500" To="White" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
                                     </EventTrigger>
                                 </Button.Triggers>
                                 <materialDesign:PackIcon Kind="WindowClose"/>
@@ -295,9 +215,9 @@
                         CornerRadius="0,0,10,10">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
                         <!-- 侧边栏 -->
                         <Border Grid.Column="0" 

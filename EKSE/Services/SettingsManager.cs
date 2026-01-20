@@ -213,7 +213,7 @@ namespace EKSE.Services
             try
             {
                 var directory = Path.GetDirectoryName(_settingsFilePath);
-                if (!Directory.Exists(directory))
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
@@ -268,7 +268,7 @@ namespace EKSE.Services
         /// <summary>
         /// 主题颜色
         /// </summary>
-        public string ThemeColor { get; set; }
+        public string? ThemeColor { get; set; }
         
         /// <summary>
         /// 是否开机自启
@@ -293,6 +293,6 @@ namespace EKSE.Services
         /// <summary>
         /// 主题类型（浅色/深色）
         /// </summary>
-        public string ThemeType { get; set; }
+        public string? ThemeType { get; set; }
     }
 }

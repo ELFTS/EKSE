@@ -10,10 +10,8 @@ using System.Windows.Media;
 using EKSE.Views;
 using EKSE.Components;
 using EKSE.Services;
-using EKSE.Models;
 using EKSE.Commands;
 using MaterialDesignThemes.Wpf;
-using MaterialDesignColors;
 using Hardcodet.Wpf.TaskbarNotification;
 
 namespace EKSE
@@ -38,7 +36,6 @@ namespace EKSE
         
         // Windows API 常量
         private const int WM_GETMINMAXINFO = 0x0024;
-        private const int MONITOR_DEFAULTTONEAREST = 0x00000002;
         
         public MainWindow()
         {
@@ -81,19 +78,7 @@ namespace EKSE
             }
         }
         
-        /// <summary>
-        /// 初始化系统托盘图标
-        /// </summary>
-        private void InitializeNotifyIcon()
-        {
-            if (MyNotifyIcon != null)
-            {
-                // 创建命令
-                MyNotifyIcon.DataContext = this;
-                
-                // 由于我们使用命令绑定，所以不需要手动处理事件
-            }
-        }
+
         
         /// <summary>
         /// 显示主窗口命令
@@ -133,7 +118,7 @@ namespace EKSE
         }
         
         /// <summary>
-        /// 应用垂直滑入动画
+        /// 应用淡入动画
         /// </summary>
         private void ApplyVerticalSlideInAnimation()
         {
@@ -144,18 +129,7 @@ namespace EKSE
                 if (rootBorder != null)
                 {
                     // 创建一个新的Storyboard来管理动画
-                    Storyboard slideInStoryboard = new Storyboard();
-                    
-                    // 创建厚度动画实现垂直滑入效果
-                    ThicknessAnimation thicknessAnimation = new ThicknessAnimation
-                    {
-                        From = new Thickness(0, -ActualHeight, 0, 0),
-                        To = new Thickness(0, 0, 0, 0),
-                        Duration = TimeSpan.FromMilliseconds(500)
-                    };
-                    thicknessAnimation.EasingFunction = new CircleEase { EasingMode = EasingMode.EaseOut };
-                    Storyboard.SetTarget(thicknessAnimation, rootBorder);
-                    Storyboard.SetTargetProperty(thicknessAnimation, new PropertyPath("(FrameworkElement.Margin)"));
+                    Storyboard fadeInStoryboard = new Storyboard();
                     
                     // 创建透明度动画实现淡入效果
                     DoubleAnimation opacityAnimation = new DoubleAnimation
@@ -168,16 +142,15 @@ namespace EKSE
                     Storyboard.SetTargetProperty(opacityAnimation, new PropertyPath("(UIElement.Opacity)"));
                     
                     // 将动画添加到Storyboard中
-                    slideInStoryboard.Children.Add(thicknessAnimation);
-                    slideInStoryboard.Children.Add(opacityAnimation);
+                    fadeInStoryboard.Children.Add(opacityAnimation);
                     
                     // 开始动画
-                    slideInStoryboard.Begin();
+                    fadeInStoryboard.Begin();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"应用垂直滑入动画失败: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"应用淡入动画失败: {ex.Message}");
             }
         }
         
@@ -209,18 +182,21 @@ namespace EKSE
         /// <summary>
         /// 窗口状态改变事件处理
         /// </summary>
-        private void MainWindow_StateChanged(object sender, EventArgs e)
+        private void MainWindow_StateChanged(object? sender, EventArgs e)
         {
             try
             {
                 // 从设置管理器获取保存的设置
-                var settings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
-                
-                // 如果启用了最小化到托盘功能且窗口被最小化
-                if (settings.MinimizeToTray && WindowState == WindowState.Minimized)
+                if (Application.Current is App app && app.SettingsManager != null)
                 {
-                    // 隐藏窗口而不是最小化到任务栏
-                    this.Hide();
+                    var settings = app.SettingsManager.GetCurrentSettings();
+                    
+                    // 如果启用了最小化到托盘功能且窗口被最小化
+                    if (settings != null && settings.MinimizeToTray && WindowState == WindowState.Minimized)
+                    {
+                        // 隐藏窗口而不是最小化到任务栏
+                        this.Hide();
+                    }
                 }
             }
             catch (Exception ex)
@@ -232,7 +208,7 @@ namespace EKSE
         /// <summary>
         /// 窗口关闭事件处理
         /// </summary>
-        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
             try
             {
@@ -314,7 +290,7 @@ namespace EKSE
         }
         
         /// <summary>
-        /// 启动垂直滑动动画
+        /// 启动淡入动画
         /// </summary>
         private void StartVerticalSlideAnimation()
         {
@@ -326,18 +302,6 @@ namespace EKSE
                 {
                     // 创建一个新的Storyboard来控制动画
                     var storyboard = new Storyboard();
-                    
-                    // 创建厚度动画实现垂直滑动效果
-                    var thicknessAnimation = new ThicknessAnimation
-                    {
-                        From = new Thickness(0, -ActualHeight, 0, 0),
-                        To = new Thickness(0, 0, 0, 0),
-                        Duration = TimeSpan.FromSeconds(0.8),
-                        EasingFunction = new CircleEase { EasingMode = EasingMode.EaseOut }
-                    };
-                    Storyboard.SetTarget(thicknessAnimation, rootBorder);
-                    Storyboard.SetTargetProperty(thicknessAnimation, new PropertyPath("(FrameworkElement.Margin)"));
-                    storyboard.Children.Add(thicknessAnimation);
                     
                     // 创建透明度动画实现淡入效果
                     var opacityAnimation = new DoubleAnimation
@@ -356,7 +320,7 @@ namespace EKSE
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"垂直滑动动画失败: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"淡入动画失败: {ex.Message}");
             }
         }
         
@@ -365,35 +329,38 @@ namespace EKSE
             try
             {
                 // 从设置管理器获取保存的颜色设置
-                var settings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
-                System.Diagnostics.Debug.WriteLine($"从设置管理器获取的设置: ThemeColor={settings?.ThemeColor}");
-                
-                if (settings != null && !string.IsNullOrEmpty(settings.ThemeColor))
+                if (Application.Current is App app && app.SettingsManager != null)
                 {
-                    var color = (Color)ColorConverter.ConvertFromString(settings.ThemeColor);
-                    if (Application.Current != null && Application.Current.Resources != null)
+                    var settings = app.SettingsManager.GetCurrentSettings();
+                    System.Diagnostics.Debug.WriteLine($"从设置管理器获取的设置: ThemeColor={settings?.ThemeColor}");
+                    
+                    if (settings != null && !string.IsNullOrEmpty(settings.ThemeColor))
                     {
-                        // 创建标题栏背景色画笔 - 使用线性渐变而不是纯色
-                        var titleBarBrush = BrushHelper.CreateTitleBarBrush(color);
-                        
-                        // 更新标题栏背景色资源
-                        Application.Current.Resources["TitleBarBackground"] = titleBarBrush;
-                        System.Diagnostics.Debug.WriteLine($"窗口加载时应用标题栏颜色: {color}");
+                        var color = (Color)ColorConverter.ConvertFromString(settings.ThemeColor);
+                        if (Application.Current != null && Application.Current.Resources != null)
+                        {
+                            // 创建标题栏背景色画笔 - 使用线性渐变而不是纯色
+                            var titleBarBrush = BrushHelper.CreateTitleBarBrush(color);
+                            
+                            // 更新标题栏背景色资源
+                            Application.Current.Resources["TitleBarBackground"] = titleBarBrush;
+                            System.Diagnostics.Debug.WriteLine($"窗口加载时应用标题栏颜色: {color}");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("Application.Current或Resources为null，无法应用标题栏颜色");
+                        }
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine("Application.Current或Resources为null，无法应用标题栏颜色");
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("设置或主题颜色为空，使用默认紫色");
-                    // 使用默认紫色
-                    var defaultColor = Colors.Purple;
-                    var titleBarBrush = BrushHelper.CreateTitleBarBrush(defaultColor);
-                    if (Application.Current != null && Application.Current.Resources != null)
-                    {
-                        Application.Current.Resources["TitleBarBackground"] = titleBarBrush;
+                        System.Diagnostics.Debug.WriteLine("设置或主题颜色为空，使用默认紫色");
+                        // 使用默认紫色
+                        var defaultColor = Colors.Purple;
+                        var titleBarBrush = BrushHelper.CreateTitleBarBrush(defaultColor);
+                        if (Application.Current != null && Application.Current.Resources != null)
+                        {
+                            Application.Current.Resources["TitleBarBackground"] = titleBarBrush;
+                        }
                     }
                 }
             }

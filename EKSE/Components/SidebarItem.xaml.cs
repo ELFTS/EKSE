@@ -23,7 +23,7 @@ namespace EKSE.Components
         public static readonly DependencyProperty IsActiveProperty =
             DependencyProperty.Register("IsActive", typeof(bool), typeof(SidebarItem), new PropertyMetadata(false, OnIsActiveChanged));
 
-        public event EventHandler Click;
+        public event EventHandler? Click;
 
         // 定义默认颜色
         private static readonly Brush ActiveBackgroundBrush = new LinearGradientBrush(
@@ -38,16 +38,14 @@ namespace EKSE.Components
         private static readonly Brush ActiveForegroundBrush = Brushes.Blue; // 默认激活前景色
 
         // 动画相关
-        private Storyboard _backgroundStoryboard;
-        private Storyboard _foregroundStoryboard;
-        private Storyboard _iconSizeStoryboard;
+        private Storyboard? _foregroundStoryboard;
+        private Storyboard? _iconSizeStoryboard;
 
         public SidebarItem()
         {
             InitializeComponent();
 
             // 获取动画资源
-            _backgroundStoryboard = (Storyboard)Resources["BackgroundAnimation"];
             _foregroundStoryboard = (Storyboard)Resources["ForegroundAnimation"];
             _iconSizeStoryboard = (Storyboard)Resources["IconSizeAnimation"];
 

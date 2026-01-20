@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Windows;
 using NAudio.Wave;
-using EKSE.Models;
 using System.Collections.Concurrent;
 
 namespace EKSE.Services
@@ -12,7 +11,7 @@ namespace EKSE.Services
     public class SoundService : IDisposable
     {
         private readonly WaveOutEvent _waveOut;
-        private AudioFileReader _audioFileReader;
+        private AudioFileReader? _audioFileReader;
         private ProfileManager _profileManager;
         
         // 音频资源池，用于缓存已经加载的音频文件信息（仅缓存文件路径和基本参数，不缓存实际的读取器）
@@ -27,11 +26,11 @@ namespace EKSE.Services
         private const int WM_KEYUP = 0x0101;
         private LowLevelKeyboardProc _proc;
         private IntPtr _hookID = IntPtr.Zero;
-        private AudioFileManager _audioFileManager;
+        private AudioFileManager? _audioFileManager;
         
         // 事件定义
-        public event EventHandler<SoundEventArgs> SoundPlayed;
-        public event EventHandler<SoundErrorEventArgs> SoundError;
+        public event EventHandler? SoundPlayed;
+        public event EventHandler? SoundError;
         
         // 按键状态跟踪（使用ConcurrentDictionary提高并发性能）
         private readonly ConcurrentDictionary<Key, bool> _keyStates = new ConcurrentDictionary<Key, bool>();
@@ -59,151 +58,86 @@ namespace EKSE.Services
             try
             {
                 // 检查是否启用音效
-                var currentSettings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
-                if (!currentSettings.EnableSound)
+                if (Application.Current is App app && app.SettingsManager != null)
                 {
-                    // 音效未启用，直接返回
-                    return;
+                    var currentSettings = app.SettingsManager.GetCurrentSettings();
+                    if (currentSettings != null && !currentSettings.EnableSound)
+                    {
+                        return;
+                    }
                 }
                 
-                System.Diagnostics.Debug.WriteLine($"尝试播放按键 {key} 的音效");
-                
                 // 获取按键对应的音效路径
-                var soundPath = GetSoundPathForKey(key);
-                System.Diagnostics.Debug.WriteLine($"按键 {key} 对应的音效路径: {soundPath}");
+                var soundPath = _profileManager?.GetKeySound(key);
                 
                 // 检查音效文件是否存在
                 if (string.IsNullOrEmpty(soundPath) || !File.Exists(soundPath))
                 {
-                    System.Diagnostics.Debug.WriteLine($"音效文件不存在或路径为空: {soundPath}");
-                    // 触发音效播放错误事件
                     SoundError?.Invoke(this, new SoundErrorEventArgs(key, "音效文件不存在"));
                     return;
                 }
                 
-                // 检查文件是否被占用
-                try
-                {
-                    using (var stream = File.Open(soundPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                    {
-                        // 文件可以被打开，继续播放
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"音效文件被占用或无法访问: {ex.Message}");
-                    SoundError?.Invoke(this, new SoundErrorEventArgs(key, $"音效文件无法访问: {ex.Message}"));
-                    return;
-                }
-                
-                // 停止当前正在播放的音效
-                _waveOut.Stop();
-                _audioFileReader?.Dispose();
-                
-                // 创建新的音频文件读取器
-                _audioFileReader = new AudioFileReader(soundPath);
-                
-                // 缓存音频信息（仅缓存基本信息，不缓存读取器实例）
-                if (!_audioInfoCache.ContainsKey(soundPath) && _audioInfoCache.Count < MaxCacheSize)
-                {
-                    _audioInfoCache.TryAdd(soundPath, (_audioFileReader.WaveFormat, _audioFileReader.TotalTime));
-                }
-                
-                _waveOut.Init(_audioFileReader);
-                _waveOut.Play();
+                // 播放音效
+                PlayAudioInternal(soundPath);
                 
                 // 触发音效播放事件
                 SoundPlayed?.Invoke(this, new SoundEventArgs(key, soundPath));
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"播放音效时出错: {ex.Message}");
-                // 触发音效播放错误事件
                 SoundError?.Invoke(this, new SoundErrorEventArgs(key, ex.Message));
             }
         }
         
         /// <summary>
-        /// 获取指定按键的音效文件路径
+        /// 内部方法：播放音频文件
         /// </summary>
-        /// <param name="key">按键</param>
-        /// <returns>音效文件路径</returns>
-        private string GetSoundPathForKey(Key key)
+        private void PlayAudioInternal(string audioFilePath)
         {
-            System.Diagnostics.Debug.WriteLine($"获取按键 {key} 的音效路径");
-            
-            // 检查当前方案中是否有该按键的音效
-            if (_profileManager?.CurrentProfile?.KeySounds != null)
+            try
             {
-                System.Diagnostics.Debug.WriteLine($"当前方案: {_profileManager.CurrentProfile.Name}");
-                System.Diagnostics.Debug.WriteLine($"当前方案路径: {_profileManager.CurrentProfile.FilePath}");
-                
-                // 打印所有按键信息用于调试
-                foreach (var kvp in _profileManager.CurrentProfile.KeySounds)
+                // 使用lock确保线程安全
+                lock (this)
                 {
-                    System.Diagnostics.Debug.WriteLine($"方案中包含按键: {kvp.Key} -> {kvp.Value}");
-                }
-                
-                // 特别检查数字键
-                for (int i = 0; i <= 9; i++)
-                {
-                    var digitKey = (Key)Enum.Parse(typeof(Key), "D" + i);
-                    if (_profileManager.CurrentProfile.KeySounds.ContainsKey(digitKey))
+                    // 停止当前正在播放的音效
+                    if (_waveOut.PlaybackState != PlaybackState.Stopped)
                     {
-                        System.Diagnostics.Debug.WriteLine($"方案中包含数字键 {i}: {digitKey} -> {_profileManager.CurrentProfile.KeySounds[digitKey]}");
+                        _waveOut.Stop();
                     }
-                }
-                
-                if (_profileManager.CurrentProfile.KeySounds.ContainsKey(key))
-                {
-                    var soundPath = _profileManager.CurrentProfile.KeySounds[key];
-                    System.Diagnostics.Debug.WriteLine($"找到按键 {key} 的音效路径: {soundPath}");
-                    return soundPath;
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"当前方案中未找到按键 {key} 的音效");
+                    
+                    // 释放音频文件读取器资源
+                    _audioFileReader?.Dispose();
+                    _audioFileReader = null;
+                    
+                    // 创建新的音频文件读取器
+                    _audioFileReader = new AudioFileReader(audioFilePath);
+                    
+                    // 缓存音频信息（仅缓存基本信息，不缓存读取器实例）
+                    if (!_audioInfoCache.ContainsKey(audioFilePath) && _audioInfoCache.Count < MaxCacheSize)
+                    {
+                        _audioInfoCache.TryAdd(audioFilePath, (_audioFileReader.WaveFormat, _audioFileReader.TotalTime));
+                    }
+                    
+                    // 重新初始化并播放
+                    _waveOut.Init(_audioFileReader);
+                    _waveOut.Play();
                 }
             }
-            else
+            catch
             {
-                System.Diagnostics.Debug.WriteLine("当前方案或按键音效映射为空");
-                if (_profileManager?.CurrentProfile == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("当前方案为空");
-                }
-                else if (_profileManager.CurrentProfile.KeySounds == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("当前方案的KeySounds为空");
-                }
+                // 忽略异常，防止崩溃
             }
-            
-            // 不再返回默认音效，如果没有找到对应音效则返回null
-            return null;
-        }
-        
-        private string GetSoundFile(Key key)
-        {
-            // 尝试获取按键对应的声音文件
-            var soundFile = _profileManager?.GetKeySound(key);
-
-            // 如果找到了按键对应的声音文件，直接返回
-            if (!string.IsNullOrEmpty(soundFile))
-                return soundFile;
-
-            // 不再返回默认音效，如果没有找到对应音效则返回null
-            return null;
         }
         
         /// <summary>
-        /// 当前方案改变时的处理方法
+        /// 重置音频服务状态
         /// </summary>
-        private void OnCurrentProfileChanged(object sender, EventArgs e)
+        private void ResetAudioState()
         {
-            // 清空音频缓存，因为方案改变了
-            ClearAudioCache();
+            // 清空音频缓存
+            _audioInfoCache.Clear();
             
-            // 停止当前播放的音效并彻底释放相关资源
+            // 停止当前播放的音效
             try
             {
                 _waveOut.Stop();
@@ -219,11 +153,11 @@ namespace EKSE.Services
         }
         
         /// <summary>
-        /// 清空音频缓存
+        /// 当前方案改变时的处理方法
         /// </summary>
-        private void ClearAudioCache()
+        private void OnCurrentProfileChanged(object? sender, EventArgs e)
         {
-            _audioInfoCache.Clear();
+            ResetAudioState();
         }
         
         /// <summary>
@@ -231,22 +165,7 @@ namespace EKSE.Services
         /// </summary>
         public void Refresh()
         {
-            // 清空音频缓存
-            ClearAudioCache();
-            
-            // 停止当前播放的音效并彻底释放相关资源
-            try
-            {
-                _waveOut.Stop();
-            }
-            catch
-            {
-                // 忽略停止播放时的异常
-            }
-            
-            // 释放音频文件读取器资源
-            _audioFileReader?.Dispose();
-            _audioFileReader = null;
+            ResetAudioState();
         }
         
         // 全局键盘钩子实现
@@ -256,7 +175,7 @@ namespace EKSE.Services
             using (var curModule = curProcess.MainModule)
             {
                 return SetWindowsHookEx(WH_KEYBOARD_LL, proc,
-                    GetModuleHandle(curModule.ModuleName), 0);
+                GetModuleHandle(curModule?.ModuleName ?? string.Empty), 0);
             }
         }
 
@@ -271,9 +190,11 @@ namespace EKSE.Services
 
                 if (wParam == (IntPtr)WM_KEYDOWN)
                 {
-                    // 只有当按键未被按下时才播放音效
-                    if (_keyStates.AddOrUpdate(key, true, (k, oldValue) => oldValue) == false)
+                    // 检查当前按键状态
+                    bool currentState;
+                    if (!_keyStates.TryGetValue(key, out currentState) || !currentState)
                     {
+                        // 按键未被按下，播放音效并更新状态
                         PlaySound(key);
                         _keyStates[key] = true;
                     }
@@ -311,7 +232,7 @@ namespace EKSE.Services
             UnhookWindowsHookEx(_hookID);
             
             // 清空音频缓存
-            ClearAudioCache();
+            _audioInfoCache.Clear();
             
             // 释放音频设备
             _waveOut?.Stop();
@@ -332,39 +253,11 @@ namespace EKSE.Services
             // 检查音频文件是否存在
             if (string.IsNullOrEmpty(audioFilePath) || !File.Exists(audioFilePath))
             {
-                System.Diagnostics.Debug.WriteLine($"音频文件不存在或路径为空: {audioFilePath}");
                 return;
             }
             
-            // 检查文件是否被占用
-            try
-            {
-                using (var stream = File.Open(audioFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    // 文件可以被打开，继续播放
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"音频文件被占用或无法访问: {ex.Message}");
-                return;
-            }
-            
-            // 停止当前正在播放的音效
-            _waveOut.Stop();
-            _audioFileReader?.Dispose();
-            
-            // 创建新的音频文件读取器
-            _audioFileReader = new AudioFileReader(audioFilePath);
-            
-            // 缓存音频信息（仅缓存基本信息，不缓存读取器实例）
-            if (!_audioInfoCache.ContainsKey(audioFilePath) && _audioInfoCache.Count < MaxCacheSize)
-            {
-                _audioInfoCache.TryAdd(audioFilePath, (_audioFileReader.WaveFormat, _audioFileReader.TotalTime));
-            }
-            
-            _waveOut.Init(_audioFileReader);
-            _waveOut.Play();
+            // 播放音频
+            PlayAudioInternal(audioFilePath);
         }
         catch (Exception ex)
         {

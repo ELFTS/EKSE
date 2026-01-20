@@ -16,13 +16,13 @@ namespace EKSE.Views
     public partial class SettingsView : UserControl
     {
         // 定义颜色更改事件
-        public event EventHandler<Color> ThemeColorChanged;
+        public event EventHandler<Color>? ThemeColorChanged;
         
         // 保存当前选中的颜色
         private static Color _currentThemeColor = Colors.Purple;
         
         // 保存当前设置
-        private AppSettings _currentSettings;
+        private AppSettings? _currentSettings;
         
         // 标志位，用于防止在初始化过程中触发事件处理
         private bool _isInitializing = true;
@@ -59,8 +59,6 @@ namespace EKSE.Views
 
         private void InitializeConfigManagement()
         {
-            System.Diagnostics.Debug.WriteLine("初始化配置管理");
-            
             // 注册颜色选项的事件处理程序
             RegisterColorOptionEvents();
             
@@ -71,8 +69,6 @@ namespace EKSE.Views
         // 注册颜色选项事件
         private void RegisterColorOptionEvents()
         {
-            System.Diagnostics.Debug.WriteLine("注册颜色选项事件");
-            
             PurpleColorOption.Checked += ColorOption_Checked;
             BlueColorOption.Checked += ColorOption_Checked;
             GreenColorOption.Checked += ColorOption_Checked;
@@ -87,8 +83,6 @@ namespace EKSE.Views
         // 取消注册颜色选项事件
         private void UnregisterColorOptionEvents()
         {
-            System.Diagnostics.Debug.WriteLine("取消注册颜色选项事件");
-            
             PurpleColorOption.Checked -= ColorOption_Checked;
             BlueColorOption.Checked -= ColorOption_Checked;
             GreenColorOption.Checked -= ColorOption_Checked;
@@ -105,26 +99,19 @@ namespace EKSE.Views
             try
             {
                 // 从应用程序设置管理器加载当前设置（使用单例模式）
-                _currentSettings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
-                
-                System.Diagnostics.Debug.WriteLine($"=== 加载设置 ===");
-                System.Diagnostics.Debug.WriteLine($"_currentSettings实例: {_currentSettings?.GetHashCode()}");
-                System.Diagnostics.Debug.WriteLine($"AutoStart值: {_currentSettings?.AutoStart}");
-                System.Diagnostics.Debug.WriteLine($"MinimizeToTray值: {_currentSettings?.MinimizeToTray}");
+                if (Application.Current is App app && app.SettingsManager != null)
+                {
+                    _currentSettings = app.SettingsManager.GetCurrentSettings();
+                }
                 
                 // 确保_currentSettings不为null
                 if (_currentSettings == null)
                 {
                     _currentSettings = new AppSettings();
-                    System.Diagnostics.Debug.WriteLine("LoadCurrentSettings: 创建了新的AppSettings实例");
                 }
-                
-                System.Diagnostics.Debug.WriteLine($"加载当前设置: ThemeColor={_currentSettings.ThemeColor}, AutoStart={_currentSettings.AutoStart}, MinimizeToTray={_currentSettings.MinimizeToTray}");
                 
                 // 应用保存的设置到UI控件
                 ApplySettingsToUI();
-                
-                // 注意：ApplySettingsToUI已经调用了RestoreColorSelection，这里不需要重复调用
             }
             catch (Exception ex)
             {
@@ -139,8 +126,6 @@ namespace EKSE.Views
         // 应用设置到UI控件
         private void ApplySettingsToUI()
         {
-            System.Diagnostics.Debug.WriteLine("开始应用设置到UI");
-            
             if (_currentSettings != null)
             {
                 // 应用保存的主题颜色
@@ -148,7 +133,6 @@ namespace EKSE.Views
                 {
                     var color = (Color)ColorConverter.ConvertFromString(_currentSettings.ThemeColor);
                     _currentThemeColor = color;
-                    System.Diagnostics.Debug.WriteLine($"已应用主题颜色到_currentThemeColor: {color}");
                     
                     // 同时更新标题栏颜色
                     UpdateTitleBarColor(color);
@@ -158,7 +142,6 @@ namespace EKSE.Views
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("主题颜色为空，使用默认紫色");
                     _currentThemeColor = Colors.Purple;
                     UpdateTitleBarColor(Colors.Purple);
                     ApplyThemeColor(Colors.Purple);
@@ -169,24 +152,12 @@ namespace EKSE.Views
                 
                 // 恢复开关控件状态
                 RestoreToggleStates();
-                
-                // 应用保存的主题类型设置
-                if (_currentSettings.ThemeType == "Dark")
-                {
-                    // 如果有主题选择的ComboBox，设置为深色主题
-                    // 这里暂时不实现，因为需要找到具体的控件名称
-                }
-                
-                // 应用保存的开机自启设置
-                // 这个设置通常在主窗口或应用程序级别处理
             }
         }
 
         // 恢复颜色选择状态
         private void RestoreColorSelection()
         {
-            System.Diagnostics.Debug.WriteLine($"恢复颜色选择状态，当前主题颜色: {_currentThemeColor}");
-            
             // 移除事件处理程序以避免在设置选中状态时触发事件
             UnregisterColorOptionEvents();
             
@@ -195,47 +166,38 @@ namespace EKSE.Views
             if (_currentThemeColor.Equals(Colors.Red))
             {
                 RedColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择红色");
             }
             else if (_currentThemeColor.Equals(Colors.Green))
             {
                 GreenColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择绿色");
             }
             else if (_currentThemeColor.Equals(Colors.Blue))
             {
                 BlueColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择蓝色");
             }
             else if (_currentThemeColor.Equals(Colors.Orange))
             {
                 OrangeColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择橙色");
             }
             else if (_currentThemeColor.Equals(Colors.DeepPink))
             {
                 PinkColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择粉色");
             }
             else if (_currentThemeColor.Equals(Colors.Indigo))
             {
                 IndigoColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择靛蓝色");
             }
             else if (_currentThemeColor.Equals(Colors.Teal))
             {
                 TealColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择蓝绿色");
             }
             else if (_currentThemeColor.Equals(Colors.LimeGreen))
             {
                 LimeColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择青绿色");
             }
             else // 默认为紫色
             {
                 PurpleColorOption.IsChecked = true;
-                System.Diagnostics.Debug.WriteLine("已恢复选择紫色（默认）");
             }
             
             // 重新添加事件处理程序
@@ -245,27 +207,18 @@ namespace EKSE.Views
         // 恢复开关控件状态
         private void RestoreToggleStates()
         {
-            System.Diagnostics.Debug.WriteLine("恢复开关控件状态");
-            System.Diagnostics.Debug.WriteLine($"_currentSettings实例: {_currentSettings?.GetHashCode()}");
-            System.Diagnostics.Debug.WriteLine($"_currentSettings.AutoStart: {_currentSettings?.AutoStart}");
-            System.Diagnostics.Debug.WriteLine($"_currentSettings.MinimizeToTray: {_currentSettings?.MinimizeToTray}");
-            System.Diagnostics.Debug.WriteLine($"AutoStartToggle: {AutoStartToggle?.GetHashCode()}");
-            System.Diagnostics.Debug.WriteLine($"MinimizeToTrayToggle: {MinimizeToTrayToggle?.GetHashCode()}");
-            
             if (_currentSettings != null)
             {
                 // 恢复开机自启开关状态
                 if (AutoStartToggle != null)
                 {
                     AutoStartToggle.IsChecked = _currentSettings.AutoStart;
-                    System.Diagnostics.Debug.WriteLine($"恢复开机自启开关状态: {_currentSettings.AutoStart}");
                 }
                 
                 // 恢复最小化到托盘开关状态
                 if (MinimizeToTrayToggle != null)
                 {
                     MinimizeToTrayToggle.IsChecked = _currentSettings.MinimizeToTray;
-                    System.Diagnostics.Debug.WriteLine($"恢复最小化到托盘开关状态: {_currentSettings.MinimizeToTray}");
                 }
             }
         }
@@ -301,10 +254,13 @@ namespace EKSE.Views
                 _currentSettings.ThemeType = "Light";
                 
                 // 保存设置
-                ((App)Application.Current).SettingsManager.SaveSettings(_currentSettings);
-                
-                // 触发颜色更改事件
-                ThemeColorChanged?.Invoke(this, _currentThemeColor);
+                if (Application.Current is App app && app.SettingsManager != null)
+                {
+                    app.SettingsManager.SaveSettings(_currentSettings);
+                    
+                    // 触发颜色更改事件
+                    ThemeColorChanged?.Invoke(this, _currentThemeColor);
+                }
                 
                 MessageBox.Show("设置已重置为默认值", "重置完成", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -318,7 +274,10 @@ namespace EKSE.Views
             if (_currentSettings == null)
             {
                 System.Diagnostics.Debug.WriteLine("_currentSettings为null，从设置管理器重新加载");
-                _currentSettings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
+                if (Application.Current is App app && app.SettingsManager != null)
+                {
+                    _currentSettings = app.SettingsManager.GetCurrentSettings();
+                }
                 
                 // 如果还是null，则创建默认设置
                 if (_currentSettings == null)
@@ -397,7 +356,10 @@ namespace EKSE.Views
                 if (_currentSettings == null)
                 {
                     System.Diagnostics.Debug.WriteLine("_currentSettings为null，从设置管理器重新加载");
-                    _currentSettings = ((App)Application.Current).SettingsManager.GetCurrentSettings();
+                    if (Application.Current is App appInstance && appInstance.SettingsManager != null)
+                    {
+                        _currentSettings = appInstance.SettingsManager.GetCurrentSettings();
+                    }
                     
                     // 如果还是null，则创建默认设置
                     if (_currentSettings == null)
@@ -412,14 +374,14 @@ namespace EKSE.Views
                 
                 // 保存设置
                 System.Diagnostics.Debug.WriteLine("准备保存设置...");
-                if (_currentSettings != null)
+                if (_currentSettings != null && Application.Current is App app && app.SettingsManager != null)
                 {
-                    ((App)Application.Current).SettingsManager.SaveSettings(_currentSettings);
+                    app.SettingsManager.SaveSettings(_currentSettings);
                     System.Diagnostics.Debug.WriteLine("设置保存完成");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("错误：_currentSettings为null，无法保存设置");
+                    System.Diagnostics.Debug.WriteLine("错误：无法保存设置，当前设置或应用实例为null");
                 }
                 
                 // 强制刷新按钮样式
@@ -497,10 +459,13 @@ namespace EKSE.Views
                 paletteHelper.SetTheme(theme);
                 
                 // 更新当前主题颜色
-                ((App)Application.Current).SetCurrentThemeColor(color);
-                
-                // 更新渐变按钮样式以反映新的主题颜色
-                ((App)Application.Current).UpdateGradientButtonStyle();
+                if (Application.Current is App app)
+                {
+                    app.SetCurrentThemeColor(color);
+                    
+                    // 更新渐变按钮样式以反映新的主题颜色
+                    app.UpdateGradientButtonStyle();
+                }
             }
             catch (Exception ex)
             {
@@ -543,9 +508,9 @@ namespace EKSE.Views
             UpdateCurrentSettings();
             
             // 保存设置（使用单例模式）
-            if (_currentSettings != null)
+            if (_currentSettings != null && Application.Current is App app && app.SettingsManager != null)
             {
-                ((App)Application.Current).SettingsManager.SaveSettings(_currentSettings);
+                app.SettingsManager.SaveSettings(_currentSettings);
                 System.Diagnostics.Debug.WriteLine("开关设置已保存");
             }
         }

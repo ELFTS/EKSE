@@ -21,12 +21,12 @@ namespace EKSE
         /// <summary>
         /// 设置管理器实例
         /// </summary>
-        public SettingsManager SettingsManager { get; private set; }
+        public SettingsManager? SettingsManager { get; private set; }
         
         // 存储当前主题颜色
         private Color _currentThemeColor = Colors.Purple;
 
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
             

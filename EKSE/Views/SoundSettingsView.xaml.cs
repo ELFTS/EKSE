@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,7 +10,6 @@ using EKSE.Components;
 using EKSE.Services;
 using EKSE.Models;
 using Microsoft.VisualBasic;
-using NAudio.Wave;
 
 namespace EKSE.Views
 {
@@ -119,14 +116,17 @@ namespace EKSE.Views
             InitializeProfileUI();
             
             // 设置虚拟键盘的服务引用
-            VirtualKeyboardControl.SetServices(_soundService, _profileManager);
+            if (_soundService != null && _profileManager != null)
+            {
+                VirtualKeyboardControl.SetServices(_soundService, _profileManager);
+            }
             
             // 刷新音频文件列表
             RefreshAudioFilesList();
         }
         
         // 当声音方案列表发生变化时的处理方法
-        private void OnProfilesChanged(object sender, EventArgs e)
+        private void OnProfilesChanged(object? sender, EventArgs e)
         {
             // 在UI线程上刷新界面
             if (Dispatcher.CheckAccess())
@@ -155,7 +155,7 @@ namespace EKSE.Views
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnCurrentProfileChanged(object sender, EventArgs e)
+        private void OnCurrentProfileChanged(object? sender, EventArgs e)
         {
             if (Dispatcher.CheckAccess())
             {
@@ -176,7 +176,7 @@ namespace EKSE.Views
         }
         
         // 当音频文件列表发生变化时的处理方法
-        private void OnAudioFilesChanged(object sender, EventArgs e)
+        private void OnAudioFilesChanged(object? sender, EventArgs e)
         {
             // 在UI线程上刷新界面
             if (Dispatcher.CheckAccess())
@@ -309,7 +309,7 @@ namespace EKSE.Views
                 return;
 
             var currentProfile = _profileManager.CurrentProfile;
-            var newName = Interaction.InputBox("请输入新的方案名称:", "重命名声音方案", currentProfile.Name);
+            var newName = Interaction.InputBox("请输入新的方案名称:", "重命名声音方案", currentProfile.Name ?? "");
             
             if (!string.IsNullOrWhiteSpace(newName) && newName != currentProfile.Name)
             {

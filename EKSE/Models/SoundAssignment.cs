@@ -11,12 +11,12 @@ namespace EKSE.Models
         /// 按键名称
         /// </summary>
         [JsonProperty("key")]
-        public string Key { get; set; }
+        public string? Key { get; set; }
         
         /// <summary>
         /// 音效文件名
         /// </summary>
         [JsonProperty("sound")]
-        public string Sound { get; set; }
+        public string? Sound { get; set; }
     }
 }

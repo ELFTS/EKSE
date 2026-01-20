@@ -16,11 +16,11 @@ namespace EKSE.Services
     {
         private readonly string _profilesDirectory;
         private readonly List<SoundProfile> _profiles;
-        private SoundProfile _currentProfile;
+        private SoundProfile? _currentProfile;
         
         // 事件：方案列表变化、当前方案变化
-        public event EventHandler ProfilesChanged;
-        public event EventHandler CurrentProfileChanged;
+        public event EventHandler? ProfilesChanged;
+        public event EventHandler? CurrentProfileChanged;
         
         // 特殊键名映射
         private static readonly Dictionary<string, Key> KeyMap = new Dictionary<string, Key>
@@ -53,6 +53,11 @@ namespace EKSE.Services
                 CreateDefaultProfile();
             
             _currentProfile = _profiles.FirstOrDefault();
+            if (_currentProfile == null)
+            {
+                CreateDefaultProfile();
+                _currentProfile = _profiles.FirstOrDefault();
+            }
             
             // 触发事件以通知监听者
             ProfilesChanged?.Invoke(this, EventArgs.Empty);
@@ -60,7 +65,7 @@ namespace EKSE.Services
         }
         
         public IReadOnlyList<SoundProfile> Profiles => _profiles.AsReadOnly();
-        public SoundProfile CurrentProfile => _currentProfile;
+        public SoundProfile? CurrentProfile => _currentProfile;
         
         private void LoadProfiles()
         {
@@ -80,11 +85,12 @@ namespace EKSE.Services
                             var json = File.ReadAllText(configFile);
                             var settings = new JsonSerializerSettings();
                             settings.Converters.Add(new SoundProfileJsonConverter());
-                            profile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
-                            if (profile != null)
+                            var deserializedProfile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
+                            if (deserializedProfile != null)
                             {
+                                profile = deserializedProfile;
                                 profile.FilePath = directory;
-                                ConvertAssignedSoundsToKeySounds(profile);
+                                UpdateKeySoundsFromAssignments(profile);
                             }
                             else
                             {
@@ -102,7 +108,6 @@ namespace EKSE.Services
                             };
                         }
                         
-                        LoadKeySounds(profile);
                         _profiles.Add(profile);
                     }
                     catch
@@ -116,28 +121,35 @@ namespace EKSE.Services
             }
         }
         
-        private void ConvertAssignedSoundsToKeySounds(SoundProfile profile)
+        private void UpdateKeySoundsFromAssignments(SoundProfile profile)
         {
             profile.KeySounds.Clear();
             if (profile.AssignedSounds?.Count > 0)
             {
                 foreach (var assignment in profile.AssignedSounds)
                 {
-                    var key = ParseKeyName(assignment.Key);
-                    if (key.HasValue)
+                    if (assignment != null && !string.IsNullOrEmpty(profile.FilePath) && !string.IsNullOrEmpty(assignment.Key) && !string.IsNullOrEmpty(assignment.Sound))
                     {
-                        var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
-                        if (File.Exists(soundPath))
+                        var key = ParseKeyName(assignment.Key);
+                        if (key.HasValue)
                         {
-                            profile.KeySounds[key.Value] = soundPath;
+                            var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
+                            if (File.Exists(soundPath))
+                            {
+                                profile.KeySounds[key.Value] = soundPath;
+                            }
                         }
                     }
                 }
             }
         }
         
-        private Key? ParseKeyName(string keyName)
+        private Key? ParseKeyName(string? keyName)
         {
+            if (string.IsNullOrEmpty(keyName))
+                return null;
+            
+            // 处理数字键
             if (keyName.Length == 1 && char.IsDigit(keyName[0]))
             {
                 return keyName[0] switch
@@ -148,6 +160,7 @@ namespace EKSE.Services
                 };
             }
             
+            // 处理D开头的数字键（如D0, D1）
             if (keyName.Length == 2 && keyName.StartsWith("D") && char.IsDigit(keyName[1]))
             {
                 return keyName[1] switch
@@ -158,33 +171,12 @@ namespace EKSE.Services
                 };
             }
             
+            // 尝试直接解析Key枚举
             if (Enum.TryParse<Key>(keyName, true, out var key))
                 return key;
             
-            if (KeyMap.TryGetValue(keyName, out var mappedKey))
-                return mappedKey;
-            
-            return null;
-        }
-        
-        private void LoadKeySounds(SoundProfile profile)
-        {
-            if (profile.AssignedSounds?.Count > 0)
-            {
-                profile.KeySounds.Clear();
-                foreach (var assignment in profile.AssignedSounds)
-                {
-                    var key = ParseKeyName(assignment.Key);
-                    if (key.HasValue)
-                    {
-                        var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
-                        if (File.Exists(soundPath))
-                        {
-                            profile.KeySounds[key.Value] = soundPath;
-                        }
-                    }
-                }
-            }
+            // 尝试从映射表中查找
+            return KeyMap.TryGetValue(keyName, out var mappedKey) ? mappedKey : null;
         }
         
         private void CreateDefaultProfile()
@@ -268,11 +260,11 @@ namespace EKSE.Services
         /// 删除方案目录及其内容
         /// </summary>
         /// <param name="profilePath">方案目录路径</param>
-        private void DeleteProfileDirectory(string profilePath)
+        private void DeleteProfileDirectory(string? profilePath)
         {
             try
             {
-                if (Directory.Exists(profilePath))
+                if (!string.IsNullOrEmpty(profilePath) && Directory.Exists(profilePath))
                 {
                     // 使用更简单可靠的方式删除整个目录树
                     Directory.Delete(profilePath, true);
@@ -288,17 +280,20 @@ namespace EKSE.Services
         {
             try
             {
-                var profileFile = Path.Combine(profile.FilePath, "index.json");
-                ConvertKeySoundsToAssignedSounds(profile);
-                
-                var settings = new JsonSerializerSettings 
-                { 
-                    Formatting = Formatting.Indented
-                };
-                settings.Converters.Add(new SoundProfileJsonConverter());
-                
-                var json = JsonConvert.SerializeObject(profile, settings);
-                File.WriteAllText(profileFile, json);
+                if (!string.IsNullOrEmpty(profile.FilePath))
+                {
+                    var profileFile = Path.Combine(profile.FilePath, "index.json");
+                    ConvertKeySoundsToAssignedSounds(profile);
+                    
+                    var settings = new JsonSerializerSettings 
+                    { 
+                        Formatting = Formatting.Indented
+                    };
+                    settings.Converters.Add(new SoundProfileJsonConverter());
+                    
+                    var json = JsonConvert.SerializeObject(profile, settings);
+                    File.WriteAllText(profileFile, json);
+                }
             }
             catch
             {
@@ -338,12 +333,11 @@ namespace EKSE.Services
                 // 如果当前有方案，先清理其资源
                 if (_currentProfile != null)
                 {
-                    // 清理当前方案的资源
                     _currentProfile.KeySounds.Clear();
                 }
                 
                 _currentProfile = profile;
-                LoadKeySounds(_currentProfile);
+                UpdateKeySoundsFromAssignments(_currentProfile);
                 CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -363,20 +357,20 @@ namespace EKSE.Services
             }
         }
         
-        public string GetKeySound(Key key)
+        public string? GetKeySound(Key key)
         {
             if (_currentProfile != null && _currentProfile.KeySounds.ContainsKey(key))
             {
                 var soundPath = _currentProfile.KeySounds[key];
-                return File.Exists(soundPath) ? soundPath : null;
+                return !string.IsNullOrEmpty(soundPath) && File.Exists(soundPath) ? soundPath : null;
             }
             
             return null;
         }
         
-        public string ImportSoundToCurrentProfile(string sourceFilePath)
+        public string? ImportSoundToCurrentProfile(string sourceFilePath)
         {
-            if (_currentProfile == null || !File.Exists(sourceFilePath))
+            if (_currentProfile == null || !File.Exists(sourceFilePath) || string.IsNullOrEmpty(_currentProfile.FilePath))
                 return null;
             
             try
@@ -385,6 +379,9 @@ namespace EKSE.Services
                 Directory.CreateDirectory(keySoundsDirectory);
                 
                 var fileName = Path.GetFileName(sourceFilePath);
+                if (fileName == null)
+                    return null;
+                    
                 var destFilePath = Path.Combine(keySoundsDirectory, fileName);
                 
                 var counter = 1;
@@ -409,7 +406,7 @@ namespace EKSE.Services
             }
         }
         
-        public SoundProfile ImportProfile(string importPath)
+        public SoundProfile? ImportProfile(string importPath)
         {
             if (!File.Exists(importPath))
                 return null;
@@ -456,7 +453,6 @@ namespace EKSE.Services
                 var reloadedProfile = LoadProfileFromFile(finalProfileDirectory);
                 if (reloadedProfile != null)
                 {
-                    LoadKeySounds(reloadedProfile);
                     SaveProfile(reloadedProfile);
                     
                     _profiles.Add(reloadedProfile);
@@ -484,10 +480,13 @@ namespace EKSE.Services
             }
         }
         
-        private SoundProfile LoadProfileFromFile(string profileDirectory)
+        private SoundProfile? LoadProfileFromFile(string profileDirectory)
         {
             try
             {
+                if (string.IsNullOrEmpty(profileDirectory))
+                    return null;
+                    
                 var profileName = Path.GetFileName(profileDirectory);
                 var configFile = Path.Combine(profileDirectory, "index.json");
 
@@ -500,7 +499,7 @@ namespace EKSE.Services
                     if (profile != null)
                     {
                         profile.FilePath = profileDirectory;
-                        ConvertAssignedSoundsToKeySounds(profile);
+                        UpdateKeySoundsFromAssignments(profile);
                         return profile;
                     }
                 }
@@ -545,12 +544,12 @@ namespace EKSE.Services
             }
         }
 
-        public bool RenameProfile(SoundProfile profile, string newName)
+        public bool RenameProfile(SoundProfile? profile, string newName)
         {
-            if (profile == null || string.IsNullOrWhiteSpace(newName))
+            if (profile == null || string.IsNullOrWhiteSpace(newName) || string.IsNullOrEmpty(profile.FilePath))
                 return false;
 
-            if (_profiles.Any(p => p != profile && p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
+            if (_profiles.Any(p => p != profile && !string.IsNullOrEmpty(p.Name) && p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
                 return false;
 
             string oldPath = profile.FilePath;
@@ -570,36 +569,40 @@ namespace EKSE.Services
                     Directory.Delete(newPath, true);
                 }
 
-                Directory.Move(oldPath, newPath);
-                
-                profile.Name = newName;
-                profile.FilePath = newPath;
-
-                var profileFile = Path.Combine(profile.FilePath, "index.json");
-                if (File.Exists(profileFile))
+                if (Directory.Exists(oldPath))
                 {
-                    var json = File.ReadAllText(profileFile);
-                    var settings = new JsonSerializerSettings();
-                    settings.Converters.Add(new SoundProfileJsonConverter());
-                    var updatedProfile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
+                    Directory.Move(oldPath, newPath);
                     
-                    if (updatedProfile != null)
+                    profile.Name = newName;
+                    profile.FilePath = newPath;
+
+                    var profileFile = Path.Combine(profile.FilePath, "index.json");
+                    if (File.Exists(profileFile))
                     {
-                        profile.AssignedSounds = updatedProfile.AssignedSounds;
+                        var json = File.ReadAllText(profileFile);
+                        var settings = new JsonSerializerSettings();
+                        settings.Converters.Add(new SoundProfileJsonConverter());
+                        var updatedProfile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
+                        
+                        if (updatedProfile != null)
+                        {
+                            profile.AssignedSounds = updatedProfile.AssignedSounds;
+                        }
                     }
-                }
 
-                LoadKeySounds(profile);
-                SaveProfile(profile);
-                
-                if (_currentProfile == profile)
-                {
-                    _currentProfile = profile;
-                    CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
-                }
+                    UpdateKeySoundsFromAssignments(profile);
+                    SaveProfile(profile);
+                    
+                    if (_currentProfile == profile)
+                    {
+                        _currentProfile = profile;
+                        CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
+                    }
 
-                ProfilesChanged?.Invoke(this, EventArgs.Empty);
-                return true;
+                    ProfilesChanged?.Invoke(this, EventArgs.Empty);
+                    return true;
+                }
+                return false;
             }
             catch
             {

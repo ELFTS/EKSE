@@ -32,21 +32,21 @@
             Background="Transparent"
             Padding="15,10">
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
             <Image x:Name="IconPresenter"
                    Width="24" 
                    Height="24"
-                   VerticalAlignment="Center"/>
+                   HorizontalAlignment="Center"/>
 
             <TextBlock x:Name="TextPresenter"
-                       Grid.Column="1"
-                       VerticalAlignment="Center"
-                       Margin="15,0,0,0"
-                       FontSize="14"/>
+                       Grid.Row="1"
+                       HorizontalAlignment="Center"
+                       Margin="0,5,0,0"
+                       FontSize="12"/>
         </Grid>
     </Border>
 </UserControl>
