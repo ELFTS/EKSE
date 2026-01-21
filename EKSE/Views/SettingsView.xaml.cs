@@ -461,10 +461,16 @@ namespace EKSE.Views
                 // 更新当前主题颜色
                 if (Application.Current is App app)
                 {
-                    app.SetCurrentThemeColor(color);
-                    
-                    // 更新渐变按钮样式以反映新的主题颜色
-                    app.UpdateGradientButtonStyle();
+                    if (app.ThemeManager != null)
+                    {
+                        app.ThemeManager.UpdateThemeColor(color);
+                        
+                        // 更新渐变按钮样式以反映新的主题颜色
+                        if (app.ButtonStyleManager != null)
+                        {
+                            app.ButtonStyleManager.UpdateGradientButtonStyle();
+                        }
+                    }
                 }
             }
             catch (Exception ex)
