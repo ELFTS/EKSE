@@ -36,7 +36,7 @@
                        HorizontalAlignment="Center"
                        Foreground="{DynamicResource MaterialDesignBodyLight}"/>
             
-            <materialDesign:Card Margin="0,30,0,0" Width="300">
+            <materialDesign:Card Margin="0,30,0,0" Width="300" Background="#80FFFFFF">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>

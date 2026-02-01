@@ -20,7 +20,7 @@
 
         <ScrollViewer Grid.Row="1">
             <StackPanel>
-                <materialDesign:Card Margin="0,0,0,15">
+                <materialDesign:Card Margin="0,0,0,15" Background="#80FFFFFF">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -49,7 +49,7 @@
                     </Grid>
                 </materialDesign:Card>
 
-                <materialDesign:Card Margin="0,0,0,15">
+                <materialDesign:Card Margin="0,0,0,15" Background="#80FFFFFF">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -78,7 +78,7 @@
                     </Grid>
                 </materialDesign:Card>
 
-                <materialDesign:Card Margin="0,0,0,15">
+                <materialDesign:Card Margin="0,0,0,15" Background="#80FFFFFF">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -190,7 +190,7 @@
                     </Grid>
                 </materialDesign:Card>
 
-                <materialDesign:Card Margin="0,0,0,15">
+                <materialDesign:Card Margin="0,0,0,15" Background="#80FFFFFF">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>

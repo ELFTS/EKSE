@@ -22,7 +22,7 @@
         <ScrollViewer Grid.Row="1">
             <StackPanel>
                 <!-- 声音方案管理 -->
-                <materialDesign:Card Margin="0,0,0,15">
+                <materialDesign:Card Margin="0,0,0,15" Background="#80FFFFFF">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -108,7 +108,7 @@
                 </materialDesign:Card>
                 
                 <!-- 虚拟键盘 -->
-                <materialDesign:Card Margin="0,0,0,15">
+                <materialDesign:Card Margin="0,0,0,15" Background="#80FFFFFF">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -141,7 +141,7 @@
                 </materialDesign:Card>
 
                 <!-- 音频文件管理 -->
-                <materialDesign:Card>
+                <materialDesign:Card Background="#80FFFFFF">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
