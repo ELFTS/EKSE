@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:everything="clr-namespace:EverythingUI.WPF.Controls;assembly=EverythingUI.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid Margin="20">
@@ -15,93 +15,95 @@
 
         <!-- 标题 -->
         <TextBlock Grid.Row="0"
-                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                    Text="关于 万物键盘音效"
+                   FontSize="24"
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
         <!-- 软件介绍内容 -->
-        <Grid Grid.Row="1" Margin="0,0,0,20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <StackPanel Grid.Row="0" Margin="20" HorizontalAlignment="Center">
+        <everything:EverythingCard Grid.Row="1" 
+                                   CardVariant="Elevated"
+                                   CornerRadius="16"
+                                   Padding="40"
+                                   Margin="0,0,0,20">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <!-- Logo -->
                 <Image x:Name="LogoImage"
                        Width="128" 
                        Height="128" 
-                       HorizontalAlignment="Center"/>
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,20"/>
                 
                 <!-- 软件名称 -->
-                <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
-                           Text="万物键盘音效"
+                <TextBlock Text="万物键盘音效"
+                           FontSize="28"
+                           FontWeight="Bold"
                            HorizontalAlignment="Center"
-                           Margin="0,10,0,5"/>
-                
-                <!-- 软件描述 -->
-                <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                           TextWrapping="Wrap"
-                           Text="万物键盘音效 是一款现代化的键盘音效软件，为您的打字过程增添愉悦的声音体验。"
-                           HorizontalAlignment="Center"
-                           TextAlignment="Center"
                            Margin="0,0,0,10"/>
                 
                 <!-- 版本号 -->
-                <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                           Text="版本 1.0.0"
+                <TextBlock Text="版本 1.0.0"
+                           FontSize="14"
                            HorizontalAlignment="Center"
-                           Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                           Foreground="Gray"
+                           Margin="0,0,0,20"/>
+                
+                <!-- 软件描述 -->
+                <TextBlock TextWrapping="Wrap"
+                           Text="万物键盘音效 是一款现代化的键盘音效软件，为您的打字过程增添愉悦的声音体验。"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           FontSize="14"
+                           Foreground="#666666"
+                           MaxWidth="500"/>
             </StackPanel>
-
-            <Separator Grid.Row="1"/>
-        </Grid>
+        </everything:EverythingCard>
 
         <!-- 底部区域（按钮和版权信息） -->
         <Grid Grid.Row="2">
             <StackPanel>
                 <!-- 按钮区域 -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
-                    <Button Style="{StaticResource GradientButtonStyle}"
-                            Margin="5"
-                            Click="GithubButton_Click">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
+                    <everything:EverythingButton Margin="8"
+                            Click="GithubButton_Click"
+                            GradientStartColor="#24292E"
+                            GradientEndColor="#000000">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Github" />
-                            <TextBlock Text="Github" Margin="5,0,0,0"/>
+                            <TextBlock Text="🐙" FontSize="16"/>
+                            <TextBlock Text="Github" Margin="8,0,0,0" FontWeight="SemiBold"/>
                         </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource GradientButtonStyle}"
-                            Margin="5"
-                            Click="QQGroupButton_Click">
+                    </everything:EverythingButton>
+                    <everything:EverythingButton Margin="8"
+                            Click="QQGroupButton_Click"
+                            GradientStartColor="#12B7F5"
+                            GradientEndColor="#0099CC">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Qqchat" />
-                            <TextBlock Text="QQ群" Margin="5,0,0,0"/>
+                            <TextBlock Text="💬" FontSize="16"/>
+                            <TextBlock Text="QQ群" Margin="8,0,0,0" FontWeight="SemiBold"/>
                         </StackPanel>
-                    </Button>
-                    <Button Style="{StaticResource GradientButtonStyle}"
-                            Margin="5"
-                            Click="FeedbackButton_Click">
+                    </everything:EverythingButton>
+                    <everything:EverythingButton Margin="8"
+                            Click="FeedbackButton_Click"
+                            GradientStartColor="#00ACF0"
+                            GradientEndColor="#0078D4">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="CommentQuestionOutline" />
-                            <TextBlock Text="问题反馈" Margin="5,0,0,0"/>
+                            <TextBlock Text="💭" FontSize="16"/>
+                            <TextBlock Text="问题反馈" Margin="8,0,0,0" FontWeight="SemiBold"/>
                         </StackPanel>
-                    </Button>
+                    </everything:EverythingButton>
                 </StackPanel>
 
                 <!-- 版权信息 -->
-                <Border Background="{DynamicResource PrimaryHueLightBrush}" 
-                        CornerRadius="4" 
-                        Padding="15" 
-                        Margin="0,5,0,0">
-                    <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                               Text="版权所有 (C) 2021-2025 万物永存技术工作室 保留所有权利"
+                <everything:EverythingCard CardVariant="Outlined"
+                                           CornerRadius="8"
+                                           Padding="15"
+                                           HorizontalAlignment="Center">
+                    <TextBlock Text="版权所有 (C) 2021-2025 万物永存技术工作室 保留所有权利"
                                HorizontalAlignment="Center"
-                               Foreground="{DynamicResource PrimaryHueDarkBrush}"
+                               Foreground="#1565C0"
                                FontSize="14"
                                FontWeight="Medium"/>
-                </Border>
+                </everything:EverythingCard>
             </StackPanel>
         </Grid>
     </Grid>

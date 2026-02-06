@@ -8,7 +8,6 @@ using EKSE.Views;
 using EKSE.Components;
 using EKSE.Services;
 using EKSE.Commands;
-using MaterialDesignThemes.Wpf;
 
 namespace EKSE
 {

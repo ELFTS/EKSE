@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid Margin="20">
@@ -15,16 +14,16 @@
 
         <!-- 标题 -->
         <TextBlock Grid.Row="0"
-                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                    Text="赞助我们"
+                   FontSize="24"
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
         <!-- 赞助说明文字 -->
         <TextBlock Grid.Row="1"
-                   Style="{StaticResource MaterialDesignBody1TextBlock}"
                    TextWrapping="Wrap"
                    LineHeight="24"
+                   FontSize="14"
                    Margin="0,0,0,30"
                    Text="我们是游牧民族（无业游民），如果你喜欢我们开发的软件，欢迎捐赠我们让我们吃上香喷喷的美食吧～"/>
 

@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Media;
-using MaterialDesignThemes.Wpf;
 
 namespace EKSE.Services
 {

@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EKSE"
         xmlns:components="clr-namespace:EKSE.Components"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        xmlns:everything="clr-namespace:EverythingUI.WPF.Controls;assembly=EverythingUI.WPF"
         mc:Ignorable="d"
         Title="万物键盘音效"
         Height="600"
@@ -16,6 +16,20 @@
     <Window.Resources>
         <!-- 缓动函数 -->
         <CircleEase x:Key="CircleEase" EasingMode="EaseOut"/>
+        
+        <!-- 最小化滑出动画 -->
+        <Storyboard x:Key="MinimizeSlideOutStoryboard">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="1.0" To="0.0"
+                             Duration="0:0:0.3"/>
+        </Storyboard>
+        
+        <!-- 关闭滑出动画 -->
+        <Storyboard x:Key="CloseSlideOutStoryboard">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="1.0" To="0.0"
+                             Duration="0:0:0.3"/>
+        </Storyboard>
     </Window.Resources>
 
     <WindowChrome.WindowChrome>

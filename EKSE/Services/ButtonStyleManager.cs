@@ -29,9 +29,8 @@ namespace EKSE.Services
             {
                 if (Application.Current?.Resources == null) return;
                 
-                // 创建新的样式，基于MaterialDesignRaisedButton
-                var gradientButtonStyle = new Style(typeof(Button), 
-                    (Style)Application.Current.Resources["MaterialDesignRaisedButton"]);
+                // 创建新的样式
+                var gradientButtonStyle = new Style(typeof(Button));
                 
                 // 设置默认背景为渐变色
                 var baseColor = _themeManager.CurrentThemeColor;
@@ -41,6 +40,18 @@ namespace EKSE.Services
                 {
                     Property = Control.BackgroundProperty,
                     Value = gradientBrush
+                });
+                
+                gradientButtonStyle.Setters.Add(new Setter
+                {
+                    Property = Control.ForegroundProperty,
+                    Value = Brushes.White
+                });
+                
+                gradientButtonStyle.Setters.Add(new Setter
+                {
+                    Property = Control.PaddingProperty,
+                    Value = new Thickness(10, 5, 10, 5)
                 });
                 
                 // 创建鼠标悬停触发器
@@ -77,7 +88,7 @@ namespace EKSE.Services
                 });
                 
                 // 添加样式到应用程序资源
-                Application.Current.Resources["GradientButtonStyle"] = gradientButtonStyle;
+                Application.Current.Resources["DefaultButtonStyle"] = gradientButtonStyle;
             }
             catch (Exception ex)
             {

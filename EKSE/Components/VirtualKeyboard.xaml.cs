@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
 using EKSE.Services; // 添加SoundService引用
+using EverythingUI.WPF.Controls;
 
 namespace EKSE.Components
 {
@@ -43,7 +44,7 @@ namespace EKSE.Components
         // 按键点击事件
         private void KeyButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is string keyName)
+            if (sender is EverythingButton button && button.Tag is string keyName)
             {
                 // 将字符串转换为Key枚举
                 if (Enum.TryParse<Key>(keyName, out Key key))
@@ -84,7 +85,7 @@ namespace EKSE.Components
             // 遍历Grid中的所有按钮
             foreach (var child in MainGrid.Children)
             {
-                if (child is Button button)
+                if (child is EverythingButton button)
                 {
                     UpdateButtonVisualState(button);
                 }
@@ -92,7 +93,7 @@ namespace EKSE.Components
         }
         
         // 更新单个按钮的视觉状态
-        private void UpdateButtonVisualState(Button button)
+        private void UpdateButtonVisualState(EverythingButton button)
         {
             if (_profileManager?.CurrentProfile == null) return;
             
@@ -102,21 +103,22 @@ namespace EKSE.Components
                 // 检查是否是当前选中的键
                 if (key == _selectedKey)
                 {
-                    // 当前选中的键使用SecondaryMid颜色 - 改为使用渐变色
-                    var secondaryBrush = Application.Current.FindResource("SecondaryHueMidBrush") as Brush ?? CreateGradientBrush(Colors.LightBlue);
-                    button.Background = secondaryBrush;
+                    // 当前选中的键使用紫色渐变
+                    button.GradientStartColor = Color.FromArgb(255, 172, 51, 193);
+                    button.GradientEndColor = Color.FromArgb(255, 141, 44, 158);
                 }
                 // 检查是否已分配音效
                 else if (_profileManager.CurrentProfile.KeySounds.ContainsKey(key))
                 {
-                    // 已分配音效的键使用PrimaryMid颜色 - 改为使用渐变色
-                    var primaryBrush = Application.Current.FindResource("PrimaryHueMidBrush") as Brush ?? CreateGradientBrush(Colors.Blue);
-                    button.Background = primaryBrush;
+                    // 已分配音效的键使用绿色渐变
+                    button.GradientStartColor = Color.FromArgb(255, 160, 214, 5);
+                    button.GradientEndColor = Color.FromArgb(255, 25, 166, 84);
                 }
                 else
                 {
-                    // 未分配音效的键使用默认颜色
-                    button.ClearValue(Button.BackgroundProperty);
+                    // 未分配音效的键使用默认灰色渐变
+                    button.GradientStartColor = Color.FromArgb(255, 229, 229, 229);
+                    button.GradientEndColor = Color.FromArgb(255, 166, 166, 166);
                 }
             }
         }

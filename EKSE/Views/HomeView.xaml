@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:everything="clr-namespace:EverythingUI.WPF.Controls;assembly=EverythingUI.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid Margin="20">
@@ -13,8 +13,8 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0"
-                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                    Text="欢迎使用 万物键盘音效"
+                   FontSize="24"
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
@@ -26,38 +26,48 @@
                    Height="120"
                    HorizontalAlignment="Center"/>
 
-            <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                       Text="万物键盘音效"
+            <TextBlock Text="万物键盘音效"
+                       FontSize="20"
+                       FontWeight="SemiBold"
                        HorizontalAlignment="Center"
                        Margin="0,20,0,10"/>
 
-            <TextBlock Style="{StaticResource MaterialDesignBody1TextBlock}"
-                       Text="点击侧边栏开始配置您的键盘音效"
+            <TextBlock Text="点击侧边栏开始配置您的键盘音效"
+                       FontSize="14"
                        HorizontalAlignment="Center"
-                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                       Foreground="Gray"/>
             
-            <materialDesign:Card Margin="0,30,0,0" Width="300" Background="#80FFFFFF">
+            <everything:EverythingCard Margin="0,30,0,0" 
+                                       Width="320" 
+                                       CardVariant="Elevated"
+                                       CornerRadius="12"
+                                       Padding="20">
+                <everything:EverythingCard.Header>
+                    <TextBlock Text="音效开关" 
+                               FontSize="16" 
+                               FontWeight="SemiBold"/>
+                </everything:EverythingCard.Header>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Margin="10">
-                        <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                   Text="音效开关"/>
-                        <TextBlock Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                   Text="启用或禁用键盘音效"/>
-                    </StackPanel>
+                    <TextBlock Grid.Column="0"
+                               Text="启用或禁用键盘音效"
+                               FontSize="12"
+                               Foreground="Gray"
+                               VerticalAlignment="Center"/>
 
-                    <ToggleButton Grid.Column="1"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                    <everything:EverythingToggleSwitch Grid.Column="1"
                                   x:Name="SoundToggle"
-                                  Margin="10"
+                                  SwitchWidth="50"
+                                  SwitchHeight="26"
+                                  ThumbSize="22"
                                   Checked="SoundToggle_Checked"
                                   Unchecked="SoundToggle_Unchecked"/>
                 </Grid>
-            </materialDesign:Card>
+            </everything:EverythingCard>
         </StackPanel>
     </Grid>
 </UserControl>

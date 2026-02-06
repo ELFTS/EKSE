@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:everything="clr-namespace:EverythingUI.WPF.Controls;assembly=EverythingUI.WPF"
              xmlns:components="clr-namespace:EKSE.Components"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -14,186 +14,197 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0"
-                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"
                    Text="音效设置"
+                   FontSize="24"
                    FontWeight="Bold"
                    Margin="0,0,0,20"/>
 
-        <ScrollViewer Grid.Row="1">
+        <ScrollViewer Grid.Row="1" Style="{StaticResource EverythingScrollViewerStyle}">
             <StackPanel>
                 <!-- 声音方案管理 -->
-                <materialDesign:Card Margin="0,0,0,15" Background="#80FFFFFF">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Margin="15">
-                            <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                       Text="声音方案"/>
-                            <TextBlock Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                       Text="管理和切换声音方案"/>
+                <everything:EverythingCard Margin="0,0,0,15" 
+                                           CardVariant="Elevated"
+                                           CornerRadius="12"
+                                           Padding="20">
+                    <everything:EverythingCard.Header>
+                        <StackPanel>
+                            <TextBlock Text="声音方案"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="管理和切换声音方案"
+                                       FontSize="12"
+                                       Foreground="Gray"
+                                       Margin="0,4,0,0"/>
                         </StackPanel>
-
-                        <StackPanel Grid.Row="1" 
-                                    Orientation="Horizontal"
-                                    Margin="15,0,15,15">
-                            <ComboBox x:Name="ProfileComboBox"
+                    </everything:EverythingCard.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <everything:EverythingComboBox x:Name="ProfileComboBox"
                                       MinWidth="200"
                                       Margin="0,0,10,0"
+                                      Placeholder="选择声音方案..."
                                       SelectionChanged="ProfileComboBox_SelectionChanged"/>
                             
-                            <Button x:Name="NewProfileButton"
-                                    Style="{StaticResource GradientButtonStyle}"
+                            <everything:EverythingButton x:Name="NewProfileButton"
                                     Click="NewProfileButton_Click"
-                                    Margin="0,0,10,0">
-                                <Button.Content>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock>新建</TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
+                                    Margin="0,0,10,0"
+                                    GradientStartColor="#00ACF0"
+                                    GradientEndColor="#0078D4">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="➕" Margin="0,0,5,0"/>
+                                    <TextBlock Text="新建"/>
+                                </StackPanel>
+                            </everything:EverythingButton>
                             
-                            <Button x:Name="DeleteProfileButton"
-                                    Style="{StaticResource GradientButtonStyle}"
+                            <everything:EverythingButton x:Name="DeleteProfileButton"
                                     Click="DeleteProfileButton_Click"
-                                    Margin="0,0,10,0">
-                                <Button.Content>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock>删除</TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                            
-                            <Button x:Name="ExportProfileButton"
-                                    Style="{StaticResource GradientButtonStyle}"
-                                    Click="ExportProfileButton_Click"
-                                    Margin="0,0,10,0">
-                                <Button.Content>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="Export" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock>导出</TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                            
-                            <Button x:Name="ImportProfileButton"
-                                    Style="{StaticResource GradientButtonStyle}"
-                                    Click="ImportProfileButton_Click"
-                                    Margin="0,0,10,0">
-                                <Button.Content>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="Import" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock>导入</TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
-                            
-                            <Button x:Name="RenameProfileButton"
-                                    Style="{StaticResource GradientButtonStyle}"
-                                    Click="RenameProfileButton_Click"
-                                    Margin="0,0,10,0">
-                                <Button.Content>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="RenameBox" Width="16" Height="16" Margin="0,0,5,0"/>
-                                        <TextBlock>重命名</TextBlock>
-                                    </StackPanel>
-                                </Button.Content>
-                            </Button>
+                                    Margin="0,0,10,0"
+                                    GradientStartColor="#FF5833"
+                                    GradientEndColor="#D43030">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑️" Margin="0,0,5,0"/>
+                                    <TextBlock Text="删除"/>
+                                </StackPanel>
+                            </everything:EverythingButton>
                         </StackPanel>
-                    </Grid>
-                </materialDesign:Card>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <everything:EverythingButton x:Name="ExportProfileButton"
+                                    Click="ExportProfileButton_Click"
+                                    Margin="0,0,10,0"
+                                    GradientStartColor="#A0D605"
+                                    GradientEndColor="#19A654">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📤" Margin="0,0,5,0"/>
+                                    <TextBlock Text="导出"/>
+                                </StackPanel>
+                            </everything:EverythingButton>
+                            
+                            <everything:EverythingButton x:Name="ImportProfileButton"
+                                    Click="ImportProfileButton_Click"
+                                    Margin="0,0,10,0"
+                                    GradientStartColor="#A0D605"
+                                    GradientEndColor="#19A654">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📥" Margin="0,0,5,0"/>
+                                    <TextBlock Text="导入"/>
+                                </StackPanel>
+                            </everything:EverythingButton>
+                            
+                            <everything:EverythingButton x:Name="RenameProfileButton"
+                                    Click="RenameProfileButton_Click"
+                                    GradientStartColor="#FFC300"
+                                    GradientEndColor="#FF8D1A">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✏️" Margin="0,0,5,0"/>
+                                    <TextBlock Text="重命名"/>
+                                </StackPanel>
+                            </everything:EverythingButton>
+                        </StackPanel>
+                    </StackPanel>
+                </everything:EverythingCard>
                 
                 <!-- 虚拟键盘 -->
-                <materialDesign:Card Margin="0,0,0,15" Background="#80FFFFFF">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-
-                        <StackPanel Grid.Row="0" Margin="15">
-                            <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                       Text="虚拟键盘"/>
-                            <TextBlock Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                       Text="点击选择要设置音效的按键"/>
+                <everything:EverythingCard Margin="0,0,0,15" 
+                                           CardVariant="Elevated"
+                                           CornerRadius="12"
+                                           Padding="20">
+                    <everything:EverythingCard.Header>
+                        <StackPanel>
+                            <TextBlock Text="虚拟键盘"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="点击选择要设置音效的按键"
+                                       FontSize="12"
+                                       Foreground="Gray"
+                                       Margin="0,4,0,0"/>
                         </StackPanel>
-
-                        <StackPanel Grid.Row="1" Margin="15,0,15,15">
-                            <TextBlock x:Name="SelectedKeyText" 
-                                       Text="当前选中按键: 无"
-                                       Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                       Margin="0,0,0,5"/>
-                            
-                            <TextBlock x:Name="CurrentSoundPathText"
-                                       Text="当前音效路径: 无"
-                                       Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                       TextWrapping="Wrap"
-                                       Margin="0,5,0,10"/>
-                            
-                            <components:VirtualKeyboard x:Name="VirtualKeyboardControl" 
-                                                       KeySelected="VirtualKeyboardControl_KeySelected"/>
-                        </StackPanel>
-                    </Grid>
-                </materialDesign:Card>
+                    </everything:EverythingCard.Header>
+                    <StackPanel>
+                        <everything:EverythingCard Margin="0,0,0,15"
+                                                   CardVariant="Outlined"
+                                                   CornerRadius="8"
+                                                   Padding="15">
+                            <StackPanel>
+                                <TextBlock x:Name="SelectedKeyText" 
+                                           Text="当前选中按键: 无"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,5"/>
+                                
+                                <TextBlock x:Name="CurrentSoundPathText"
+                                           Text="当前音效路径: 无"
+                                           FontSize="12"
+                                           Foreground="Gray"
+                                           TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </everything:EverythingCard>
+                        
+                        <components:VirtualKeyboard x:Name="VirtualKeyboardControl" 
+                                                   KeySelected="VirtualKeyboardControl_KeySelected"/>
+                    </StackPanel>
+                </everything:EverythingCard>
 
                 <!-- 音频文件管理 -->
-                <materialDesign:Card Background="#80FFFFFF">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        
-                        <StackPanel Grid.Row="0" Margin="15">
-                            <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                       Text="音频文件管理"/>
-                            <TextBlock Style="{StaticResource MaterialDesignCaptionTextBlock}"
-                                       Text="管理系统中的音频文件"/>
+                <everything:EverythingCard CardVariant="Elevated"
+                                           CornerRadius="12"
+                                           Padding="20">
+                    <everything:EverythingCard.Header>
+                        <StackPanel>
+                            <TextBlock Text="音频文件管理"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="管理系统中的音频文件"
+                                       FontSize="12"
+                                       Foreground="Gray"
+                                       Margin="0,4,0,0"/>
                         </StackPanel>
-                        
-                        <StackPanel Grid.Row="1" 
-                                    Orientation="Horizontal"
-                                    Margin="15,0,15,15">
-                            <Button x:Name="AddAudioFileButton"
-                                    Style="{StaticResource GradientButtonStyle}"
+                    </everything:EverythingCard.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <everything:EverythingButton x:Name="AddAudioFileButton"
                                     Content="添加音频文件"
                                     Click="AddAudioFileButton_Click"
-                                    Margin="0,0,10,0"/>
+                                    Margin="0,0,10,0"
+                                    GradientStartColor="#00ACF0"
+                                    GradientEndColor="#0078D4"/>
                             
-                            <Button x:Name="RefreshAudioFilesButton"
-                                    Style="{StaticResource GradientButtonStyle}"
+                            <everything:EverythingButton x:Name="RefreshAudioFilesButton"
                                     Content="刷新"
-                                    Click="RefreshAudioFilesButton_Click"/>
+                                    Click="RefreshAudioFilesButton_Click"
+                                    GradientStartColor="#808080"
+                                    GradientEndColor="#383838"/>
                         </StackPanel>
                         
                         <!-- 音频文件列表 -->
-                        <StackPanel Grid.Row="2" Margin="15,0,15,15">
-                            <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                       Text="可用音频文件"
-                                       Margin="0,0,0,10"/>
-                            
+                        <everything:EverythingCard CardVariant="Outlined"
+                                                   CornerRadius="8"
+                                                   Padding="15">
+                            <everything:EverythingCard.Header>
+                                <TextBlock Text="可用音频文件"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"/>
+                            </everything:EverythingCard.Header>
                             <ListBox x:Name="AudioFilesListBox"
                                      Height="300"
                                      SelectionMode="Single"
+                                     BorderThickness="0"
+                                     Background="Transparent"
                                      MouseDoubleClick="AudioFilesListBox_MouseDoubleClick">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid>
+                                        <Grid Margin="0,5">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             
                                             <StackPanel Grid.Column="0" 
-                                                        Orientation="Horizontal">
+                                                        Orientation="Horizontal"
+                                                        VerticalAlignment="Center">
+                                                <TextBlock Text="🎵" Margin="0,0,8,0"/>
                                                 <TextBlock Text="{Binding Name}" 
                                                            TextTrimming="CharacterEllipsis"
                                                            VerticalAlignment="Center"/>
@@ -201,41 +212,44 @@
                                                            FontStyle="Italic"
                                                            FontSize="10"
                                                            VerticalAlignment="Center"
-                                                           Margin="5,0,0,0"
-                                                           Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                                           Margin="8,0,0,0"
+                                                           Foreground="Gray"/>
                                             </StackPanel>
                                             
-                                            <Button Grid.Column="1"
-                                                    Style="{StaticResource GradientButtonStyle}"
+                                            <everything:EverythingButton Grid.Column="1"
                                                     Click="PlayAudioFileButton_Click"
                                                     Margin="5,0"
-                                                    Padding="5,0">
+                                                    Padding="8,4"
+                                                    GradientStartColor="#00BAAD"
+                                                    GradientEndColor="#00998F">
                                                 <StackPanel Orientation="Horizontal">
-                                                    <materialDesign:PackIcon Kind="Play" Width="16" Height="16" Margin="0,0,3,0"/>
+                                                    <TextBlock Text="▶" Margin="0,0,3,0"/>
                                                     <TextBlock Text="播放"/>
                                                 </StackPanel>
-                                            </Button>
+                                            </everything:EverythingButton>
                                             
-                                            <Button Grid.Column="2"
-                                                    Style="{StaticResource GradientButtonStyle}"
+                                            <everything:EverythingButton Grid.Column="2"
                                                     Content="重命名"
                                                     Click="RenameAudioFileButton_Click"
                                                     Margin="5,0"
-                                                    Padding="5,0"/>
+                                                    Padding="8,4"
+                                                    GradientStartColor="#FFC300"
+                                                    GradientEndColor="#FF8D1A"/>
                                             
-                                            <Button Grid.Column="3"
-                                                    Style="{StaticResource GradientButtonStyle}"
+                                            <everything:EverythingButton Grid.Column="3"
                                                     Content="删除"
                                                     Click="DeleteAudioFileButton_Click"
                                                     Margin="5,0"
-                                                    Padding="5,0"/>
+                                                    Padding="8,4"
+                                                    GradientStartColor="#FF5833"
+                                                    GradientEndColor="#D43030"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
-                        </StackPanel>
-                    </Grid>
-                </materialDesign:Card>
+                        </everything:EverythingCard>
+                    </StackPanel>
+                </everything:EverythingCard>
             </StackPanel>
         </ScrollViewer>
     </Grid>

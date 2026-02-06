@@ -4,8 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Win32;
-using MaterialDesignColors;
-using MaterialDesignThemes.Wpf;
 using EKSE.Services;
 
 namespace EKSE.Views
@@ -137,7 +135,7 @@ namespace EKSE.Views
                     // 同时更新标题栏颜色
                     UpdateTitleBarColor(color);
                     
-                    // 应用主题颜色到MaterialDesignThemes
+                    // 应用主题颜色
                     ApplyThemeColor(color);
                 }
                 else
@@ -397,15 +395,7 @@ namespace EKSE.Views
         /// </summary>
         private void RefreshButtonStyles()
         {
-            // 重新应用样式到所有按钮
-            if (ExportConfigButton != null)
-                ExportConfigButton.Style = (Style)FindResource("GradientButtonStyle");
-                
-            if (ImportConfigButton != null)
-                ImportConfigButton.Style = (Style)FindResource("GradientButtonStyle");
-                
-            if (ResetSettingsButton != null)
-                ResetSettingsButton.Style = (Style)FindResource("GradientButtonStyle");
+            // 按钮样式由 EverythingUI.WPF 管理，不需要手动刷新
         }
 
         private Color GetColorFromRadioButton(RadioButton radioButton)
@@ -439,25 +429,6 @@ namespace EKSE.Views
         {
             try
             {
-                // 使用MaterialDesignThemes库应用主题颜色
-                var paletteHelper = new PaletteHelper();
-                var theme = paletteHelper.GetTheme();
-                
-                // 创建新的颜色方案
-                theme.PrimaryLight = new ColorPair(
-                    Color.FromArgb(100, color.R, color.G, color.B),
-                    Colors.Black);
-                theme.PrimaryMid = new ColorPair(color, Colors.White);
-                theme.PrimaryDark = new ColorPair(
-                    Color.FromArgb(255, 
-                        Math.Max((byte)0, (byte)(color.R * 0.7)), 
-                        Math.Max((byte)0, (byte)(color.G * 0.7)), 
-                        Math.Max((byte)0, (byte)(color.B * 0.7))), 
-                    Colors.White);
-                
-                // 应用新主题
-                paletteHelper.SetTheme(theme);
-                
                 // 更新当前主题颜色
                 if (Application.Current is App app)
                 {
