@@ -98,78 +98,6 @@
                             <ComboBoxItem>深色主题</ComboBoxItem>
                         </everything:EverythingComboBox>
                         
-                        <TextBlock Text="主题颜色"
-                                   FontSize="14"
-                                   Margin="0,15,0,10"/>
-                        
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" 
-                                      VerticalScrollBarVisibility="Disabled">
-                            <StackPanel Orientation="Horizontal">
-                                <RadioButton x:Name="PurpleColorOption"
-                                             GroupName="Colors" 
-                                             Margin="0,0,10,0"
-                                             IsChecked="True"
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="Purple"/>
-                                </RadioButton>
-                                
-                                <RadioButton x:Name="BlueColorOption"
-                                             GroupName="Colors" 
-                                             Margin="0,0,10,0"
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="Blue"/>
-                                </RadioButton>
-                                
-                                <RadioButton x:Name="GreenColorOption"
-                                             GroupName="Colors" 
-                                             Margin="0,0,10,0"
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="Green"/>
-                                </RadioButton>
-                                
-                                <RadioButton x:Name="OrangeColorOption"
-                                             GroupName="Colors" 
-                                             Margin="0,0,10,0"
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="Orange"/>
-                                </RadioButton>
-                                
-                                <RadioButton x:Name="RedColorOption"
-                                             GroupName="Colors" 
-                                             Margin="0,0,10,0"
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="Red"/>
-                                </RadioButton>
-                                
-                                <RadioButton x:Name="PinkColorOption"
-                                             GroupName="Colors" 
-                                             Margin="0,0,10,0"
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="DeepPink"/>
-                                </RadioButton>
-                                
-                                <RadioButton x:Name="IndigoColorOption"
-                                             GroupName="Colors" 
-                                             Margin="0,0,10,0"
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="Indigo"/>
-                                </RadioButton>
-                                
-                                <RadioButton x:Name="TealColorOption"
-                                             GroupName="Colors" 
-                                             Margin="0,0,10,0"
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="Teal"/>
-                                </RadioButton>
-                                
-                                <RadioButton x:Name="LimeColorOption"
-                                             GroupName="Colors" 
-                                             Checked="ColorOption_Checked">
-                                    <Ellipse Width="24" Height="24" Fill="LimeGreen"/>
-                                </RadioButton>
-                            </StackPanel>
-                        </ScrollViewer>
-                        
                         <TextBlock Text="音量设置"
                                    FontSize="14"
                                    Margin="0,20,0,10"/>
@@ -183,47 +111,7 @@
                     </StackPanel>
                 </everything:EverythingCard>
 
-                <!-- 配置管理 -->
-                <everything:EverythingCard Margin="0,0,0,15" 
-                                           CardVariant="Elevated"
-                                           CornerRadius="12"
-                                           Padding="20">
-                    <everything:EverythingCard.Header>
-                        <TextBlock Text="配置管理"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"/>
-                    </everything:EverythingCard.Header>
-                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                        <everything:EverythingButton x:Name="ExportConfigButton"
-                                Margin="0,0,10,0"
-                                GradientStartColor="#00ACF0"
-                                GradientEndColor="#0078D4">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="📤" Margin="0,0,5,0"/>
-                                <TextBlock Text="导出配置"/>
-                            </StackPanel>
-                        </everything:EverythingButton>
-                        
-                        <everything:EverythingButton x:Name="ImportConfigButton"
-                                Margin="0,0,10,0"
-                                GradientStartColor="#00ACF0"
-                                GradientEndColor="#0078D4">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="📥" Margin="0,0,5,0"/>
-                                <TextBlock Text="导入配置"/>
-                            </StackPanel>
-                        </everything:EverythingButton>
-                        
-                        <everything:EverythingButton x:Name="ResetSettingsButton"
-                                GradientStartColor="#808080"
-                                GradientEndColor="#383838">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="🔄" Margin="0,0,5,0"/>
-                                <TextBlock Text="重置设置"/>
-                            </StackPanel>
-                        </everything:EverythingButton>
-                    </StackPanel>
-                </everything:EverythingCard>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>

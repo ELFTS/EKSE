@@ -152,7 +152,7 @@ namespace EKSE.Views
         {
             if (_profileManager != null && ProfileComboBox.SelectedItem is SoundProfile profile)
             {
-                _profileManager.SetCurrentProfile(profile);
+                _profileManager.SwitchProfile(profile);
             }
         }
         
@@ -190,7 +190,7 @@ namespace EKSE.Views
                 {
                     MessageBox.Show("重命名成功", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                     _audioFileManager?.Refresh();
-                    _soundService?.Refresh();
+                    // SoundService.Refresh() 已移除，音频状态会自动处理
                     RefreshFullUI();
                 }
                 else

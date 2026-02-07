@@ -9,537 +9,268 @@ using EKSE.Models;
 
 namespace EKSE.Services
 {
-    /// <summary>
-    /// 声音方案管理器
-    /// </summary>
     public class ProfileManager
     {
         private readonly string _profilesDirectory;
-        private readonly List<SoundProfile> _profiles;
+        private readonly List<SoundProfile> _profiles = new();
         private SoundProfile? _currentProfile;
-        
-        // 事件：方案列表变化、当前方案变化
+
         public event EventHandler? ProfilesChanged;
         public event EventHandler? CurrentProfileChanged;
-        
-        // 特殊键名映射
-        private static readonly Dictionary<string, Key> KeyMap = new Dictionary<string, Key>
+
+        private static readonly Dictionary<string, Key> KeyMap = new()
         {
             ["Space"] = Key.Space, ["Enter"] = Key.Enter, ["Backspace"] = Key.Back,
             ["Tab"] = Key.Tab, ["Caps"] = Key.CapsLock, ["Esc"] = Key.Escape,
             ["Win"] = Key.LWin, ["L Shift"] = Key.LeftShift, ["R Shift"] = Key.RightShift,
             ["L Ctrl"] = Key.LeftCtrl, ["R Ctrl"] = Key.RightCtrl, ["L Alt"] = Key.LeftAlt,
             ["R Alt"] = Key.RightAlt, ["↑"] = Key.Up, ["↓"] = Key.Down,
-            ["←"] = Key.Left, ["→"] = Key.Right, ["[ {"] = Key.OemOpenBrackets,
-            ["] }"] = Key.OemCloseBrackets, ["; :"] = Key.OemSemicolon, ["'"] = Key.OemQuotes,
-            [", <"] = Key.OemComma, [". >"] = Key.OemPeriod, ["/ ?"] = Key.OemQuestion,
-            ["\\"] = Key.Oem5, ["-"] = Key.OemMinus, ["="] = Key.OemPlus,
-            ["Del"] = Key.Delete, ["Ins"] = Key.Insert, ["Home"] = Key.Home,
-            ["End"] = Key.End, ["PgUp"] = Key.PageUp, ["PgDn"] = Key.PageDown,
-            ["Pause"] = Key.Pause, ["SrcLk"] = Key.Scroll, ["Fn"] = Key.None
+            ["←"] = Key.Left, ["→"] = Key.Right
         };
 
         public ProfileManager()
         {
             _profilesDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Profiles");
-            _profiles = new List<SoundProfile>();
-            
-            if (!Directory.Exists(_profilesDirectory))
-                Directory.CreateDirectory(_profilesDirectory);
-            
+            Directory.CreateDirectory(_profilesDirectory);
+
             LoadProfiles();
+            if (!_profiles.Any()) CreateDefaultProfile();
+
+            _currentProfile = _profiles.FirstOrDefault() ?? CreateDefaultProfile();
             
-            if (!_profiles.Any())
-                CreateDefaultProfile();
-            
-            _currentProfile = _profiles.FirstOrDefault();
-            if (_currentProfile == null)
-            {
-                CreateDefaultProfile();
-                _currentProfile = _profiles.FirstOrDefault();
-            }
-            
-            // 触发事件以通知监听者
             ProfilesChanged?.Invoke(this, EventArgs.Empty);
             CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
         }
-        
+
         public IReadOnlyList<SoundProfile> Profiles => _profiles.AsReadOnly();
         public SoundProfile? CurrentProfile => _currentProfile;
-        
-        /// <summary>
-        /// 获取JSON序列化设置
-        /// </summary>
-        private JsonSerializerSettings GetJsonSerializerSettings(bool indented = false)
+
+        private JsonSerializerSettings GetJsonSettings() => new()
         {
-            var settings = new JsonSerializerSettings();
-            settings.Converters.Add(new SoundProfileJsonConverter());
-            if (indented)
-            {
-                settings.Formatting = Formatting.Indented;
-            }
-            return settings;
-        }
+            Converters = { new SoundProfileJsonConverter() },
+            Formatting = Formatting.Indented
+        };
 
         private void LoadProfiles()
         {
-            try
+            foreach (var directory in Directory.GetDirectories(_profilesDirectory))
             {
-                var profileDirectories = Directory.GetDirectories(_profilesDirectory);
-                foreach (var directory in profileDirectories)
+                try
                 {
-                    try
-                    {
-                        var profileName = Path.GetFileName(directory);
-                        var configFile = Path.Combine(directory, "index.json");
-                        
-                        SoundProfile profile;
-                        if (File.Exists(configFile))
-                        {
-                            var json = File.ReadAllText(configFile);
-                            var settings = GetJsonSerializerSettings();
-                            var deserializedProfile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
-                            if (deserializedProfile != null)
-                            {
-                                profile = deserializedProfile;
-                                profile.FilePath = directory;
-                                UpdateKeySoundsFromAssignments(profile);
-                            }
-                            else
-                            {
-                                profile = new SoundProfile(profileName)
-                                {
-                                    FilePath = directory
-                                };
-                            }
-                        }
-                        else
-                        {
-                            profile = new SoundProfile(profileName)
-                            {
-                                FilePath = directory
-                            };
-                        }
-                        
-                        _profiles.Add(profile);
-                    }
-                    catch
-                    {
-                        // 忽略单个方案加载错误
-                    }
+                    var profile = LoadProfileFromDirectory(directory);
+                    if (profile != null) _profiles.Add(profile);
                 }
-            }
-            catch
-            {
+                catch { }
             }
         }
-        
+
+        private SoundProfile? LoadProfileFromDirectory(string directory)
+        {
+            var profileName = Path.GetFileName(directory);
+            var configFile = Path.Combine(directory, "index.json");
+
+            SoundProfile profile;
+            if (File.Exists(configFile))
+            {
+                var json = File.ReadAllText(configFile);
+                profile = JsonConvert.DeserializeObject<SoundProfile>(json, GetJsonSettings()) ?? new SoundProfile(profileName);
+            }
+            else
+            {
+                profile = new SoundProfile(profileName);
+            }
+
+            profile.FilePath = directory;
+            UpdateKeySoundsFromAssignments(profile);
+            return profile;
+        }
+
         private void UpdateKeySoundsFromAssignments(SoundProfile profile)
         {
             profile.KeySounds.Clear();
             if (profile.AssignedSounds?.Count > 0)
             {
-                foreach (var assignment in profile.AssignedSounds)
+                foreach (var assignment in profile.AssignedSounds.Where(a => a != null))
                 {
-                    if (assignment != null && !string.IsNullOrEmpty(profile.FilePath) && !string.IsNullOrEmpty(assignment.Key) && !string.IsNullOrEmpty(assignment.Sound))
+                    var key = ParseKeyName(assignment.Key);
+                    if (key.HasValue && !string.IsNullOrEmpty(assignment.Sound))
                     {
-                        var key = ParseKeyName(assignment.Key);
-                        if (key.HasValue)
-                        {
-                            var soundPath = Path.Combine(profile.FilePath, "sounds", assignment.Sound);
-                            if (File.Exists(soundPath))
-                            {
-                                profile.KeySounds[key.Value] = soundPath;
-                            }
-                        }
+                        var soundPath = Path.Combine(profile.FilePath!, "sounds", assignment.Sound);
+                        if (File.Exists(soundPath)) profile.KeySounds[key.Value] = soundPath;
                     }
                 }
             }
         }
-        
+
         private Key? ParseKeyName(string? keyName)
         {
-            if (string.IsNullOrEmpty(keyName))
-                return null;
-            
-            // 处理数字键（单个数字或D开头的数字）
-            if (keyName.Length is 1 or 2)
-            {
-                char digitChar = keyName.Length switch
-                {
-                    1 => keyName[0],
-                    2 when keyName.StartsWith("D") && char.IsDigit(keyName[1]) => keyName[1],
-                    _ => ' '
-                };
-                
-                if (char.IsDigit(digitChar))
-                {
-                    return digitChar switch
-                    {
-                        '0' => Key.D0, '1' => Key.D1, '2' => Key.D2, '3' => Key.D3,
-                        '4' => Key.D4, '5' => Key.D5, '6' => Key.D6, '7' => Key.D7,
-                        '8' => Key.D8, '9' => Key.D9, _ => null
-                    };
-                }
-            }
-            
-            // 尝试直接解析Key枚举
-            if (Enum.TryParse<Key>(keyName, true, out var key))
-                return key;
-            
-            // 尝试从映射表中查找
+            if (string.IsNullOrEmpty(keyName)) return null;
+
+            // 数字键处理
+            if (keyName.Length == 1 && char.IsDigit(keyName[0]))
+                return (Key)Enum.Parse(typeof(Key), $"D{keyName[0]}");
+
+            if (Enum.TryParse<Key>(keyName, true, out var key)) return key;
             return KeyMap.TryGetValue(keyName, out var mappedKey) ? mappedKey : null;
         }
-        
-        private void CreateDefaultProfile()
+
+        private SoundProfile CreateDefaultProfile()
         {
-            var defaultProfile = new SoundProfile("默认方案");
-            var profileDirectory = Path.Combine(_profilesDirectory, defaultProfile.Name);
-            
-            Directory.CreateDirectory(profileDirectory);
-            defaultProfile.FilePath = profileDirectory;
-            
-            CopyCurrentProfileMappings(defaultProfile);
-            
-            _profiles.Add(defaultProfile);
-            SaveProfile(defaultProfile);
+            var profile = new SoundProfile("默认方案");
+            var directory = Path.Combine(_profilesDirectory, profile.Name);
+            Directory.CreateDirectory(directory);
+            profile.FilePath = directory;
+
+            _currentProfile?.KeySounds.ToList().ForEach(kvp => profile.KeySounds[kvp.Key] = kvp.Value);
+            _profiles.Add(profile);
+            SaveProfile(profile);
+            return profile;
         }
-        
+
         public SoundProfile CreateProfile(string name)
         {
             var profile = new SoundProfile(name);
-            var profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
-            
-            Directory.CreateDirectory(profileDirectory);
-            profile.FilePath = profileDirectory;
-            
-            CopyCurrentProfileMappings(profile);
-            
+            var directory = Path.Combine(_profilesDirectory, name);
+            Directory.CreateDirectory(directory);
+            profile.FilePath = directory;
+
+            _currentProfile?.KeySounds.ToList().ForEach(kvp => profile.KeySounds[kvp.Key] = kvp.Value);
             _profiles.Add(profile);
             SaveProfile(profile);
-            
             ProfilesChanged?.Invoke(this, EventArgs.Empty);
-            
             return profile;
         }
-        
-        private void CopyCurrentProfileMappings(SoundProfile targetProfile)
-        {
-            if (_currentProfile == null) return;
-            
-            foreach (var kvp in _currentProfile.KeySounds)
-            {
-                targetProfile.KeySounds[kvp.Key] = kvp.Value;
-            }
-        }
-        
+
         public void DeleteProfile(SoundProfile profile)
         {
-            // 至少需要保留一个方案
-            if (_profiles.Count <= 1)
-            {
-                // 至少保留一个声音方案
+            if (_profiles.Count <= 1 || profile.Name == "默认方案" || !_profiles.Remove(profile))
                 return;
-            }
-            
-            // 不允许删除默认方案
-            if (profile.Name == "默认方案")
-            {
-                // 关键配置保护：禁止删除默认方案
-                return;
-            }
-            
-            // 从方案列表中移除
-            if (!_profiles.Remove(profile))
-                return;
-            
-            // 如果删除的是当前方案，则切换到第一个可用方案
+
             if (_currentProfile == profile)
             {
                 _currentProfile = _profiles.FirstOrDefault();
-                // 触发当前方案改变事件，通知其他组件释放资源
                 CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
             }
-            
-            // 删除物理文件和目录
-            DeleteProfileDirectory(profile.FilePath);
-            
-            // 触发方案列表变化事件，通知UI更新
+
+            try { if (Directory.Exists(profile.FilePath)) Directory.Delete(profile.FilePath, true); }
+            catch { }
+
             ProfilesChanged?.Invoke(this, EventArgs.Empty);
         }
-        
-        /// <summary>
-        /// 删除方案目录及其内容
-        /// </summary>
-        /// <param name="profilePath">方案目录路径</param>
-        private void DeleteProfileDirectory(string? profilePath)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(profilePath) && Directory.Exists(profilePath))
-                {
-                    // 使用更简单可靠的方式删除整个目录树
-                    Directory.Delete(profilePath, true);
-                }
-            }
-            catch
-            {
-                // 静默忽略删除失败，不进行重试或强制删除
-            }
-        }
-        
+
         public void SaveProfile(SoundProfile profile)
         {
             try
             {
-                if (!string.IsNullOrEmpty(profile.FilePath))
+                if (string.IsNullOrEmpty(profile.FilePath)) return;
+
+                profile.AssignedSounds = profile.KeySounds.Select(kvp => new SoundAssignment
                 {
-                    var profileFile = Path.Combine(profile.FilePath, "index.json");
-                    ConvertKeySoundsToAssignedSounds(profile);
-                    
-                    var json = JsonConvert.SerializeObject(profile, GetJsonSerializerSettings(true));
-                    File.WriteAllText(profileFile, json);
-                }
+                    Key = kvp.Key.ToString(),
+                    Sound = Path.GetFileName(kvp.Value)
+                }).ToList();
+
+                var json = JsonConvert.SerializeObject(profile, GetJsonSettings());
+                File.WriteAllText(Path.Combine(profile.FilePath, "index.json"), json);
             }
-            catch
-            {
-            }
+            catch { }
         }
-        
-        private void ConvertKeySoundsToAssignedSounds(SoundProfile profile)
-        {
-            profile.AssignedSounds = new List<SoundAssignment>();
-            foreach (var kvp in profile.KeySounds)
-            {
-                var soundFileName = Path.GetFileName(kvp.Value);
-                if (!string.IsNullOrEmpty(soundFileName))
-                {
-                    profile.AssignedSounds.Add(new SoundAssignment
-                    {
-                        Key = kvp.Key.ToString(),
-                        Sound = soundFileName
-                    });
-                }
-            }
-        }
-        
-        public void SetCurrentProfile(SoundProfile profile)
-        {
-            if (_profiles.Contains(profile))
-            {
-                _currentProfile = profile;
-                CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
-            }
-        }
-        
+
         public void SwitchProfile(SoundProfile profile)
         {
-            if (profile != null && _profiles.Contains(profile))
-            {
-                // 如果当前有方案，先清理其资源
-                if (_currentProfile != null)
-                {
-                    _currentProfile.KeySounds.Clear();
-                }
-                
-                _currentProfile = profile;
-                UpdateKeySoundsFromAssignments(_currentProfile);
-                CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
-            }
+            if (!_profiles.Contains(profile)) return;
+
+            _currentProfile?.KeySounds.Clear();
+            _currentProfile = profile;
+            UpdateKeySoundsFromAssignments(_currentProfile);
+            CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
         }
-        
+
         public void SetKeySound(Key key, string soundPath)
         {
-            if (_currentProfile != null && File.Exists(soundPath))
-            {
-                try
-                {
-                    _currentProfile.KeySounds[key] = soundPath;
-                    SaveProfile(_currentProfile);
-                }
-                catch
-                {}
-            }
+            if (_currentProfile == null || !File.Exists(soundPath)) return;
+            _currentProfile.KeySounds[key] = soundPath;
+            SaveProfile(_currentProfile);
         }
-        
+
         public string? GetKeySound(Key key)
         {
-            if (_currentProfile == null || !_currentProfile.KeySounds.ContainsKey(key))
-                return null;
-            
-            var soundPath = _currentProfile.KeySounds[key];
-            return !string.IsNullOrEmpty(soundPath) && File.Exists(soundPath) ? soundPath : null;
+            if (_currentProfile?.KeySounds.TryGetValue(key, out var path) == true && File.Exists(path))
+                return path;
+            return null;
         }
-        
-        public string? ImportSoundToCurrentProfile(string sourceFilePath)
+
+        public string? ImportSound(string sourcePath)
         {
-            if (_currentProfile == null || !File.Exists(sourceFilePath) || string.IsNullOrEmpty(_currentProfile.FilePath))
-                return null;
-            
-            try
-            {
-                var fileName = Path.GetFileName(sourceFilePath);
-                if (string.IsNullOrEmpty(fileName))
-                    return null;
-                    
-                var keySoundsDirectory = Path.Combine(_currentProfile.FilePath, "sounds");
-                Directory.CreateDirectory(keySoundsDirectory);
-                
-                var destFilePath = Path.Combine(keySoundsDirectory, fileName);
-                var counter = 1;
-                var baseFileName = Path.GetFileNameWithoutExtension(fileName);
-                var extension = Path.GetExtension(fileName);
-                
-                // 处理文件名冲突
-                while (File.Exists(destFilePath))
-                {
-                    var newFileName = $"{baseFileName}_{counter}{extension}";
-                    destFilePath = Path.Combine(keySoundsDirectory, newFileName);
-                    counter++;
-                }
-                
-                File.Copy(sourceFilePath, destFilePath);
-                SaveProfile(_currentProfile);
-                
-                return destFilePath;
-            }
-            catch
-            {
-                return null;
-            }
+            if (_currentProfile == null || !File.Exists(sourcePath)) return null;
+
+            var soundsDir = Path.Combine(_currentProfile.FilePath!, "sounds");
+            Directory.CreateDirectory(soundsDir);
+
+            var fileName = Path.GetFileName(sourcePath);
+            var destPath = Path.Combine(soundsDir, fileName);
+
+            for (int i = 1; File.Exists(destPath); i++)
+                destPath = Path.Combine(soundsDir, $"{Path.GetFileNameWithoutExtension(fileName)}_{i}{Path.GetExtension(fileName)}");
+
+            File.Copy(sourcePath, destPath);
+            SaveProfile(_currentProfile);
+            return destPath;
         }
-        
+
         public SoundProfile? ImportProfile(string importPath)
         {
-            if (!File.Exists(importPath))
-                return null;
-            
-            var tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            Directory.CreateDirectory(tempDirectory);
-            
-            try
-            {
-                ZipFile.ExtractToDirectory(importPath, tempDirectory);
-                
-                var profileJsonPath = Path.Combine(tempDirectory, "index.json");
-                if (!File.Exists(profileJsonPath))
-                    return null;
-                
-                var json = File.ReadAllText(profileJsonPath);
-                var profile = JsonConvert.DeserializeObject<SoundProfile>(json, GetJsonSerializerSettings());
-                
-                if (profile == null)
-                    return null;
-                
-                // 处理文件名冲突
-                var profileDirectory = Path.Combine(_profilesDirectory, profile.Name);
-                if (Directory.Exists(profileDirectory))
-                {
-                    var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-                    profile.Name = $"{profile.Name}_{timestamp}";
-                }
-                
-                var finalProfileDirectory = Path.Combine(_profilesDirectory, profile.Name);
-                Directory.CreateDirectory(finalProfileDirectory);
-                profile.FilePath = finalProfileDirectory;
-                
-                // 复制配置文件
-                File.Copy(profileJsonPath, Path.Combine(finalProfileDirectory, "index.json"), true);
-                
-                // 复制声音文件
-                var sourceKeySoundsDir = Path.Combine(tempDirectory, "sounds");
-                if (Directory.Exists(sourceKeySoundsDir))
-                {
-                    var destKeySoundsDir = Path.Combine(finalProfileDirectory, "sounds");
-                    CopyDirectory(sourceKeySoundsDir, destKeySoundsDir);
-                }
-                
-                // 加载并返回新配置文件
-                var reloadedProfile = LoadProfileFromFile(finalProfileDirectory);
-                if (reloadedProfile != null)
-                {
-                    SaveProfile(reloadedProfile);
-                    _profiles.Add(reloadedProfile);
-                    SwitchProfile(reloadedProfile);
-                    ProfilesChanged?.Invoke(this, EventArgs.Empty);
-                }
-                
-                return reloadedProfile;
-            }
-            catch
-            {
-                return null;
-            }
-            finally
-            {
-                if (Directory.Exists(tempDirectory))
-                {
-                    Directory.Delete(tempDirectory, true);
-                }
-            }
-        }
-        
-        private SoundProfile? LoadProfileFromFile(string profileDirectory)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(profileDirectory))
-                    return null;
-                    
-                var profileName = Path.GetFileName(profileDirectory);
-                var configFile = Path.Combine(profileDirectory, "index.json");
+            if (!File.Exists(importPath)) return null;
 
-                if (File.Exists(configFile))
-                {
-                    var json = File.ReadAllText(configFile);
-                    var settings = GetJsonSerializerSettings();
-                    var profile = JsonConvert.DeserializeObject<SoundProfile>(json, settings);
-                    if (profile != null)
-                    {
-                        profile.FilePath = profileDirectory;
-                        UpdateKeySoundsFromAssignments(profile);
-                        return profile;
-                    }
-                }
-                
-                return null;
-            }
-            catch
+            var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            try
             {
-                return null;
+                ZipFile.ExtractToDirectory(importPath, tempDir);
+                var profile = LoadProfileFromDirectory(tempDir);
+                if (profile == null) return null;
+
+                // 处理重名
+                var targetDir = Path.Combine(_profilesDirectory, profile.Name);
+                if (Directory.Exists(targetDir))
+                {
+                    profile.Name = $"{profile.Name}_{DateTime.Now:yyyyMMddHHmmss}";
+                    targetDir = Path.Combine(_profilesDirectory, profile.Name);
+                }
+
+                Directory.CreateDirectory(targetDir);
+                CopyDirectory(tempDir, targetDir);
+                profile.FilePath = targetDir;
+
+                _profiles.Add(profile);
+                SwitchProfile(profile);
+                ProfilesChanged?.Invoke(this, EventArgs.Empty);
+                return profile;
             }
+            catch { return null; }
+            finally { if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true); }
         }
-        
+
         public bool ExportProfile(SoundProfile profile, string exportPath)
         {
-            if (!Directory.Exists(profile.FilePath))
-                return false;
-            
             try
             {
-                ZipFile.CreateFromDirectory(profile.FilePath, exportPath);
-                return true;
+                if (Directory.Exists(profile.FilePath))
+                {
+                    ZipFile.CreateFromDirectory(profile.FilePath, exportPath);
+                    return true;
+                }
             }
-            catch
-            {
-                return false;
-            }
+            catch { }
+            return false;
         }
-        
-        private void CopyDirectory(string sourceDir, string destDir)
+
+        private static void CopyDirectory(string source, string dest)
         {
-            Directory.CreateDirectory(destDir);
-            foreach (var file in Directory.GetFiles(sourceDir))
-            {
-                var destFile = Path.Combine(destDir, Path.GetFileName(file));
-                File.Copy(file, destFile);
-            }
-            
-            foreach (var directory in Directory.GetDirectories(sourceDir))
-            {
-                var destSubDir = Path.Combine(destDir, Path.GetFileName(directory));
-                CopyDirectory(directory, destSubDir);
-            }
+            Directory.CreateDirectory(dest);
+            foreach (var file in Directory.GetFiles(source))
+                File.Copy(file, Path.Combine(dest, Path.GetFileName(file)), true);
+            foreach (var dir in Directory.GetDirectories(source))
+                CopyDirectory(dir, Path.Combine(dest, Path.GetFileName(dir)));
         }
 
         public bool RenameProfile(SoundProfile? profile, string newName)
@@ -547,53 +278,35 @@ namespace EKSE.Services
             if (profile == null || string.IsNullOrWhiteSpace(newName) || string.IsNullOrEmpty(profile.FilePath))
                 return false;
 
-            if (_profiles.Any(p => p != profile && !string.IsNullOrEmpty(p.Name) && p.Name.Equals(newName, StringComparison.OrdinalIgnoreCase)))
+            if (_profiles.Any(p => p != profile && p.Name?.Equals(newName, StringComparison.OrdinalIgnoreCase) == true))
                 return false;
 
-            string oldPath = profile.FilePath;
-            string newPath = Path.Combine(_profilesDirectory, newName);
-            
+            var oldPath = profile.FilePath;
+            var newPath = Path.Combine(_profilesDirectory, newName);
+
             try
             {
-                bool isCurrentProfile = _currentProfile == profile;
-                if (isCurrentProfile)
+                var wasCurrent = _currentProfile == profile;
+                if (wasCurrent) _currentProfile?.KeySounds.Clear();
+
+                if (Directory.Exists(newPath)) Directory.Delete(newPath, true);
+                if (Directory.Exists(oldPath)) Directory.Move(oldPath, newPath);
+
+                profile.Name = newName;
+                profile.FilePath = newPath;
+                SaveProfile(profile);
+
+                if (wasCurrent)
                 {
-                    // 清理当前方案的资源
-                    _currentProfile.KeySounds.Clear();
+                    _currentProfile = profile;
                     CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
                 }
 
-                // 处理目标路径已存在的情况
-                if (Directory.Exists(newPath))
-                {
-                    Directory.Delete(newPath, true);
-                }
-
-                if (Directory.Exists(oldPath))
-                {
-                    Directory.Move(oldPath, newPath);
-                    
-                    profile.Name = newName;
-                    profile.FilePath = newPath;
-
-                    // 更新配置文件
-                    UpdateKeySoundsFromAssignments(profile);
-                    SaveProfile(profile);
-                    
-                    if (isCurrentProfile)
-                    {
-                        _currentProfile = profile;
-                        CurrentProfileChanged?.Invoke(this, EventArgs.Empty);
-                    }
-
-                    ProfilesChanged?.Invoke(this, EventArgs.Empty);
-                    return true;
-                }
-                return false;
+                ProfilesChanged?.Invoke(this, EventArgs.Empty);
+                return true;
             }
             catch
             {
-                ProfilesChanged?.Invoke(this, EventArgs.Empty);
                 return false;
             }
         }

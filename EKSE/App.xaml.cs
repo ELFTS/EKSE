@@ -13,16 +13,6 @@ namespace EKSE
         /// 设置管理器实例
         /// </summary>
         public SettingsManager? SettingsManager { get; private set; }
-        
-        /// <summary>
-        /// 主题管理服务
-        /// </summary>
-        public ThemeManager? ThemeManager { get; private set; }
-        
-        /// <summary>
-        /// 按钮样式管理服务
-        /// </summary>
-        public ButtonStyleManager? ButtonStyleManager { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -33,14 +23,6 @@ namespace EKSE
             
             // 加载保存的设置
             var settings = SettingsManager.LoadSettings();
-            
-            // 初始化主题管理服务
-            ThemeManager = new ThemeManager();
-            ThemeManager.InitializeTheme(settings);
-            
-            // 初始化按钮样式管理服务
-            ButtonStyleManager = new ButtonStyleManager(ThemeManager);
-            ButtonStyleManager.UpdateGradientButtonStyle();
             
             // 直接创建并显示主窗口
             var mainWindow = new MainWindow();
