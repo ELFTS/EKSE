@@ -56,45 +56,6 @@
 | [Newtonsoft.Json](https://www.newtonsoft.com/json) | 13.0.3 | JSON序列化 |
 | [Hardcodet.NotifyIcon.Wpf](https://github.com/hardcodet/wpf-notifyicon) | 2.0.1 | 系统托盘图标 |
 
-## 💻 开发环境
-
-- Visual Studio 2022 (17.12 或更高版本)
-- .NET 9 SDK
-
-### 如何构建项目
-
-1. 克隆仓库：`git clone https://github.com/ELFTS/EKSE.git`
-2. 打开 `EKSE.slnx` 文件
-3. 选择 "Release" 配置
-4. 构建解决方案：`Ctrl+Shift+B`
-
-## 📄 项目结构
-
-```
-EKSE/
-├── Assets/           # 资源文件
-├── Commands/         # 命令模式实现
-├── Components/       # 自定义组件
-├── Models/           # 数据模型
-├── Services/         # 核心服务
-├── Views/            # 界面视图
-└── App.xaml          # 应用入口
-```
-
-## 🤝 贡献
-
-我们欢迎社区贡献！如果您想为项目做出贡献，请：
-
-1. Fork 仓库
-2. 创建功能分支：`git checkout -b feature/your-feature`
-3. 提交更改：`git commit -am 'Add some feature'`
-4. 推送到分支：`git push origin feature/your-feature`
-5. 创建 Pull Request
-
-## 📜 许可证
-
-本项目采用 [GNU General Public License v3](LICENSE.txt) 许可协议
-
 ## 📞 联系方式
 
 - QQ交流群：957042500
